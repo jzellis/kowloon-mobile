@@ -10,6 +10,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@10play/tentap-editor": "^1.0.1",
     "@kowloon/client": "file:../client",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@reduxjs/toolkit": "^2.12.0",
@@ -27,6 +28,7 @@
     "react-native-reanimated": "4.2.1",
     "react-native-safe-area-context": "~5.6.2",
     "react-native-screens": "~4.23.0",
+    "react-native-webview": "13.16.0",
     "react-native-worklets": "0.7.4",
     "react-redux": "^9.3.0",
     "tailwindcss": "^3.4.19"
