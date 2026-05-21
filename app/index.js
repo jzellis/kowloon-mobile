@@ -1,35 +1,31 @@
-// Root screen — placeholder. The real app will start with an account-picker
-// (or first-launch onboarding) before this lands.
+// Root route — splash while accounts hydrate, then redirect:
+//   - no accounts → /welcome
+//   - has accounts → /feed (placeholder for now)
 
-import { StyleSheet, Text, View } from 'react-native';
+import { useSelector } from "react-redux";
+import { Redirect } from "expo-router";
+import { View, ActivityIndicator } from "react-native";
 
-export default function Home() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Kowloon</Text>
-      <Text style={styles.subtitle}>Mobile · scaffold</Text>
-    </View>
-  );
+import {
+  selectAccounts,
+  selectAccountsStatus,
+} from "../src/state/accountsSlice.js";
+
+export default function Index() {
+  const status = useSelector(selectAccountsStatus);
+  const accounts = useSelector(selectAccounts);
+
+  if (status === "idle" || status === "loading") {
+    return (
+      <View className="flex-1 items-center justify-center bg-base-100">
+        <ActivityIndicator />
+      </View>
+    );
+  }
+
+  if (accounts.length === 0) {
+    return <Redirect href="/welcome" />;
+  }
+
+  return <Redirect href="/feed" />;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FAF4E8',
-  },
-  title: {
-    fontSize: 48,
-    fontWeight: '700',
-    letterSpacing: 2,
-    color: '#1A2B4A',
-  },
-  subtitle: {
-    fontSize: 12,
-    letterSpacing: 4,
-    textTransform: 'uppercase',
-    color: '#6B5D4E',
-    marginTop: 8,
-  },
-});
