@@ -3,8 +3,8 @@
 // Posts load page by page via useFeed (GET /posts through @kowloon/client).
 // Cards show previews only; tapping a card opens the post detail screen.
 
-import { useEffect, useState } from "react";
-import { useRouter } from "expo-router";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
 import { useDispatch, useSelector } from "react-redux";
 import {
   ActivityIndicator,
@@ -60,6 +60,20 @@ export default function Feed() {
       cancelled = true;
     };
   }, [account?.id, account?.serverName, client, dispatch]);
+
+  // Refresh when the feed regains focus — after composing a post, returning
+  // from a detail view, etc. Skip the very first focus: useFeed already loads
+  // on mount, so refreshing there would double-fetch.
+  const firstFocus = useRef(true);
+  useFocusEffect(
+    useCallback(() => {
+      if (firstFocus.current) {
+        firstFocus.current = false;
+        return;
+      }
+      refresh();
+    }, [refresh])
+  );
 
   if (!account) {
     router.replace("/welcome");
@@ -140,6 +154,17 @@ export default function Feed() {
           ) : null
         }
       />
+
+      {/* Compose — square editorial FAB */}
+      <Pressable
+        onPress={() => router.push("/compose")}
+        className="absolute bottom-8 right-5 w-14 h-14 bg-primary border-2 border-base-content items-center justify-center"
+        android_ripple={{ color: "rgba(255,255,255,0.15)" }}
+      >
+        <Text className="text-primary-content text-3xl leading-none mt-[-2px]">
+          +
+        </Text>
+      </Pressable>
     </SafeAreaView>
   );
 }

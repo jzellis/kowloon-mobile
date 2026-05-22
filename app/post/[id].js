@@ -1,9 +1,7 @@
-// Post detail — stub.
+// Post detail — the reading surface.
 //
-// Fetches the single post and shows the author, title and a plain-text
-// rendering of the body. Full rich HTML rendering (and applying the user's
-// reading-typography prefs) is the next brief — that's the screen where the
-// react-native-render-html vs. custom-renderer decision gets made.
+// Fetches the single post and renders its body as rich HTML, styled with the
+// user's reading-typography prefs (font, size, line spacing, margins).
 
 import { useEffect, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -11,29 +9,18 @@ import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Avatar } from "../../src/components/posts/Avatar.jsx";
+import { HtmlContent } from "../../src/components/HtmlContent.jsx";
 import { Button } from "../../src/components/ui/Button.jsx";
 import { Eyebrow } from "../../src/components/ui/Heading.jsx";
 import { useActiveClient } from "../../src/lib/useActiveClient.js";
+import { useTypography } from "../../src/lib/TypographyContext.js";
 import { timeAgo } from "../../src/lib/timeAgo.js";
-
-function stripHtml(html) {
-  if (!html) return "";
-  return String(html)
-    .replace(/<\/(p|div|h[1-6]|li)>/gi, "\n\n")
-    .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<[^>]+>/g, "")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
-}
 
 export default function PostDetail() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const client = useActiveClient();
+  const { resolved } = useTypography();
 
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -61,21 +48,17 @@ export default function PostDetail() {
   }, [client, id]);
 
   const actor = post?.actor || {};
-  const body =
-    stripHtml(post?.body) ||
-    stripHtml(post?.summary) ||
-    post?.textPreview ||
-    "";
+  const bodyHtml = post?.body || post?.summary || "";
 
   return (
     <SafeAreaView className="flex-1 bg-base-100">
-      <ScrollView contentContainerStyle={{ padding: 24, paddingBottom: 48 }}>
+      <ScrollView contentContainerStyle={{ paddingVertical: 24, paddingBottom: 48 }}>
         {loading ? (
           <View className="py-20 items-center">
             <ActivityIndicator />
           </View>
         ) : error ? (
-          <View className="py-20 items-center">
+          <View className="py-20 items-center px-6">
             <Text className="font-reading text-base text-error text-center mb-4">
               {error}
             </Text>
@@ -83,53 +66,75 @@ export default function PostDetail() {
           </View>
         ) : post ? (
           <>
-            <Eyebrow>{post.type || "Post"}</Eyebrow>
+            {/* Header — fixed chrome margins */}
+            <View className="px-6">
+              <Eyebrow>{post.type || "Post"}</Eyebrow>
 
-            {post.title ? (
-              <Text className="font-reading text-3xl text-base-content leading-tight mt-2 mb-3">
-                {post.title}
-              </Text>
-            ) : (
-              <View className="mb-3" />
-            )}
+              {post.title ? (
+                <Text className="font-reading text-3xl text-base-content leading-tight mt-2 mb-3">
+                  {post.title}
+                </Text>
+              ) : (
+                <View className="mb-3" />
+              )}
 
-            {/* Author */}
-            <View className="flex-row items-center mt-1 mb-5">
-              <Avatar actor={actor} size={40} />
-              <View className="ml-3 flex-1">
-                <Text className="font-ui text-sm text-base-content">
-                  {actor.name || actor.id}
-                </Text>
-                <Text className="font-ui text-xs text-base-content/50">
-                  {actor.id} · {timeAgo(post.publishedAt || post.createdAt)}
-                </Text>
+              <View className="flex-row items-center mt-1 mb-5">
+                <Avatar actor={actor} size={40} baseUrl={client?.http?.baseUrl} />
+                <View className="ml-3 flex-1">
+                  <Text className="font-ui text-sm text-base-content">
+                    {actor.name || actor.id}
+                  </Text>
+                  <Text className="font-ui text-xs text-base-content/50">
+                    {actor.id} · {timeAgo(post.publishedAt || post.createdAt)}
+                  </Text>
+                </View>
               </View>
             </View>
 
-            {/* Body — plain text for now */}
-            <Text className="font-reading text-base text-base-content leading-7">
-              {body}
-            </Text>
-
-            <View className="border-t-2 border-base-300 mt-6 pt-3 flex-row">
-              <Text className="font-ui text-xs text-base-content/50 mr-5">
-                {post.replyCount || 0} replies
-              </Text>
-              <Text className="font-ui text-xs text-base-content/50">
-                {post.reactCount || 0} reactions
-              </Text>
+            {/* Body — rich HTML, reading-typography applied. Horizontal
+                padding comes from the user's column-width preference. */}
+            <View style={{ paddingHorizontal: resolved.paddingHorizontal }}>
+              {bodyHtml ? (
+                <HtmlContent
+                  html={bodyHtml}
+                  fonts={{
+                    regular: resolved.regularFamily,
+                    bold: resolved.boldFamily,
+                    italic: resolved.italicFamily,
+                  }}
+                  fontSize={resolved.fontSize}
+                  lineHeight={resolved.lineHeight}
+                  selectable
+                />
+              ) : (
+                <Text className="font-reading text-base text-base-content/50">
+                  {post.textPreview || "No content."}
+                </Text>
+              )}
             </View>
 
-            <Text className="font-ui text-xs text-base-content/40 mt-6 leading-5">
-              Rich formatting, reactions and replies land in the next pass.
-            </Text>
+            {/* Footer */}
+            <View className="px-6">
+              <View className="border-t-2 border-base-300 mt-6 pt-3 flex-row">
+                <Text className="font-ui text-xs text-base-content/50 mr-5">
+                  {post.replyCount || 0} replies
+                </Text>
+                <Text className="font-ui text-xs text-base-content/50">
+                  {post.reactCount || 0} reactions
+                </Text>
+              </View>
 
-            <Button
-              label="Back"
-              variant="ghost"
-              onPress={() => router.back()}
-              className="mt-6"
-            />
+              <Text className="font-ui text-xs text-base-content/40 mt-6 leading-5">
+                Reactions and replies land in the next pass.
+              </Text>
+
+              <Button
+                label="Back"
+                variant="ghost"
+                onPress={() => router.back()}
+                className="mt-6"
+              />
+            </View>
           </>
         ) : null}
       </ScrollView>

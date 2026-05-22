@@ -8,6 +8,7 @@ import { Image, Pressable, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 
 import { Avatar } from "./Avatar.jsx";
+import { HtmlContent } from "../HtmlContent.jsx";
 import { timeAgo } from "../../lib/timeAgo.js";
 
 // Static class strings — NativeWind needs the full class name at build time,
@@ -19,18 +20,6 @@ const TYPE_META = {
   Link: { label: "Link", accent: "text-post-link", bar: "bg-post-link" },
   Event: { label: "Event", accent: "text-post-event", bar: "bg-post-event" },
 };
-
-function stripHtml(html) {
-  if (!html) return "";
-  return String(html)
-    .replace(/<[^>]+>/g, " ")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/\s+/g, " ")
-    .trim();
-}
 
 function hostOf(url) {
   if (!url) return "";
@@ -48,7 +37,10 @@ export function PostCard({ post }) {
   const name = actor.name || handle.replace(/^@/, "");
 
   const title = post?.title?.trim();
-  const preview = post?.textPreview?.trim() || stripHtml(post?.summary);
+  // Articles carry a generated `summary`; Notes don't — their `body` is the
+  // whole (short) post, so fall back to it.
+  const previewHtml = (post?.summary || post?.body || "").trim();
+  const plainPreview = post?.textPreview?.trim();
   const image = post?.featuredImage || post?.image || null;
   const linkHost = post?.type === "Link" ? hostOf(post?.url) : "";
 
@@ -109,13 +101,15 @@ export function PostCard({ post }) {
           </Text>
         ) : null}
 
-        {/* Preview text */}
-        {preview ? (
+        {/* Preview — rich HTML excerpt */}
+        {previewHtml ? (
+          <HtmlContent html={previewHtml} fontSize={15} />
+        ) : plainPreview ? (
           <Text
             className="font-reading text-[15px] text-base-content/80 leading-6"
             numberOfLines={title ? 3 : 5}
           >
-            {preview}
+            {plainPreview}
           </Text>
         ) : null}
 
