@@ -188,6 +188,7 @@ export default function Register() {
       const account = {
         ...provisionalAccount,
         profile: result.user.profile || null,
+        serverName: serverInfo?.name || undefined,
         addedAt: new Date().toISOString(),
       };
 

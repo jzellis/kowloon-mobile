@@ -1,11 +1,17 @@
 // Settings index. Currently just Typography; more rows land as the app grows.
 
 import { useRouter } from "expo-router";
+import { useDispatch, useSelector } from "react-redux";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Button } from "../../src/components/ui/Button.jsx";
 import { Eyebrow, Heading } from "../../src/components/ui/Heading.jsx";
+import {
+  selectAccounts,
+  selectActiveAccount,
+  signOutAccount,
+} from "../../src/state/accountsSlice.js";
 
 function Row({ label, hint, onPress }) {
   return (
@@ -29,14 +35,31 @@ function Row({ label, hint, onPress }) {
 
 export default function Settings() {
   const router = useRouter();
+  const dispatch = useDispatch();
+  const account = useSelector(selectActiveAccount);
+  const accounts = useSelector(selectAccounts);
+
+  async function handleSignOut() {
+    if (!account) return;
+    await dispatch(signOutAccount(account.id));
+    router.replace(accounts.length <= 1 ? "/welcome" : "/feed");
+  }
+
   return (
     <SafeAreaView className="flex-1 bg-base-100">
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
         <View className="px-6 pt-10">
           <Eyebrow>Account</Eyebrow>
-          <Heading className="text-4xl mt-2 mb-6 leading-tight">
+          <Heading className="text-4xl mt-2 mb-1 leading-tight">
             Settings
           </Heading>
+          {account ? (
+            <Text className="font-ui text-sm text-base-content/50 mb-6">
+              {account.id}
+            </Text>
+          ) : (
+            <View className="mb-6" />
+          )}
 
           <Row
             label="Typography"
@@ -45,8 +68,18 @@ export default function Settings() {
           />
         </View>
 
-        <View className="px-6 mt-2">
-          <Button label="Back" variant="ghost" onPress={() => router.back()} />
+        <View className="px-6 mt-6">
+          <Button
+            label="Sign out"
+            variant="ghost"
+            onPress={handleSignOut}
+          />
+          <Button
+            label="Back"
+            variant="ghost"
+            onPress={() => router.back()}
+            className="mt-3"
+          />
         </View>
       </ScrollView>
     </SafeAreaView>

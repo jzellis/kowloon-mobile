@@ -1,74 +1,145 @@
-// Placeholder feed screen — for now, just shows the active account and a
-// sign-out button so we can verify the login flow end to end. The real
-// timeline UI comes next.
+// Home feed — the active account's post timeline.
+//
+// Posts load page by page via useFeed (GET /posts through @kowloon/client).
+// Cards show previews only; tapping a card opens the post detail screen.
 
+import { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
 import { useDispatch, useSelector } from "react-redux";
-import { ScrollView, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  RefreshControl,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Button } from "../src/components/ui/Button.jsx";
-import { Heading, Eyebrow } from "../src/components/ui/Heading.jsx";
+import { PostCard } from "../src/components/posts/PostCard.jsx";
+import { Avatar } from "../src/components/posts/Avatar.jsx";
+import { UserMenu } from "../src/components/UserMenu.jsx";
+import { useFeed } from "../src/lib/useFeed.js";
+import { useActiveClient } from "../src/lib/useActiveClient.js";
 import {
-  selectAccounts,
   selectActiveAccount,
-  signOutAccount,
+  updateAccountAndPersist,
 } from "../src/state/accountsSlice.js";
 
 export default function Feed() {
   const router = useRouter();
   const dispatch = useDispatch();
-  const accounts = useSelector(selectAccounts);
-  const active = useSelector(selectActiveAccount);
+  const account = useSelector(selectActiveAccount);
+  const client = useActiveClient();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const {
+    posts,
+    loading,
+    loadingMore,
+    refreshing,
+    error,
+    refresh,
+    loadMore,
+  } = useFeed();
 
-  if (!active) {
-    // Belt and suspenders — should not be reachable, the / redirect handles
-    // the no-account case. Still, guard against a stale router state.
+  // Backfill the server's display name onto the account the first time we
+  // have a client for it. Accounts created before this field existed (and
+  // any new login) get it filled in here, cached so later mounts skip it.
+  useEffect(() => {
+    if (!account || account.serverName || !client) return;
+    let cancelled = false;
+    client.feeds
+      .getServerInfo()
+      .then((info) => {
+        if (!cancelled && info?.name) {
+          dispatch(updateAccountAndPersist(account.id, { serverName: info.name }));
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [account?.id, account?.serverName, client, dispatch]);
+
+  if (!account) {
     router.replace("/welcome");
     return null;
   }
 
-  async function handleSignOut() {
-    await dispatch(signOutAccount(active.id));
-    if (accounts.length <= 1) router.replace("/welcome");
-  }
-
   return (
-    <SafeAreaView className="flex-1 bg-base-100">
-      <ScrollView contentContainerStyle={{ padding: 24 }}>
-        <Eyebrow>Signed in as</Eyebrow>
-        <Heading className="text-3xl mt-2 mb-1 leading-tight">
-          {active.profile?.name || active.username}
-        </Heading>
-        <Text className="font-ui text-sm text-base-content/60 mb-6">
-          {active.id}
+    <SafeAreaView className="flex-1 bg-base-100" edges={["top"]}>
+      {/* Masthead */}
+      <View className="px-5 pt-2 pb-3 border-b-2 border-base-content flex-row items-center justify-between">
+        <Text
+          className="font-reading text-3xl text-base-content flex-1 mr-3"
+          numberOfLines={1}
+        >
+          {account.serverName || account.server}
         </Text>
+        <Pressable
+          onPress={() => setMenuOpen(true)}
+          hitSlop={8}
+          android_ripple={{ color: "rgba(0,0,0,0.06)", borderless: true }}
+        >
+          <Avatar
+            actor={{
+              name: account.profile?.name || account.username,
+              icon: account.profile?.icon || null,
+              id: account.id,
+            }}
+            size={38}
+            baseUrl={account.baseUrl}
+          />
+        </Pressable>
+      </View>
 
-        <View className="border-2 border-base-300 bg-base-100 p-4 mb-6">
-          <Eyebrow className="mb-2">Server</Eyebrow>
-          <Text className="font-reading text-base text-base-content">
-            {active.server}
-          </Text>
-          <Text className="font-ui text-xs text-base-content/50 mt-1">
-            {active.baseUrl}
-          </Text>
-        </View>
+      <UserMenu visible={menuOpen} onClose={() => setMenuOpen(false)} />
 
-        <Text className="font-reading text-base text-base-content/70 mb-8 leading-6">
-          Feed coming next. Login round-trip works — the rest is just glass.
-        </Text>
-
-        <Button
-          label="Settings"
-          onPress={() => router.push("/settings")}
-        />
-        <Button
-          label="Sign out"
-          variant="ghost"
-          onPress={handleSignOut}
-          className="mt-3"
-        />
-      </ScrollView>
+      <FlatList
+        data={posts}
+        keyExtractor={(p) => p.id}
+        renderItem={({ item }) => <PostCard post={item} />}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={refresh} />
+        }
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.6}
+        ListEmptyComponent={
+          loading ? (
+            <View className="py-20 items-center">
+              <ActivityIndicator />
+            </View>
+          ) : error ? (
+            <View className="px-6 py-20 items-center">
+              <Text className="font-reading text-base text-error text-center mb-4">
+                {error}
+              </Text>
+              <Pressable
+                onPress={refresh}
+                className="border-2 border-base-content px-5 py-2.5"
+                android_ripple={{ color: "rgba(0,0,0,0.06)" }}
+              >
+                <Text className="font-ui uppercase tracking-[0.16em] text-xs text-base-content">
+                  Retry
+                </Text>
+              </Pressable>
+            </View>
+          ) : (
+            <View className="px-6 py-20 items-center">
+              <Text className="font-reading text-base text-base-content/60 text-center">
+                No posts in your feed yet. Pull to refresh.
+              </Text>
+            </View>
+          )
+        }
+        ListFooterComponent={
+          loadingMore ? (
+            <View className="py-6 items-center">
+              <ActivityIndicator />
+            </View>
+          ) : null
+        }
+      />
     </SafeAreaView>
   );
 }
