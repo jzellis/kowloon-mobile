@@ -55,10 +55,13 @@ module.exports = {
         },
       },
       fontFamily: {
-        // Replaced once we wire in actual font assets via expo-font.
-        // For now these resolve to system fonts; class names stay stable.
-        reading: ["serif"],
-        ui: ["System"],
+        // Static chrome fonts — bundled via expo-font (see src/lib/typography.js).
+        // `reading` is the editorial display serif used for headings; `ui` is
+        // the sans used for labels, buttons, eyebrows. The user-selectable
+        // *reading-body* font is applied via inline styles on reading surfaces
+        // (post body, article view) through useTypography(), NOT these tokens.
+        reading: ["lora-regular"],
+        ui: ["inter-regular"],
         mono: ["monospace"],
       },
       borderRadius: {

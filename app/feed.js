@@ -59,9 +59,14 @@ export default function Feed() {
         </Text>
 
         <Button
+          label="Settings"
+          onPress={() => router.push("/settings")}
+        />
+        <Button
           label="Sign out"
           variant="ghost"
           onPress={handleSignOut}
+          className="mt-3"
         />
       </ScrollView>
     </SafeAreaView>

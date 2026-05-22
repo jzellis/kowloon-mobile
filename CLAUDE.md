@@ -29,7 +29,22 @@ app.json            — Expo config (name, slug, bundle IDs)
 - **Multi-account from day one.** Architecture treats account as a primary key on every per-user piece of state (auth token, drafts, prefs, notification subscription). Initial UX may only expose a single account, but the data model is multi-tenant from the first commit. See `[[project-mobile-strategy]]` in memory.
 - **Plain JS, not TS.** The server, frontend, and client lib are all JS. Mobile follows suit for consistency.
 - **`@kowloon/client` is the only network layer.** Never call `fetch` directly — go through the client's auth/activities/feeds/etc. modules. Storage adapter auto-detects AsyncStorage on RN.
-- **Editorial design heritage.** Same magazine-y aesthetic as the web frontend: hard edges (no rounded corners), strong typography, theme tokens from the kowloon theme. RN doesn't have Tailwind out of the box — NativeWind is a likely add but not yet wired.
+- **Editorial design heritage.** Same magazine-y aesthetic as the web frontend: hard edges (no rounded corners), strong typography, theme tokens from the kowloon theme. Styling is via **NativeWind** (`className`); theme tokens live in `tailwind.config.js`.
+
+## Typography system
+
+Reading typography is a first-class feature, not a stylesheet detail — the user is a writer and cares about editorial elegance. Modelled on the Kindle's reading settings: a small curated set of good choices.
+
+- **Five bundled fonts** (`assets/fonts/`, loaded via `expo-font`): Inter (default), Atkinson Hyperlegible, Lora, Merriweather, OpenDyslexic. Regular / Bold / Italic each.
+- **`src/lib/typography.js` is the single source of truth.** Adding a font = one entry in the `FONTS` array (plus its files). The `useFonts()` asset map, the settings picker, and the resolver all derive from it.
+- **Four stepped preferences**: `fontFamily`, `fontSize` (xs–xl), `lineSpacing` (compact/normal/relaxed), `columnWidth` (narrow/normal/wide). The client owns the px / multiplier / padding mapping; the server stores only the string keys.
+- **Account-level, server-synced.** Stored at `user.prefs.typography` (a real subschema in `server/schema/User.js` — *not* an open object, so new fields there need a schema change). `TypographyProvider` hydrates on account change and writes back debounced via `@kowloon/client` `updateProfile`. The whole `typography` object is sent on every change — the server's Update handler replaces the subdocument wholesale.
+- **Applied via inline styles** on reading surfaces (post body, article view) through `useTypography()` — NOT via Tailwind classes, since the values are dynamic. The static `font-reading` / `font-ui` Tailwind tokens are chrome fonts only (Lora display serif / Inter sans).
+- **Settings UI** at `app/settings/typography.js`: live preview + horizontal typeface picker + segmented controls. No save button — changes apply and sync immediately.
+
+### Known gap — non-Western scripts
+
+The bundled fonts cover Latin only. Users writing in non-Roman scripts fall back to the device system font (the automatic behaviour when a glyph isn't in the loaded font). Adding non-Roman font support is a self-contained contribution: add entries to `FONTS` in `src/lib/typography.js` and the files to `assets/fonts/` — the picker renders dynamically, no component changes needed. Good first contribution for the community.
 
 ## Running
 
