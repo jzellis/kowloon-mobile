@@ -34,6 +34,8 @@ import {
   useEditorBridge,
 } from "@10play/tentap-editor";
 
+import * as ImagePicker from "expo-image-picker";
+
 import { PostTypeSelector } from "../src/components/posts/PostTypeSelector.jsx";
 import { PostTypeIcon } from "../src/components/posts/PostTypeIcon.jsx";
 import { AudienceSelector } from "../src/components/posts/AudienceSelector.jsx";
@@ -41,6 +43,7 @@ import { useActiveClient } from "../src/lib/useActiveClient.js";
 import { useKeyboardInset } from "../src/lib/useKeyboardInset.js";
 import { kowloonPostIdFromUrl } from "../src/lib/parseKowloonUrl.js";
 import { pmToMarkdown } from "../src/lib/pmToMarkdown.js";
+import { uploadFile } from "../src/lib/uploadFile.js";
 import { COMPOSABLE_TYPES, POST_TYPES } from "../src/lib/postTypes.js";
 
 const TOOLBAR_HEIGHT = 44;
@@ -57,6 +60,29 @@ export default function Compose() {
   const [audience, setAudience] = useState("@public");
   const [posting, setPosting] = useState(false);
   const [error, setError] = useState(null);
+
+  // Article featuredImage — local URI from the picker, uploaded at submit
+  // time. Reused later by Event composer (Phase 4) and the same upload
+  // helper will power Media attachments (Phase 3).
+  const [featuredImage, setFeaturedImage] = useState(null); // { uri, name, mimeType } | null
+
+  async function pickFeaturedImage() {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: "images",
+        quality: 0.8,
+      });
+      if (result.canceled || !result.assets?.[0]) return;
+      const asset = result.assets[0];
+      setFeaturedImage({
+        uri: asset.uri,
+        name: asset.fileName || `image-${Date.now()}.jpg`,
+        mimeType: asset.mimeType || "image/jpeg",
+      });
+    } catch (e) {
+      setError(e?.message || "Couldn't open the photo library.");
+    }
+  }
 
   // The Android window doesn't reliably resize for the keyboard under Expo
   // Go, so the content area is padded at the bottom by the measured keyboard
@@ -194,6 +220,27 @@ export default function Compose() {
 
     setPosting(true);
     try {
+      // Upload Article's featured image first (if any). The returned file ID
+      // is what gets stored on the post — the server presigns a serve URL
+      // at read time.
+      let articleFeaturedFileId;
+      if (type === "Article" && featuredImage?.uri) {
+        try {
+          const res = await uploadFile(client, {
+            uri: featuredImage.uri,
+            name: featuredImage.name,
+            mimeType: featuredImage.mimeType,
+            to: audience,
+            generateThumbnail: true,
+          });
+          articleFeaturedFileId = res?.file?.id;
+        } catch (e) {
+          setError(`Featured image upload failed: ${e?.message || "unknown"}`);
+          setPosting(false);
+          return;
+        }
+      }
+
       await client.activities.createPost({
         type,
         title:
@@ -202,10 +249,16 @@ export default function Compose() {
             : undefined,
         href: type === "Link" ? linkHref.trim() : undefined,
         target,
-        // featuredImage from the link preview — saved on the post so the
-        // feed card can render the OG image without re-fetching.
+        // featuredImage source per type:
+        //   Article — the just-uploaded file ID
+        //   Link    — the OG image URL from the preview fetch (server
+        //             downloads and stores it via proxyExternalImage)
         featuredImage:
-          type === "Link" ? linkPreview?.image || undefined : undefined,
+          type === "Article"
+            ? articleFeaturedFileId || undefined
+            : type === "Link"
+            ? linkPreview?.image || undefined
+            : undefined,
         content: markdown.trim() || undefined,
         to: audience,
         dedupeKey,
@@ -299,6 +352,39 @@ export default function Compose() {
                   placeholderTextColor="rgba(26,26,32,0.35)"
                   className="border-2 border-base-300 bg-white px-3 py-3 font-reading text-lg text-base-content"
                 />
+              </View>
+            ) : null}
+
+            {type === "Article" ? (
+              <View className="px-4 pt-3">
+                {featuredImage ? (
+                  <View className="border-2 border-base-300 bg-white">
+                    <Image
+                      source={{ uri: featuredImage.uri }}
+                      className="w-full h-40"
+                      resizeMode="cover"
+                    />
+                    <Pressable
+                      onPress={() => setFeaturedImage(null)}
+                      hitSlop={6}
+                      className="absolute top-1.5 right-1.5 bg-black/65 px-2 py-1"
+                    >
+                      <Text className="font-ui uppercase tracking-[0.14em] text-[10px] text-white">
+                        Remove
+                      </Text>
+                    </Pressable>
+                  </View>
+                ) : (
+                  <Pressable
+                    onPress={pickFeaturedImage}
+                    android_ripple={{ color: "rgba(0,0,0,0.05)" }}
+                    className="border-2 border-base-300 bg-white py-5 items-center"
+                  >
+                    <Text className="font-ui uppercase tracking-[0.14em] text-xs text-base-content/55">
+                      + Add featured image
+                    </Text>
+                  </Pressable>
+                )}
               </View>
             ) : null}
 
