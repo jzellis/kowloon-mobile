@@ -12,6 +12,20 @@ import { HtmlContent } from "../HtmlContent.jsx";
 import { kowloonPostIdFromUrl } from "../../lib/parseKowloonUrl.js";
 import { timeAgo } from "../../lib/timeAgo.js";
 
+// Classify an attachment by mediaType, with a fallback for `.m4a` files
+// which Android sometimes labels `video/mp4` even though they're audio.
+function attachmentKind(att) {
+  const mime = (att?.mediaType || "").toLowerCase();
+  const name = (att?.name || "").toLowerCase();
+  if (mime.startsWith("image/")) return "image";
+  if (mime.startsWith("audio/")) return "audio";
+  if (name.endsWith(".m4a") || name.endsWith(".aac") || name.endsWith(".mp3")) {
+    return "audio";
+  }
+  if (mime.startsWith("video/")) return "video";
+  return "other";
+}
+
 function decodeEntities(s) {
   if (!s) return "";
   return String(s)
@@ -119,21 +133,107 @@ export function PostCard({ post }) {
         </View>
 
         {post?.type === "Media" ? (
-          /* Image-first: the post IS the image. Skip HtmlContent (which
-             would re-render the inline <img>) and use textPreview as the
-             caption. */
+          /* Media: optional title, then caption, then each attachment as a
+             tile. Images render in a 2-col grid; videos and audio render as
+             full-width rows below. Falls back to the legacy single `image`
+             field for older posts that pre-date attachments. */
           <>
-            {image ? (
+            {title ? (
+              <Text className="font-reading text-xl text-base-content leading-tight mb-1.5">
+                {title}
+              </Text>
+            ) : null}
+            {plainPreview ? (
+              <Text className="font-reading text-[15px] text-base-content/80 leading-6 mb-3">
+                {decodeEntities(plainPreview)}
+              </Text>
+            ) : null}
+            {Array.isArray(post.attachments) && post.attachments.length > 0 ? (
+              <View>
+                {/* Images: 2-column grid. Single image stays full width; an
+                    odd-count final image spans both columns so the bottom
+                    edge stays flush. */}
+                {(() => {
+                  const imgs = post.attachments.filter(
+                    (a) => attachmentKind(a) === "image"
+                  );
+                  if (imgs.length === 0) return null;
+                  if (imgs.length === 1) {
+                    return (
+                      <Image
+                        source={{ uri: imgs[0].url }}
+                        className="w-full h-72 mb-2 border-2 border-base-300 bg-base-200"
+                        resizeMode="cover"
+                      />
+                    );
+                  }
+                  return (
+                    <View className="flex-row flex-wrap mb-1" style={{ gap: 4 }}>
+                      {imgs.map((img, i) => {
+                        const lastOdd =
+                          imgs.length % 2 === 1 && i === imgs.length - 1;
+                        return (
+                          <View
+                            key={`${img.url}-${i}`}
+                            style={{ width: lastOdd ? "100%" : "49%" }}
+                          >
+                            <Image
+                              source={{ uri: img.url }}
+                              className="w-full h-40 border-2 border-base-300 bg-base-200"
+                              resizeMode="cover"
+                            />
+                          </View>
+                        );
+                      })}
+                    </View>
+                  );
+                })()}
+
+                {/* Videos and audio render as full-width rows below the grid. */}
+                {post.attachments
+                  .filter((a) => attachmentKind(a) !== "image")
+                  .map((att, i) => {
+                    const kind = attachmentKind(att);
+                    if (kind === "video") {
+                      return (
+                        <View
+                          key={`${att.url}-${i}`}
+                          className="w-full h-72 mb-2 border-2 border-base-300 bg-base-200 items-center justify-center"
+                        >
+                          <Text className="font-ui uppercase tracking-[0.18em] text-base text-base-content/65">
+                            ▶ Video
+                          </Text>
+                          <Text className="font-ui text-xs text-base-content/45 mt-1">
+                            {att.name || ""}
+                          </Text>
+                        </View>
+                      );
+                    }
+                    // audio
+                    return (
+                      <View
+                        key={`${att.url}-${i}`}
+                        className="flex-row items-center border-2 border-base-300 bg-base-200 px-3 py-3 mb-2"
+                      >
+                        <Text className="font-ui text-lg text-base-content/65 mr-3">
+                          ♪
+                        </Text>
+                        <Text
+                          className="font-ui text-sm text-base-content flex-1"
+                          numberOfLines={1}
+                        >
+                          {att.name || "Audio"}
+                        </Text>
+                      </View>
+                    );
+                  })}
+              </View>
+            ) : image ? (
               <Image
                 source={{ uri: image }}
                 className="w-full h-72 mb-3 border-2 border-base-300 bg-base-200"
                 resizeMode="cover"
               />
-            ) : null}
-            {plainPreview ? (
-              <Text className="font-reading text-[15px] text-base-content/80 leading-6">
-                {decodeEntities(plainPreview)}
-              </Text>
             ) : null}
           </>
         ) : post?.type === "Link" ? (

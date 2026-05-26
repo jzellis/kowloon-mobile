@@ -19,6 +19,7 @@ import {
   ActivityIndicator,
   Image,
   Pressable,
+  ScrollView,
   Text,
   TextInput,
   View,
@@ -35,6 +36,7 @@ import {
 } from "@10play/tentap-editor";
 
 import * as ImagePicker from "expo-image-picker";
+import * as DocumentPicker from "expo-document-picker";
 
 import { PostTypeSelector } from "../src/components/posts/PostTypeSelector.jsx";
 import { PostTypeIcon } from "../src/components/posts/PostTypeIcon.jsx";
@@ -61,10 +63,13 @@ export default function Compose() {
   const [posting, setPosting] = useState(false);
   const [error, setError] = useState(null);
 
-  // Article featuredImage — local URI from the picker, uploaded at submit
-  // time. Reused later by Event composer (Phase 4) and the same upload
-  // helper will power Media attachments (Phase 3).
+  // Article featuredImage — local URI from the picker, uploaded at submit.
   const [featuredImage, setFeaturedImage] = useState(null); // { uri, name, mimeType } | null
+
+  // Media attachments — array of { uri, name, mimeType, kind }.
+  // kind: 'image' | 'video' | 'audio'. Uploaded at submit; the returned
+  // file IDs become the post's attachments[] array.
+  const [attachments, setAttachments] = useState([]);
 
   async function pickFeaturedImage() {
     try {
@@ -82,6 +87,57 @@ export default function Compose() {
     } catch (e) {
       setError(e?.message || "Couldn't open the photo library.");
     }
+  }
+
+  async function pickPhotosOrVideos() {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images", "videos"],
+        allowsMultipleSelection: true,
+        quality: 0.8,
+      });
+      if (result.canceled || !result.assets?.length) return;
+      const next = result.assets.map((a) => {
+        const isVideo = a.type === "video";
+        return {
+          uri: a.uri,
+          name:
+            a.fileName ||
+            `${isVideo ? "video" : "image"}-${Date.now()}.${
+              isVideo ? "mp4" : "jpg"
+            }`,
+          mimeType: a.mimeType || (isVideo ? "video/mp4" : "image/jpeg"),
+          kind: isVideo ? "video" : "image",
+        };
+      });
+      setAttachments((prev) => [...prev, ...next]);
+    } catch (e) {
+      setError(e?.message || "Couldn't open the photo library.");
+    }
+  }
+
+  async function pickAudio() {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: "audio/*",
+        multiple: true,
+        copyToCacheDirectory: true,
+      });
+      if (result.canceled || !result.assets?.length) return;
+      const next = result.assets.map((a) => ({
+        uri: a.uri,
+        name: a.name || `audio-${Date.now()}.mp3`,
+        mimeType: a.mimeType || "audio/mpeg",
+        kind: "audio",
+      }));
+      setAttachments((prev) => [...prev, ...next]);
+    } catch (e) {
+      setError(e?.message || "Couldn't open audio picker.");
+    }
+  }
+
+  function removeAttachment(index) {
+    setAttachments((prev) => prev.filter((_, i) => i !== index));
   }
 
   // The Android window doesn't reliably resize for the keyboard under Expo
@@ -203,9 +259,13 @@ export default function Compose() {
       setError("Couldn't read the editor content.");
       return;
     }
-    // Notes require content; other types may have title/href/attachments only.
+    // Notes require content. Media requires at least one attachment OR text.
     if (type === "Note" && !markdown.trim()) {
       setError("Write something first.");
+      return;
+    }
+    if (type === "Media" && attachments.length === 0 && !markdown.trim()) {
+      setError("Add at least one photo, video, or audio file.");
       return;
     }
 
@@ -241,10 +301,41 @@ export default function Compose() {
         }
       }
 
+      // Upload Media attachments in parallel; the server schema stores an
+      // array of file IDs but the Create handler also normalizes the
+      // { fileId, title, alt } shape (so we match the web's payload).
+      let uploadedAttachments;
+      if (type === "Media" && attachments.length > 0) {
+        try {
+          const results = await Promise.all(
+            attachments.map((a) =>
+              uploadFile(client, {
+                uri: a.uri,
+                name: a.name,
+                mimeType: a.mimeType,
+                title: a.name,
+                to: audience,
+                generateThumbnail: a.kind === "image",
+              })
+            )
+          );
+          uploadedAttachments = results
+            .map((r, i) => ({
+              fileId: r?.file?.id,
+              title: attachments[i].name || undefined,
+            }))
+            .filter((x) => x.fileId);
+        } catch (e) {
+          setError(`Attachment upload failed: ${e?.message || "unknown"}`);
+          setPosting(false);
+          return;
+        }
+      }
+
       await client.activities.createPost({
         type,
         title:
-          type === "Article" || type === "Link"
+          type === "Article" || type === "Link" || type === "Media"
             ? title.trim() || undefined
             : undefined,
         href: type === "Link" ? linkHref.trim() : undefined,
@@ -259,6 +350,7 @@ export default function Compose() {
             : type === "Link"
             ? linkPreview?.image || undefined
             : undefined,
+        attachments: uploadedAttachments,
         content: markdown.trim() || undefined,
         to: audience,
         dedupeKey,
@@ -286,6 +378,15 @@ export default function Compose() {
               autoFocus
               style={{ position: "absolute", width: 1, height: 1, opacity: 0 }}
             />
+            {/* Upper composer content (everything above the controls) scrolls
+                independently — keeps the editor reachable when a long
+                attachment list pushes things off-screen. The editor itself
+                gets a fixed height so the WebView inside has defined bounds. */}
+            <ScrollView
+              className="flex-1"
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={{ paddingBottom: 4 }}
+            >
 
             {type === "Link" ? (
               <View className="px-4 pt-3">
@@ -339,7 +440,7 @@ export default function Compose() {
               </View>
             ) : null}
 
-            {type === "Article" || type === "Link" ? (
+            {type === "Article" || type === "Link" || type === "Media" ? (
               <View className="px-4 pt-3">
                 <TextInput
                   value={title}
@@ -347,11 +448,81 @@ export default function Compose() {
                   placeholder={
                     type === "Article"
                       ? "Article title"
-                      : "Optional title for this link"
+                      : type === "Link"
+                      ? "Optional title for this link"
+                      : "Optional title"
                   }
                   placeholderTextColor="rgba(26,26,32,0.35)"
                   className="border-2 border-base-300 bg-white px-3 py-3 font-reading text-lg text-base-content"
                 />
+              </View>
+            ) : null}
+
+            {type === "Media" ? (
+              <View className="px-4 pt-3">
+                {attachments.map((att, i) => (
+                  <View
+                    key={`${att.uri}-${i}`}
+                    className="flex-row items-center border-2 border-base-300 bg-white p-2 mb-2"
+                  >
+                    {att.kind === "image" ? (
+                      <Image
+                        source={{ uri: att.uri }}
+                        className="w-14 h-14 mr-3 border-2 border-base-300 bg-base-200"
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <View className="w-14 h-14 mr-3 border-2 border-base-300 bg-base-200 items-center justify-center">
+                        <Text className="font-ui uppercase tracking-[0.14em] text-[10px] text-base-content/60">
+                          {att.kind === "audio" ? "Audio" : "Video"}
+                        </Text>
+                      </View>
+                    )}
+                    <View className="flex-1">
+                      <Text
+                        className="font-ui text-sm text-base-content"
+                        numberOfLines={1}
+                      >
+                        {att.name || "untitled"}
+                      </Text>
+                      <Text
+                        className="font-ui text-xs text-base-content/45"
+                        numberOfLines={1}
+                      >
+                        {att.kind} · {att.mimeType || ""}
+                      </Text>
+                    </View>
+                    <Pressable
+                      onPress={() => removeAttachment(i)}
+                      hitSlop={6}
+                      className="px-2 py-1"
+                    >
+                      <Text className="font-ui uppercase tracking-[0.14em] text-[10px] text-error">
+                        Remove
+                      </Text>
+                    </Pressable>
+                  </View>
+                ))}
+                <View className="flex-row">
+                  <Pressable
+                    onPress={pickPhotosOrVideos}
+                    android_ripple={{ color: "rgba(0,0,0,0.05)" }}
+                    className="flex-1 mr-2 border-2 border-base-300 bg-white py-3 items-center"
+                  >
+                    <Text className="font-ui uppercase tracking-[0.14em] text-xs text-base-content/55">
+                      + Photo / Video
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={pickAudio}
+                    android_ripple={{ color: "rgba(0,0,0,0.05)" }}
+                    className="flex-1 border-2 border-base-300 bg-white py-3 items-center"
+                  >
+                    <Text className="font-ui uppercase tracking-[0.14em] text-xs text-base-content/55">
+                      + Audio
+                    </Text>
+                  </Pressable>
+                </View>
               </View>
             ) : null}
 
@@ -394,10 +565,13 @@ export default function Compose() {
               </Text>
             ) : null}
 
-            {/* Editor — bordered box: formatting toolbar on top (always
-                visible, like the web composer), editing area filling below.
-                `hidden={false}` overrides 10tap's keyboard-accessory hiding. */}
-            <View className="flex-1 mx-4 mt-3 border-2 border-base-300">
+            {/* Editor — bordered box with formatting toolbar on top. Fixed
+                height so the WebView has defined bounds inside the parent
+                ScrollView. `hidden={false}` overrides 10tap's auto-hide. */}
+            <View
+              style={{ height: 320 }}
+              className="mx-4 mt-3 border-2 border-base-300"
+            >
               <View
                 style={{ height: TOOLBAR_HEIGHT }}
                 className="border-b-2 border-base-300"
@@ -408,6 +582,7 @@ export default function Compose() {
                 <RichText editor={editor} />
               </View>
             </View>
+            </ScrollView>
 
             {/* Audience + Cancel/Post — below the editor body */}
             <View className="flex-row items-stretch px-4 py-3">
