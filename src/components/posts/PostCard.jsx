@@ -4,12 +4,24 @@
 // Post types: Note, Article, Media, Link, Event. Each gets an accent color
 // and type-appropriate treatment.
 
-import { Image, Pressable, Text, View } from "react-native";
+import { Image, Linking, Pressable, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 
 import { Avatar } from "./Avatar.jsx";
 import { HtmlContent } from "../HtmlContent.jsx";
+import { kowloonPostIdFromUrl } from "../../lib/parseKowloonUrl.js";
 import { timeAgo } from "../../lib/timeAgo.js";
+
+function decodeEntities(s) {
+  if (!s) return "";
+  return String(s)
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, " ");
+}
 
 // Static class strings — NativeWind needs the full class name at build time,
 // so we can't interpolate `text-post-${type}`.
@@ -42,10 +54,29 @@ export function PostCard({ post }) {
   const previewHtml = (post?.summary || post?.body || "").trim();
   const plainPreview = post?.textPreview?.trim();
   const image = post?.featuredImage || post?.image || null;
-  const linkHost = post?.type === "Link" ? hostOf(post?.url) : "";
+  // For Link posts the host shown is the *external* URL's host (post.href),
+  // not the Kowloon canonical post URL (post.url) — those are always our own
+  // domain.
+  const linkHost = post?.type === "Link" ? hostOf(post?.href) : "";
 
   function open() {
     router.push(`/post/${encodeURIComponent(post.id)}`);
+  }
+
+  async function openExternal() {
+    const href = post?.href;
+    if (!href) return;
+    // Kowloon post URL → open in-app instead of the browser.
+    const kowloonId = kowloonPostIdFromUrl(href);
+    if (kowloonId) {
+      router.push(`/post/${encodeURIComponent(kowloonId)}`);
+      return;
+    }
+    try {
+      await Linking.openURL(href);
+    } catch {
+      // some URLs may not be supported by the OS; silently no-op
+    }
   }
 
   return (
@@ -87,40 +118,101 @@ export function PostCard({ post }) {
           </View>
         </View>
 
-        {/* Title — types that carry one */}
-        {title ? (
-          <Text className="font-reading text-xl text-base-content leading-tight mb-1.5">
-            {title}
-          </Text>
-        ) : null}
+        {post?.type === "Media" ? (
+          /* Image-first: the post IS the image. Skip HtmlContent (which
+             would re-render the inline <img>) and use textPreview as the
+             caption. */
+          <>
+            {image ? (
+              <Image
+                source={{ uri: image }}
+                className="w-full h-72 mb-3 border-2 border-base-300 bg-base-200"
+                resizeMode="cover"
+              />
+            ) : null}
+            {plainPreview ? (
+              <Text className="font-reading text-[15px] text-base-content/80 leading-6">
+                {decodeEntities(plainPreview)}
+              </Text>
+            ) : null}
+          </>
+        ) : post?.type === "Link" ? (
+          /* Image-first link card: image on top, then the link title, then
+             the description. Image and title open the external URL; tapping
+             elsewhere on the card still opens the post detail. */
+          <>
+            {image ? (
+              <Pressable onPress={openExternal} className="mb-3">
+                <Image
+                  source={{ uri: image }}
+                  className="w-full h-48 border-2 border-base-300 bg-base-200"
+                  resizeMode="cover"
+                />
+              </Pressable>
+            ) : null}
+            {title ? (
+              <Pressable onPress={openExternal}>
+                <Text className={`font-reading text-xl ${meta.accent} leading-tight mb-1`}>
+                  {title}
+                </Text>
+              </Pressable>
+            ) : null}
+            {linkHost ? (
+              <Text className="font-ui text-xs text-base-content/45 mb-2">
+                {linkHost}
+              </Text>
+            ) : null}
+            {plainPreview ? (
+              <Text className="font-reading text-[15px] text-base-content/80 leading-6">
+                {decodeEntities(plainPreview)}
+              </Text>
+            ) : null}
+          </>
+        ) : (
+          /* Default body — title + HTML preview + optional hero image */
+          <>
+            {title ? (
+              <Text className="font-reading text-xl text-base-content leading-tight mb-1.5">
+                {title}
+              </Text>
+            ) : null}
 
-        {/* Link host */}
-        {linkHost ? (
-          <Text className={`font-ui text-xs mb-1.5 ${meta.accent}`}>
-            {linkHost}
-          </Text>
-        ) : null}
+            {linkHost ? (
+              <Text className={`font-ui text-xs mb-1.5 ${meta.accent}`}>
+                {linkHost}
+              </Text>
+            ) : null}
 
-        {/* Preview — rich HTML excerpt */}
-        {previewHtml ? (
-          <HtmlContent html={previewHtml} fontSize={15} />
-        ) : plainPreview ? (
-          <Text
-            className="font-reading text-[15px] text-base-content/80 leading-6"
-            numberOfLines={title ? 3 : 5}
-          >
-            {plainPreview}
-          </Text>
-        ) : null}
+            {previewHtml ? (
+              <HtmlContent html={previewHtml} fontSize={15} />
+            ) : plainPreview ? (
+              <Text
+                className="font-reading text-[15px] text-base-content/80 leading-6"
+                numberOfLines={title ? 3 : 5}
+              >
+                {plainPreview}
+              </Text>
+            ) : null}
 
-        {/* Media image */}
-        {image ? (
-          <Image
-            source={{ uri: image }}
-            className="w-full h-48 mt-3 border-2 border-base-300 bg-base-200"
-            resizeMode="cover"
-          />
-        ) : null}
+            {/* Server only emits `summary` when the body needed truncating
+                (>2 paragraphs or any paragraph >1000 chars — see Post.js
+                `generateSummary`). When it's present, signal that the card
+                is showing an excerpt. */}
+            {post?.summary ? (
+              <Text className="font-reading italic text-base-content/45 mt-2 text-right">
+                Continue reading…
+              </Text>
+            ) : null}
+
+            {image ? (
+              <Image
+                source={{ uri: image }}
+                className="w-full h-48 mt-3 border-2 border-base-300 bg-base-200"
+                resizeMode="cover"
+              />
+            ) : null}
+          </>
+        )}
 
         {/* Footer counts */}
         <View className="flex-row mt-3">

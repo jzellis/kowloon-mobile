@@ -12,6 +12,7 @@ export const POST_TYPES = {
 
 export const POST_TYPE_NAMES = ["Note", "Article", "Media", "Link", "Event"];
 
-// Types the composer can actually create today. Note + Article are text
-// posts; Media/Link/Event need their own input UI and aren't built yet.
-export const COMPOSABLE_TYPES = ["Note", "Article"];
+// Types the composer can actually create today. Media + Event still need
+// their own input UI (image upload, date picker, geocoding) and remain
+// stubs until those phases land.
+export const COMPOSABLE_TYPES = ["Note", "Article", "Link"];

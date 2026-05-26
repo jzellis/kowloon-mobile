@@ -17,6 +17,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "expo-router";
 import {
   ActivityIndicator,
+  Image,
   Pressable,
   Text,
   TextInput,
@@ -38,6 +39,7 @@ import { PostTypeIcon } from "../src/components/posts/PostTypeIcon.jsx";
 import { AudienceSelector } from "../src/components/posts/AudienceSelector.jsx";
 import { useActiveClient } from "../src/lib/useActiveClient.js";
 import { useKeyboardInset } from "../src/lib/useKeyboardInset.js";
+import { kowloonPostIdFromUrl } from "../src/lib/parseKowloonUrl.js";
 import { pmToMarkdown } from "../src/lib/pmToMarkdown.js";
 import { COMPOSABLE_TYPES, POST_TYPES } from "../src/lib/postTypes.js";
 
@@ -49,6 +51,9 @@ export default function Compose() {
 
   const [type, setType] = useState("Note");
   const [title, setTitle] = useState("");
+  const [linkHref, setLinkHref] = useState("");
+  const [linkPreview, setLinkPreview] = useState(null);
+  const [previewing, setPreviewing] = useState(false);
   const [audience, setAudience] = useState("@public");
   const [posting, setPosting] = useState(false);
   const [error, setError] = useState(null);
@@ -84,6 +89,65 @@ export default function Compose() {
     }
   }, [editorState.isReady, editor]);
 
+  // Link preview: when the user types/pastes a URL in the Link composer, fetch
+  // its OG metadata from the server (debounced) and auto-populate the title
+  // if blank. The image (if any) is held in state and sent as featuredImage.
+  useEffect(() => {
+    if (type !== "Link" || !client) {
+      setLinkPreview(null);
+      return;
+    }
+    const href = linkHref.trim();
+    if (!href) {
+      setLinkPreview(null);
+      return;
+    }
+    try {
+      new URL(href);
+    } catch {
+      return;
+    }
+    let cancelled = false;
+    const t = setTimeout(async () => {
+      setPreviewing(true);
+      try {
+        const meta = await client.feeds.getLinkPreview({ url: href });
+        if (cancelled) return;
+        setLinkPreview(meta || null);
+        if (meta?.title && !title) setTitle(meta.title);
+
+        // Auto-populate the editor body with the preview summary if the
+        // editor is currently empty. (Matches the web composer's behaviour.)
+        if (meta?.summary) {
+          try {
+            const current = (await editor.getText()) || "";
+            if (!cancelled && !current.trim()) {
+              const escaped = meta.summary
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\n+/g, "<br>");
+              editor.setContent(`<p>${escaped}</p>`);
+            }
+          } catch {
+            // editor not ready or unreachable — skip silently
+          }
+        }
+      } catch {
+        // Non-fatal — preview is enhancement-only.
+      } finally {
+        if (!cancelled) setPreviewing(false);
+      }
+    }, 600);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+    // title intentionally not in deps: we only auto-populate it ONCE when
+    // preview first arrives; subsequent edits stay the user's.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [linkHref, type, client]);
+
   const composable = COMPOSABLE_TYPES.includes(type);
 
   async function handlePost() {
@@ -91,6 +155,19 @@ export default function Compose() {
     if (type === "Article" && !title.trim()) {
       setError("Articles need a title.");
       return;
+    }
+    if (type === "Link") {
+      const href = linkHref.trim();
+      if (!href) {
+        setError("Add a link URL.");
+        return;
+      }
+      try {
+        new URL(href);
+      } catch {
+        setError("That doesn't look like a valid URL.");
+        return;
+      }
     }
 
     let markdown = "";
@@ -100,17 +177,36 @@ export default function Compose() {
       setError("Couldn't read the editor content.");
       return;
     }
-    if (!markdown.trim()) {
+    // Notes require content; other types may have title/href/attachments only.
+    if (type === "Note" && !markdown.trim()) {
       setError("Write something first.");
       return;
+    }
+
+    // Auto-target: if the Link's href is a Kowloon post URL, mark it as a
+    // first-class share so the feed can render an embedded preview rather
+    // than a generic link card. (See parseKowloonUrl.)
+    let target;
+    if (type === "Link") {
+      const id = kowloonPostIdFromUrl(linkHref.trim());
+      if (id) target = id;
     }
 
     setPosting(true);
     try {
       await client.activities.createPost({
         type,
-        title: type === "Article" ? title.trim() : undefined,
-        content: markdown,
+        title:
+          type === "Article" || type === "Link"
+            ? title.trim() || undefined
+            : undefined,
+        href: type === "Link" ? linkHref.trim() : undefined,
+        target,
+        // featuredImage from the link preview — saved on the post so the
+        // feed card can render the OG image without re-fetching.
+        featuredImage:
+          type === "Link" ? linkPreview?.image || undefined : undefined,
+        content: markdown.trim() || undefined,
         to: audience,
         dedupeKey,
       });
@@ -138,12 +234,68 @@ export default function Compose() {
               style={{ position: "absolute", width: 1, height: 1, opacity: 0 }}
             />
 
-            {type === "Article" ? (
+            {type === "Link" ? (
+              <View className="px-4 pt-3">
+                <TextInput
+                  value={linkHref}
+                  onChangeText={setLinkHref}
+                  placeholder="https://example.com/article"
+                  placeholderTextColor="rgba(26,26,32,0.35)"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  keyboardType="url"
+                  className="border-2 border-base-300 bg-white px-3 py-3 font-ui text-base text-base-content"
+                />
+                {/* Link preview — auto-fetched from /preview when href changes */}
+                {previewing || linkPreview ? (
+                  <View className="flex-row mt-2 border-2 border-base-300 bg-white p-2">
+                    {previewing ? (
+                      <View className="w-16 h-16 mr-3 border-2 border-base-300 bg-base-200 items-center justify-center">
+                        <ActivityIndicator />
+                      </View>
+                    ) : linkPreview?.image ? (
+                      <Image
+                        source={{ uri: linkPreview.image }}
+                        className="w-16 h-16 mr-3 border-2 border-base-300 bg-base-200"
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <View className="w-16 h-16 mr-3 border-2 border-base-300 bg-base-200" />
+                    )}
+                    <View className="flex-1">
+                      <Text className="font-ui text-[10px] uppercase tracking-[0.14em] text-base-content/45 mb-0.5">
+                        Preview
+                      </Text>
+                      <Text
+                        className="font-reading text-sm text-base-content"
+                        numberOfLines={2}
+                      >
+                        {linkPreview?.title || (previewing ? "Loading…" : "Untitled")}
+                      </Text>
+                      {linkPreview?.summary ? (
+                        <Text
+                          className="font-ui text-xs text-base-content/55 mt-0.5"
+                          numberOfLines={2}
+                        >
+                          {linkPreview.summary}
+                        </Text>
+                      ) : null}
+                    </View>
+                  </View>
+                ) : null}
+              </View>
+            ) : null}
+
+            {type === "Article" || type === "Link" ? (
               <View className="px-4 pt-3">
                 <TextInput
                   value={title}
                   onChangeText={setTitle}
-                  placeholder="Article title"
+                  placeholder={
+                    type === "Article"
+                      ? "Article title"
+                      : "Optional title for this link"
+                  }
                   placeholderTextColor="rgba(26,26,32,0.35)"
                   className="border-2 border-base-300 bg-white px-3 py-3 font-reading text-lg text-base-content"
                 />
