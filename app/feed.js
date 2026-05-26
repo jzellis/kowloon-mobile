@@ -18,9 +18,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { PostCard } from "../src/components/posts/PostCard.jsx";
 import { Avatar } from "../src/components/posts/Avatar.jsx";
+import { FeedHeader } from "../src/components/posts/FeedHeader.jsx";
 import { UserMenu } from "../src/components/UserMenu.jsx";
 import { useFeed } from "../src/lib/useFeed.js";
 import { useActiveClient } from "../src/lib/useActiveClient.js";
+import { usePersistedFilter } from "../src/lib/usePersistedFilter.js";
 import {
   selectActiveAccount,
   updateAccountAndPersist,
@@ -32,6 +34,11 @@ export default function Feed() {
   const account = useSelector(selectActiveAccount);
   const client = useActiveClient();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // Persisted filter state — viewKey (public/server/circleId) + activeTypes.
+  const { viewKey, setViewKey, activeTypes, toggleType, clearTypes } =
+    usePersistedFilter(account?.id);
+
   const {
     posts,
     loading,
@@ -40,7 +47,7 @@ export default function Feed() {
     error,
     refresh,
     loadMore,
-  } = useFeed();
+  } = useFeed({ viewKey, activeTypes });
 
   // Backfill the server's display name onto the account the first time we
   // have a client for it. Accounts created before this field existed (and
@@ -108,6 +115,15 @@ export default function Feed() {
       </View>
 
       <UserMenu visible={menuOpen} onClose={() => setMenuOpen(false)} />
+
+      {/* Filter header — view picker (Public / Server / Circle) + type filter */}
+      <FeedHeader
+        viewKey={viewKey}
+        onViewChange={setViewKey}
+        activeTypes={activeTypes}
+        onToggleType={toggleType}
+        onClearTypes={clearTypes}
+      />
 
       <FlatList
         data={posts}

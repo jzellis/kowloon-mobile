@@ -1,10 +1,13 @@
-// Feed data hook — loads the active account's post feed from the server,
-// page by page, via @kowloon/client.
+// Feed data hook — loads posts for the active filter selection.
 //
-// GET /posts returns an ActivityStreams OrderedCollectionPage:
-//   { orderedItems: [...], currentPage, totalPages, totalItems, next }
-// Authenticated requests return the viewer's visible feed (their circles +
-// public); the client carries the account token, so no extra params needed.
+// `viewKey` chooses the source:
+//   "public"           → GET /posts?to=public  (public firehose, page-based)
+//   "server"           → GET /posts?to=server  (server-only,    page-based)
+//   "circle:<id>@..."  → GET /circles/:id/posts (circle posts,  cursor-based)
+//
+// `activeTypes` filters by post type (empty = all types).
+//
+// When `viewKey` or `activeTypes` changes the feed resets to page 1.
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useActiveClient } from "./useActiveClient.js";
@@ -21,22 +24,31 @@ function dedupeById(list) {
   return out;
 }
 
-export function useFeed() {
+function isCircle(viewKey) {
+  return typeof viewKey === "string" && viewKey.startsWith("circle:");
+}
+
+export function useFeed({ viewKey = "public", activeTypes = [] } = {}) {
   const client = useActiveClient();
 
   const [posts, setPosts] = useState([]);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(false); // initial load
+  const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
 
-  // Guard against overlapping loads and stale responses landing out of order.
+  // Pagination cursor — meaning depends on the current view:
+  //   server feeds → integer page number of last loaded page
+  //   circle feeds → ISO `publishedAt` of the oldest loaded item, used as `before`
+  const cursor = useRef(null);
   const inFlight = useRef(false);
 
-  const load = useCallback(
-    async (targetPage, mode) => {
+  // Active-types JSON for the effect dep (arrays aren't ref-stable).
+  const typesKey = JSON.stringify(activeTypes || []);
+
+  const fetchPage = useCallback(
+    async (mode) => {
       if (!client || inFlight.current) return;
       inFlight.current = true;
 
@@ -46,13 +58,45 @@ export function useFeed() {
       setError(null);
 
       try {
-        const res = await client.feeds.getServerPosts({ page: targetPage });
-        const items = res?.orderedItems || res?.items || [];
-        setTotalPages(Number(res?.totalPages) || 1);
-        setPage(targetPage);
-        setPosts((prev) =>
-          mode === "more" ? dedupeById([...prev, ...items]) : dedupeById(items)
-        );
+        let res;
+        let nextCursor = cursor.current;
+        if (isCircle(viewKey)) {
+          // Circle feed — cursor-based via `before`.
+          const before = mode === "more" ? cursor.current : undefined;
+          res = await client.feeds.getCirclePosts({
+            circleId: viewKey,
+            types: activeTypes,
+            before,
+          });
+          const items = res?.orderedItems || res?.items || [];
+          const oldest = items[items.length - 1]?.publishedAt;
+          nextCursor = oldest || cursor.current;
+          // No total available — assume more if we got a full-ish page.
+          setHasMore(items.length >= 15);
+          cursor.current = nextCursor;
+          setPosts((prev) =>
+            mode === "more" ? dedupeById([...prev, ...items]) : dedupeById(items)
+          );
+        } else {
+          // Server feed (public or server) — page-based.
+          const to = viewKey === "server" ? "server" : "public";
+          const page =
+            mode === "more"
+              ? (typeof cursor.current === "number" ? cursor.current : 0) + 1
+              : 1;
+          res = await client.feeds.getServerPosts({
+            to,
+            types: activeTypes,
+            page,
+          });
+          const items = res?.orderedItems || res?.items || [];
+          const totalPages = Number(res?.totalPages) || 1;
+          setHasMore(page < totalPages);
+          cursor.current = page;
+          setPosts((prev) =>
+            mode === "more" ? dedupeById([...prev, ...items]) : dedupeById(items)
+          );
+        }
       } catch (e) {
         setError(e?.message || "Couldn't load the feed.");
       } finally {
@@ -62,25 +106,32 @@ export function useFeed() {
         setLoadingMore(false);
       }
     },
-    [client]
+    // typesKey covers activeTypes; viewKey direct; client identity.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [client, viewKey, typesKey]
   );
 
-  // Initial load when the screen mounts or the active account changes.
+  // Reset + load whenever the view or type filter changes (or account
+  // changes, since useActiveClient swaps).
   useEffect(() => {
+    cursor.current = null;
     setPosts([]);
-    setPage(1);
-    setTotalPages(1);
-    if (client) load(1, "initial");
+    setHasMore(true);
+    if (client) fetchPage("initial");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [client]);
+  }, [client, viewKey, typesKey]);
 
-  const refresh = useCallback(() => load(1, "refresh"), [load]);
+  const refresh = useCallback(() => {
+    cursor.current = null;
+    setHasMore(true);
+    return fetchPage("refresh");
+  }, [fetchPage]);
 
   const loadMore = useCallback(() => {
-    if (!loading && !loadingMore && !refreshing && page < totalPages) {
-      load(page + 1, "more");
+    if (!loading && !loadingMore && !refreshing && hasMore) {
+      fetchPage("more");
     }
-  }, [load, loading, loadingMore, refreshing, page, totalPages]);
+  }, [fetchPage, loading, loadingMore, refreshing, hasMore]);
 
   return {
     posts,
@@ -90,6 +141,6 @@ export function useFeed() {
     error,
     refresh,
     loadMore,
-    hasMore: page < totalPages,
+    hasMore,
   };
 }
