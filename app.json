@@ -36,7 +36,9 @@
         {
           "cameraPermission": "Allow Kowloon to access your camera to scan invite QR codes."
         }
-      ]
+      ],
+      "expo-video",
+      "expo-audio"
     ]
   }
 }

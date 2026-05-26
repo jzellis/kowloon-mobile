@@ -8,6 +8,8 @@ import { Image, Linking, Pressable, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 
 import { Avatar } from "./Avatar.jsx";
+import { AudioAttachment } from "./AudioAttachment.jsx";
+import { VideoAttachment } from "./VideoAttachment.jsx";
 import { HtmlContent } from "../HtmlContent.jsx";
 import { kowloonPostIdFromUrl } from "../../lib/parseKowloonUrl.js";
 import { timeAgo } from "../../lib/timeAgo.js";
@@ -189,43 +191,17 @@ export function PostCard({ post }) {
                   );
                 })()}
 
-                {/* Videos and audio render as full-width rows below the grid. */}
+                {/* Videos and audio render as full-width rows below the grid,
+                    each with its own player. */}
                 {post.attachments
                   .filter((a) => attachmentKind(a) !== "image")
                   .map((att, i) => {
                     const kind = attachmentKind(att);
+                    const key = `${att.url}-${i}`;
                     if (kind === "video") {
-                      return (
-                        <View
-                          key={`${att.url}-${i}`}
-                          className="w-full h-72 mb-2 border-2 border-base-300 bg-base-200 items-center justify-center"
-                        >
-                          <Text className="font-ui uppercase tracking-[0.18em] text-base text-base-content/65">
-                            ▶ Video
-                          </Text>
-                          <Text className="font-ui text-xs text-base-content/45 mt-1">
-                            {att.name || ""}
-                          </Text>
-                        </View>
-                      );
+                      return <VideoAttachment key={key} att={att} />;
                     }
-                    // audio
-                    return (
-                      <View
-                        key={`${att.url}-${i}`}
-                        className="flex-row items-center border-2 border-base-300 bg-base-200 px-3 py-3 mb-2"
-                      >
-                        <Text className="font-ui text-lg text-base-content/65 mr-3">
-                          ♪
-                        </Text>
-                        <Text
-                          className="font-ui text-sm text-base-content flex-1"
-                          numberOfLines={1}
-                        >
-                          {att.name || "Audio"}
-                        </Text>
-                      </View>
-                    );
+                    return <AudioAttachment key={key} att={att} />;
                   })}
               </View>
             ) : image ? (
