@@ -1,9 +1,11 @@
 // FeedHeader — sits below the masthead on the feed screen.
 //
-// Two rows:
-//   1. The current feed view's title (tappable → bottom-sheet picker with
-//      Public / Server / Your circles).
-//   2. Horizontal post-type filter row.
+// Two rows: the feed view's title (tappable → bottom-sheet picker with
+// Public / Server / Your circles), and a horizontal post-type filter row.
+//
+// The user's selection is the default: every change auto-syncs to
+// user.prefs.{defaultFeedView, defaultPostView} (debounced in feed.js), so a
+// fresh login on any device lands on whatever you were last reading.
 
 import { View } from "react-native";
 

@@ -35,9 +35,98 @@ export default function Feed() {
   const client = useActiveClient();
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // User's server-side filter defaults — used as the fallback for
+  // usePersistedFilter on a fresh device (where AsyncStorage is empty for
+  // this account). Loaded once when the client is ready.
+  const [prefs, setPrefs] = useState(null);
+
+  useEffect(() => {
+    if (!client) return;
+    let cancelled = false;
+    (async () => {
+      let user = client.auth?.getUser?.();
+      if (!user) {
+        try {
+          user = await client.init();
+        } catch {
+          user = null;
+        }
+      }
+      if (!cancelled) setPrefs(user?.prefs || {});
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [client]);
+
+  const fallbackDefaults = prefs
+    ? {
+        viewKey: prefs.defaultFeedView || "",
+        activeTypes: Array.isArray(prefs.defaultPostView)
+          ? prefs.defaultPostView
+          : [],
+      }
+    : undefined;
+
   // Persisted filter state — viewKey (public/server/circleId) + activeTypes.
-  const { viewKey, setViewKey, activeTypes, toggleType, clearTypes } =
-    usePersistedFilter(account?.id);
+  // Falls back to the user's saved server-side defaults on first hydration.
+  const { viewKey, setViewKey, activeTypes, setActiveTypes } =
+    usePersistedFilter(account?.id, fallbackDefaults);
+
+  // Auto-sync: every user-driven filter change writes to user.prefs (debounced).
+  // The pending value is held in a ref so a quick succession of taps coalesces
+  // into a single write.
+  const syncTimer = useRef(null);
+  const pendingSync = useRef(null);
+
+  function scheduleSync(nextViewKey, nextActiveTypes) {
+    if (!client) return;
+    pendingSync.current = { viewKey: nextViewKey, activeTypes: nextActiveTypes };
+    if (syncTimer.current) clearTimeout(syncTimer.current);
+    syncTimer.current = setTimeout(() => {
+      syncTimer.current = null;
+      const payload = pendingSync.current;
+      pendingSync.current = null;
+      if (!payload || !client) return;
+      client.activities
+        ?.updateProfile({
+          updates: {
+            prefs: {
+              defaultFeedView: payload.viewKey,
+              defaultPostView: payload.activeTypes,
+            },
+          },
+        })
+        .catch(() => {
+          // Non-fatal: local state still applies; a later change reconciles.
+        });
+    }, 500);
+  }
+
+  useEffect(() => {
+    return () => {
+      if (syncTimer.current) clearTimeout(syncTimer.current);
+    };
+  }, []);
+
+  // Wrapped setters that update local state and schedule the prefs sync.
+  function handleViewChange(v) {
+    setViewKey(v);
+    scheduleSync(v, activeTypes);
+  }
+
+  function handleToggleType(type) {
+    const next = activeTypes.includes(type)
+      ? activeTypes.filter((t) => t !== type)
+      : [...activeTypes, type];
+    setActiveTypes(next);
+    scheduleSync(viewKey, next);
+  }
+
+  function handleClearTypes() {
+    setActiveTypes([]);
+    scheduleSync(viewKey, []);
+  }
 
   const {
     posts,
@@ -82,10 +171,14 @@ export default function Feed() {
     }, [refresh])
   );
 
-  if (!account) {
-    router.replace("/welcome");
-    return null;
-  }
+  // Belt-and-suspenders — the / redirect handles the no-account case. Run as
+  // an effect so we don't trip React's "setState during render" warning by
+  // calling router.replace synchronously in the render path.
+  useEffect(() => {
+    if (!account) router.replace("/welcome");
+  }, [account, router]);
+
+  if (!account) return null;
 
   return (
     <SafeAreaView className="flex-1 bg-base-100" edges={["top"]}>
@@ -119,10 +212,10 @@ export default function Feed() {
       {/* Filter header — view picker (Public / Server / Circle) + type filter */}
       <FeedHeader
         viewKey={viewKey}
-        onViewChange={setViewKey}
+        onViewChange={handleViewChange}
         activeTypes={activeTypes}
-        onToggleType={toggleType}
-        onClearTypes={clearTypes}
+        onToggleType={handleToggleType}
+        onClearTypes={handleClearTypes}
       />
 
       <FlatList
