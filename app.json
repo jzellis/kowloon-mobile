@@ -38,7 +38,8 @@
         }
       ],
       "expo-video",
-      "expo-audio"
+      "expo-audio",
+      "@react-native-community/datetimepicker"
     ]
   }
 }

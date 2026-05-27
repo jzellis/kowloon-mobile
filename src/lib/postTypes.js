@@ -12,6 +12,4 @@ export const POST_TYPES = {
 
 export const POST_TYPE_NAMES = ["Note", "Article", "Media", "Link", "Event"];
 
-// Types the composer can actually create today. Event still needs its own
-// input UI (date picker, geocoding) and remains a stub until Phase 4.
-export const COMPOSABLE_TYPES = ["Note", "Article", "Link", "Media"];
+export const COMPOSABLE_TYPES = ["Note", "Article", "Link", "Media", "Event"];

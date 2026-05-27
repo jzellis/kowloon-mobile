@@ -41,6 +41,8 @@ import * as DocumentPicker from "expo-document-picker";
 import { PostTypeSelector } from "../src/components/posts/PostTypeSelector.jsx";
 import { PostTypeIcon } from "../src/components/posts/PostTypeIcon.jsx";
 import { AudienceSelector } from "../src/components/posts/AudienceSelector.jsx";
+import { LocationField } from "../src/components/posts/LocationField.jsx";
+import { DateTimeField } from "../src/components/posts/DateTimeField.jsx";
 import { useActiveClient } from "../src/lib/useActiveClient.js";
 import { useKeyboardInset } from "../src/lib/useKeyboardInset.js";
 import { kowloonPostIdFromUrl } from "../src/lib/parseKowloonUrl.js";
@@ -49,6 +51,23 @@ import { uploadFile } from "../src/lib/uploadFile.js";
 import { COMPOSABLE_TYPES, POST_TYPES } from "../src/lib/postTypes.js";
 
 const TOOLBAR_HEIGHT = 44;
+
+// Event date/time helpers — see project_event_datetime_logic memory.
+const pad = (n) => String(n).padStart(2, "0");
+function addOneHourToTime(time) {
+  if (!time) return "";
+  const [h, m] = time.split(":").map(Number);
+  return `${pad(((h ?? 0) + 1) % 24)}:${pad(m ?? 0)}`;
+}
+function nextRoundHour() {
+  const now = new Date();
+  const h = now.getMinutes() > 0 ? (now.getHours() + 1) % 24 : now.getHours();
+  return `${pad(h)}:00`;
+}
+function joinDateTime(date, time) {
+  if (!date) return undefined;
+  return time ? `${date}T${time}` : date;
+}
 
 export default function Compose() {
   const router = useRouter();
@@ -70,6 +89,34 @@ export default function Compose() {
   // kind: 'image' | 'video' | 'audio'. Uploaded at submit; the returned
   // file IDs become the post's attachments[] array.
   const [attachments, setAttachments] = useState([]);
+
+  // Universal geotag — available on every post type. null when unset;
+  // otherwise { name, lat, lon }.
+  const [location, setLocation] = useState(null);
+
+  // Event date/time — four separate string parts per
+  // project_event_datetime_logic memory. Auto-fill rules in
+  // handleStartDateChange / handleStartTimeChange below.
+  const [startDatePart, setStartDatePart] = useState("");
+  const [startTimePart, setStartTimePart] = useState("");
+  const [endDatePart, setEndDatePart] = useState("");
+  const [endTimePart, setEndTimePart] = useState("");
+
+  function handleStartDateChange(date) {
+    setStartDatePart(date);
+    // Default the end date to match the start.
+    setEndDatePart(date);
+    if (date && !startTimePart) {
+      const rounded = nextRoundHour();
+      setStartTimePart(rounded);
+      setEndTimePart(addOneHourToTime(rounded));
+    }
+  }
+
+  function handleStartTimeChange(time) {
+    setStartTimePart(time);
+    if (time) setEndTimePart(addOneHourToTime(time));
+  }
 
   async function pickFeaturedImage() {
     try {
@@ -251,6 +298,10 @@ export default function Compose() {
         return;
       }
     }
+    if (type === "Event" && !startDatePart) {
+      setError("Events need a start date.");
+      return;
+    }
 
     let markdown = "";
     try {
@@ -284,7 +335,10 @@ export default function Compose() {
       // is what gets stored on the post — the server presigns a serve URL
       // at read time.
       let articleFeaturedFileId;
-      if (type === "Article" && featuredImage?.uri) {
+      if (
+        (type === "Article" || type === "Event") &&
+        featuredImage?.uri
+      ) {
         try {
           const res = await uploadFile(client, {
             uri: featuredImage.uri,
@@ -335,22 +389,36 @@ export default function Compose() {
       await client.activities.createPost({
         type,
         title:
-          type === "Article" || type === "Link" || type === "Media"
+          type === "Article" ||
+          type === "Link" ||
+          type === "Media" ||
+          type === "Event"
             ? title.trim() || undefined
             : undefined,
         href: type === "Link" ? linkHref.trim() : undefined,
         target,
         // featuredImage source per type:
-        //   Article — the just-uploaded file ID
-        //   Link    — the OG image URL from the preview fetch (server
-        //             downloads and stores it via proxyExternalImage)
+        //   Article / Event — the just-uploaded file ID
+        //   Link            — the OG image URL from the preview fetch (server
+        //                     downloads and stores it via proxyExternalImage)
         featuredImage:
-          type === "Article"
+          type === "Article" || type === "Event"
             ? articleFeaturedFileId || undefined
             : type === "Link"
             ? linkPreview?.image || undefined
             : undefined,
         attachments: uploadedAttachments,
+        location: location
+          ? { type: "Place", name: location.name, lat: location.lat, lon: location.lon }
+          : undefined,
+        startTime:
+          type === "Event"
+            ? joinDateTime(startDatePart, startTimePart)
+            : undefined,
+        endTime:
+          type === "Event"
+            ? joinDateTime(endDatePart, endTimePart)
+            : undefined,
         content: markdown.trim() || undefined,
         to: audience,
         dedupeKey,
@@ -440,7 +508,10 @@ export default function Compose() {
               </View>
             ) : null}
 
-            {type === "Article" || type === "Link" || type === "Media" ? (
+            {type === "Article" ||
+            type === "Link" ||
+            type === "Media" ||
+            type === "Event" ? (
               <View className="px-4 pt-3">
                 <TextInput
                   value={title}
@@ -448,12 +519,35 @@ export default function Compose() {
                   placeholder={
                     type === "Article"
                       ? "Article title"
+                      : type === "Event"
+                      ? "Event title"
                       : type === "Link"
                       ? "Optional title for this link"
                       : "Optional title"
                   }
                   placeholderTextColor="rgba(26,26,32,0.35)"
                   className="border-2 border-base-300 bg-white px-3 py-3 font-reading text-lg text-base-content"
+                />
+              </View>
+            ) : null}
+
+            {type === "Event" ? (
+              <View className="px-4 pt-3">
+                <View className="mb-2">
+                  <DateTimeField
+                    label="Starts"
+                    dateValue={startDatePart}
+                    timeValue={startTimePart}
+                    onDateChange={handleStartDateChange}
+                    onTimeChange={handleStartTimeChange}
+                  />
+                </View>
+                <DateTimeField
+                  label="Ends (optional)"
+                  dateValue={endDatePart}
+                  timeValue={endTimePart}
+                  onDateChange={setEndDatePart}
+                  onTimeChange={setEndTimePart}
                 />
               </View>
             ) : null}
@@ -526,7 +620,7 @@ export default function Compose() {
               </View>
             ) : null}
 
-            {type === "Article" ? (
+            {type === "Article" || type === "Event" ? (
               <View className="px-4 pt-3">
                 {featuredImage ? (
                   <View className="border-2 border-base-300 bg-white">
@@ -584,6 +678,12 @@ export default function Compose() {
             </View>
             </ScrollView>
 
+            {/* Universal location picker — pinned above the controls so a
+                geotag is always one tap away regardless of post type. */}
+            <View className="px-4 pt-2">
+              <LocationField value={location} onChange={setLocation} />
+            </View>
+
             {/* Audience + Cancel/Post — below the editor body */}
             <View className="flex-row items-stretch px-4 py-3">
               <View className="flex-1 mr-2">
@@ -618,7 +718,7 @@ export default function Compose() {
             </View>
           </>
         ) : (
-          /* Media / Link / Event — picker shows them, input UI not built yet */
+          /* Fallback for any post type not yet in COMPOSABLE_TYPES. */
           <View className="flex-1 px-8 items-center justify-center">
             <PostTypeIcon type={type} size={64} />
             <Text className="font-reading text-2xl text-base-content mt-4 mb-2">
