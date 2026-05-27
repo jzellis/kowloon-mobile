@@ -11,7 +11,9 @@ import { Avatar } from "./Avatar.jsx";
 import { AudioAttachment } from "./AudioAttachment.jsx";
 import { VideoAttachment } from "./VideoAttachment.jsx";
 import { LocationLine } from "./LocationLine.jsx";
+import { PostActionBar } from "./PostActionBar.jsx";
 import { HtmlContent } from "../HtmlContent.jsx";
+import { useActiveClient } from "../../lib/useActiveClient.js";
 import { kowloonPostIdFromUrl } from "../../lib/parseKowloonUrl.js";
 import { timeAgo } from "../../lib/timeAgo.js";
 
@@ -59,6 +61,8 @@ function hostOf(url) {
 
 export function PostCard({ post }) {
   const router = useRouter();
+  const client = useActiveClient();
+  const currentUser = client?.auth?.getUser?.() || null;
   const meta = TYPE_META[post?.type] || TYPE_META.Note;
 
   const actor = post?.actor || {};
@@ -299,14 +303,14 @@ export function PostCard({ post }) {
           </>
         )}
 
-        {/* Footer counts */}
-        <View className="flex-row mt-3">
-          <Text className="font-ui text-xs text-base-content/50 mr-5">
-            {post?.replyCount || 0} replies
-          </Text>
-          <Text className="font-ui text-xs text-base-content/50">
-            {post?.reactCount || 0} reactions
-          </Text>
+        {/* Action bar — reply / react / repost / share / bookmark */}
+        <View className="mt-3 pt-3 border-t border-base-300">
+          <PostActionBar
+            post={post}
+            client={client}
+            currentUser={currentUser}
+            size="sm"
+          />
         </View>
       </View>
     </Pressable>

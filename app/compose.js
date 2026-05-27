@@ -14,7 +14,7 @@
 // server stores Markdown source), createPost() via @kowloon/client.
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   ActivityIndicator,
   Image,
@@ -72,11 +72,38 @@ function joinDateTime(date, time) {
 export default function Compose() {
   const router = useRouter();
   const client = useActiveClient();
+  // Repost / share-as-Link prefill: the action bar's Repost button navigates
+  // here with `?type=Link&href=...&title=...&featuredImage=...` so the user
+  // can edit before posting.
+  const params = useLocalSearchParams();
 
-  const [type, setType] = useState("Note");
-  const [title, setTitle] = useState("");
-  const [linkHref, setLinkHref] = useState("");
+  const [type, setType] = useState(
+    typeof params.type === "string" && COMPOSABLE_TYPES.includes(params.type)
+      ? params.type
+      : "Note"
+  );
+  const [title, setTitle] = useState(
+    typeof params.title === "string" ? params.title : ""
+  );
+  const [linkHref, setLinkHref] = useState(
+    typeof params.href === "string" ? params.href : ""
+  );
   const [linkPreview, setLinkPreview] = useState(null);
+  // Repost prefill: when the action bar's Repost button hands off a Kowloon
+  // post, this carries the source post's featuredImage URL. It wins over the
+  // link-preview fetch's image at submit time so the reshare keeps the
+  // original's hero, not whatever the server's OG fetch returns.
+  const [forcedFeaturedImage] = useState(
+    typeof params.featuredImage === "string" && params.featuredImage
+      ? params.featuredImage
+      : null
+  );
+  // Repost prefill: a plain-text excerpt of the source post — injected into
+  // the editor as a Markdown-style blockquote once the editor reports ready.
+  const repostQuoteRef = useRef(
+    typeof params.quote === "string" ? params.quote : ""
+  );
+  const repostInjectedRef = useRef(false);
   const [previewing, setPreviewing] = useState(false);
   const [audience, setAudience] = useState("@public");
   const [posting, setPosting] = useState(false);
@@ -216,6 +243,26 @@ export default function Compose() {
       handedOff.current = true;
       editor.focus();
     }
+    // Repost: once the editor is up, drop the source post's excerpt in as a
+    // blockquote. Followed by an empty paragraph so the cursor lands below
+    // the quote — ready for the user's own comment.
+    if (
+      editorState.isReady &&
+      !repostInjectedRef.current &&
+      repostQuoteRef.current.trim()
+    ) {
+      repostInjectedRef.current = true;
+      const escaped = repostQuoteRef.current
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\n+/g, "<br>");
+      try {
+        editor.setContent(`<blockquote><p>${escaped}</p></blockquote><p></p>`);
+      } catch {
+        // editor not ready or unreachable — skip silently
+      }
+    }
   }, [editorState.isReady, editor]);
 
   // Link preview: when the user types/pastes a URL in the Link composer, fetch
@@ -247,7 +294,9 @@ export default function Compose() {
 
         // Auto-populate the editor body with the preview summary if the
         // editor is currently empty. (Matches the web composer's behaviour.)
-        if (meta?.summary) {
+        // Skip when we have a repost-quote — that's our own injected body,
+        // we don't want the preview's summary stomping on it.
+        if (meta?.summary && !repostQuoteRef.current.trim()) {
           try {
             const current = (await editor.getText()) || "";
             if (!cancelled && !current.trim()) {
@@ -405,7 +454,7 @@ export default function Compose() {
           type === "Article" || type === "Event"
             ? articleFeaturedFileId || undefined
             : type === "Link"
-            ? linkPreview?.image || undefined
+            ? forcedFeaturedImage || linkPreview?.image || undefined
             : undefined,
         attachments: uploadedAttachments,
         location: location
@@ -468,10 +517,19 @@ export default function Compose() {
                   keyboardType="url"
                   className="border-2 border-base-300 bg-white px-3 py-3 font-ui text-base text-base-content"
                 />
-                {/* Link preview — auto-fetched from /preview when href changes */}
-                {previewing || linkPreview ? (
+                {/* Link preview — auto-fetched from /preview when href
+                    changes. On a Repost, forcedFeaturedImage carries the
+                    source post's hero so the preview block shows the right
+                    image immediately, even before the OG fetch returns. */}
+                {previewing || linkPreview || forcedFeaturedImage ? (
                   <View className="flex-row mt-2 border-2 border-base-300 bg-white p-2">
-                    {previewing ? (
+                    {forcedFeaturedImage ? (
+                      <Image
+                        source={{ uri: forcedFeaturedImage }}
+                        className="w-16 h-16 mr-3 border-2 border-base-300 bg-base-200"
+                        resizeMode="cover"
+                      />
+                    ) : previewing ? (
                       <View className="w-16 h-16 mr-3 border-2 border-base-300 bg-base-200 items-center justify-center">
                         <ActivityIndicator />
                       </View>
@@ -492,7 +550,9 @@ export default function Compose() {
                         className="font-reading text-sm text-base-content"
                         numberOfLines={2}
                       >
-                        {linkPreview?.title || (previewing ? "Loading…" : "Untitled")}
+                        {linkPreview?.title ||
+                          title ||
+                          (previewing ? "Loading…" : "Untitled")}
                       </Text>
                       {linkPreview?.summary ? (
                         <Text

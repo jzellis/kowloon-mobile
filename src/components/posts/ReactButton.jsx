@@ -18,6 +18,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Smile } from "lucide-react-native";
 
 const PICKER_CELL = 44;
 
@@ -110,7 +111,7 @@ export function ReactButton({ client, post, onReacted, size = "md" }) {
     }
   }
 
-  const fontSize = size === "sm" ? 14 : 18;
+  const iconSize = size === "sm" ? 16 : 20;
   const countSize = size === "sm" ? "text-[11px]" : "text-xs";
 
   return (
@@ -127,9 +128,7 @@ export function ReactButton({ client, post, onReacted, size = "md" }) {
           android_ripple={{ color: "rgba(0,0,0,0.06)", borderless: true }}
           className="flex-row items-center"
         >
-          <Text style={{ fontSize }} className="text-base-content/55">
-            😊
-          </Text>
+          <Smile size={iconSize} color="rgba(26,26,32,0.55)" strokeWidth={1.75} />
           {count > 0 ? (
             <Text className={`font-ui ${countSize} text-base-content/55 ml-1.5`}>
               {count}

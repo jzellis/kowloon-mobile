@@ -216,13 +216,24 @@ export function PostBody({ post, typography }) {
       ) : null}
 
       {/* Hero image — Article, Event, or Link. Media uses the attachment
-          gallery as its content. */}
+          gallery as its content. On Link posts the image is part of the
+          clickable external surface (matching the title + host). */}
       {hero ? (
-        <Image
-          source={{ uri: hero }}
-          className="w-full h-72 mb-5 border-2 border-base-300 bg-base-200"
-          resizeMode="cover"
-        />
+        type === "Link" && post?.href ? (
+          <Pressable onPress={openHref}>
+            <Image
+              source={{ uri: hero }}
+              className="w-full h-72 mb-5 border-2 border-base-300 bg-base-200"
+              resizeMode="cover"
+            />
+          </Pressable>
+        ) : (
+          <Image
+            source={{ uri: hero }}
+            className="w-full h-72 mb-5 border-2 border-base-300 bg-base-200"
+            resizeMode="cover"
+          />
+        )
       ) : null}
 
       {/* Media gallery */}

@@ -11,8 +11,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Avatar } from "../../src/components/posts/Avatar.jsx";
 import { Button } from "../../src/components/ui/Button.jsx";
 import { Eyebrow } from "../../src/components/ui/Heading.jsx";
+import { PostActionBar } from "../../src/components/posts/PostActionBar.jsx";
 import { PostBody } from "../../src/components/posts/PostBody.jsx";
-import { ReactButton } from "../../src/components/posts/ReactButton.jsx";
 import { Reply } from "../../src/components/posts/Reply.jsx";
 import { ReplyComposer } from "../../src/components/posts/ReplyComposer.jsx";
 import { useActiveClient } from "../../src/lib/useActiveClient.js";
@@ -38,7 +38,11 @@ const TYPE_ACCENT = {
 
 export default function PostDetail() {
   const router = useRouter();
-  const { id } = useLocalSearchParams();
+  const { id, focusReply } = useLocalSearchParams();
+  // `focusReply=1` is appended by PostActionBar when the user taps Reply
+  // from a feed card — auto-focuses the composer and pops the keyboard once
+  // the post loads.
+  const shouldFocusReply = focusReply === "1" || focusReply === "true";
   const client = useActiveClient();
   const { resolved } = useTypography();
 
@@ -160,23 +164,19 @@ export default function PostDetail() {
               <PostBody post={post} typography={typography} />
             </View>
 
-            {/* Action bar — react + reply count */}
+            {/* Action bar — reply / react / repost / share / bookmark */}
             <View className="px-5 pt-5">
-              <View className="border-t-2 border-base-300 pt-4 flex-row items-center">
-                <View className="mr-6">
-                  <ReactButton
-                    client={client}
-                    post={post}
-                    onReacted={() => {
-                      // Refresh the post so the server-computed reactSummary
-                      // / preview reflects the new reaction next render.
-                      load();
-                    }}
-                  />
-                </View>
-                <Text className="font-ui text-xs uppercase tracking-[0.16em] text-base-content/55">
-                  {replies.length} {replies.length === 1 ? "reply" : "replies"}
-                </Text>
+              <View className="border-t-2 border-base-300 pt-4">
+                <PostActionBar
+                  post={post}
+                  client={client}
+                  currentUser={currentUser}
+                  onReply={() => {
+                    // Already on the detail page — scroll to the composer.
+                    scrollRef.current?.scrollToEnd({ animated: true });
+                  }}
+                  onReacted={load}
+                />
               </View>
             </View>
 
@@ -214,6 +214,7 @@ export default function PostDetail() {
                     : null
                 }
                 canReply={post.canReply}
+                autoFocus={shouldFocusReply && !loading && !!post}
                 onSubmitted={({ duplicated }) => {
                   if (!duplicated) load();
                 }}

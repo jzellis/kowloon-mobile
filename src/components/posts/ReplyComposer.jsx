@@ -4,7 +4,7 @@
 // network blip retry doesn't create two reply Activities on the server). The
 // key is regenerated whenever the text changes.
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 
 import { Avatar } from "./Avatar.jsx";
@@ -15,11 +15,22 @@ export function ReplyComposer({
   currentUser,
   canReply,
   onSubmitted,
+  autoFocus = false,
 }) {
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const dedupeRef = useRef(null);
+  const inputRef = useRef(null);
+
+  // Imperative focus — autoFocus on first render isn't enough on Android,
+  // where the input lives off-screen until the parent ScrollView lays out.
+  // Delay one tick so layout completes, then focus to raise the keyboard.
+  useEffect(() => {
+    if (!autoFocus) return;
+    const t = setTimeout(() => inputRef.current?.focus(), 300);
+    return () => clearTimeout(t);
+  }, [autoFocus]);
 
   if (!currentUser) return null;
 
@@ -64,6 +75,7 @@ export function ReplyComposer({
       </View>
       <View className="flex-1 min-w-0">
         <TextInput
+          ref={inputRef}
           value={text}
           onChangeText={setText}
           multiline
