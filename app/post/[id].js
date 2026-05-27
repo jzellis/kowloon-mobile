@@ -9,6 +9,7 @@ import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Avatar } from "../../src/components/posts/Avatar.jsx";
+import { BackLink } from "../../src/components/ui/BackLink.jsx";
 import { Button } from "../../src/components/ui/Button.jsx";
 import { Eyebrow } from "../../src/components/ui/Heading.jsx";
 import { PostActionBar } from "../../src/components/posts/PostActionBar.jsx";
@@ -130,8 +131,12 @@ export default function PostDetail() {
             {/* Type accent bar */}
             <View className={`h-[3px] ${typeBar}`} />
 
+            <View className="px-5 pt-3">
+              <BackLink />
+            </View>
+
             {/* Header */}
-            <View className="px-5 pt-5">
+            <View className="px-5 pt-4">
               <View className="flex-row items-center justify-between mb-3">
                 <Eyebrow className={typeAccent}>{type}</Eyebrow>
                 <Text className="font-ui text-xs text-base-content/50">

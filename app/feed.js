@@ -20,6 +20,8 @@ import { PostCard } from "../src/components/posts/PostCard.jsx";
 import { Avatar } from "../src/components/posts/Avatar.jsx";
 import { FeedHeader } from "../src/components/posts/FeedHeader.jsx";
 import { UserMenu } from "../src/components/UserMenu.jsx";
+import { LeftDrawer } from "../src/components/drawer/LeftDrawer.jsx";
+import { Menu } from "lucide-react-native";
 import { useFeed } from "../src/lib/useFeed.js";
 import { useActiveClient } from "../src/lib/useActiveClient.js";
 import { usePersistedFilter } from "../src/lib/usePersistedFilter.js";
@@ -34,6 +36,7 @@ export default function Feed() {
   const account = useSelector(selectActiveAccount);
   const client = useActiveClient();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   // User's server-side filter defaults — used as the fallback for
   // usePersistedFilter on a fresh device (where AsyncStorage is empty for
@@ -183,7 +186,15 @@ export default function Feed() {
   return (
     <SafeAreaView className="flex-1 bg-base-100" edges={["top"]}>
       {/* Masthead */}
-      <View className="px-5 pt-2 pb-3 border-b-2 border-base-content flex-row items-center justify-between">
+      <View className="px-5 pt-2 pb-3 border-b-2 border-base-content flex-row items-center">
+        <Pressable
+          onPress={() => setDrawerOpen(true)}
+          hitSlop={8}
+          android_ripple={{ color: "rgba(0,0,0,0.06)", borderless: true }}
+          className="mr-3"
+        >
+          <Menu size={26} color="rgba(26,26,32,0.85)" strokeWidth={1.75} />
+        </Pressable>
         <Text
           className="font-reading text-3xl text-base-content flex-1 mr-3"
           numberOfLines={1}
@@ -207,6 +218,7 @@ export default function Feed() {
         </Pressable>
       </View>
 
+      <LeftDrawer visible={drawerOpen} onClose={() => setDrawerOpen(false)} />
       <UserMenu visible={menuOpen} onClose={() => setMenuOpen(false)} />
 
       {/* Filter header — view picker (Public / Server / Circle) + type filter */}
