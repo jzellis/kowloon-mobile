@@ -1,20 +1,40 @@
-// Post detail — the reading surface.
+// Post detail — the reading surface with reactions + replies.
 //
-// Fetches the single post and renders its body as rich HTML, styled with the
-// user's reading-typography prefs (font, size, line spacing, margins).
+// Fetches the post and its replies, applies the user's reading typography to
+// the body, and exposes the React + Reply actions inline.
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Avatar } from "../../src/components/posts/Avatar.jsx";
-import { HtmlContent } from "../../src/components/HtmlContent.jsx";
 import { Button } from "../../src/components/ui/Button.jsx";
 import { Eyebrow } from "../../src/components/ui/Heading.jsx";
+import { PostBody } from "../../src/components/posts/PostBody.jsx";
+import { ReactButton } from "../../src/components/posts/ReactButton.jsx";
+import { Reply } from "../../src/components/posts/Reply.jsx";
+import { ReplyComposer } from "../../src/components/posts/ReplyComposer.jsx";
 import { useActiveClient } from "../../src/lib/useActiveClient.js";
+import { useKeyboardInset } from "../../src/lib/useKeyboardInset.js";
 import { useTypography } from "../../src/lib/TypographyContext.js";
 import { timeAgo } from "../../src/lib/timeAgo.js";
+
+// Same accent palette as the feed card — keep these in sync.
+const TYPE_BAR = {
+  Note: "bg-post-note",
+  Article: "bg-post-article",
+  Media: "bg-post-media",
+  Link: "bg-post-link",
+  Event: "bg-post-event",
+};
+const TYPE_ACCENT = {
+  Note: "text-post-note",
+  Article: "text-post-article",
+  Media: "text-post-media",
+  Link: "text-post-link",
+  Event: "text-post-event",
+};
 
 export default function PostDetail() {
   const router = useRouter();
@@ -23,36 +43,73 @@ export default function PostDetail() {
   const { resolved } = useTypography();
 
   const [post, setPost] = useState(null);
+  const [replies, setReplies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const currentUser = client?.auth?.getUser?.() || null;
 
+  const scrollRef = useRef(null);
+  const { keyboardInset } = useKeyboardInset();
+
+  // When the keyboard opens, slide the composer (at the bottom of the scroll
+  // view) into view. Keep a small breathing margin above the keyboard.
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      if (!client || !id) return;
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await client.feeds.getPost({ postId: String(id) });
-        const doc = res?.post || res?.object || res;
-        if (!cancelled) setPost(doc);
-      } catch (e) {
-        if (!cancelled) setError(e?.message || "Couldn't load this post.");
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+    if (keyboardInset > 0 && scrollRef.current) {
+      // setTimeout lets the contentContainer's padding update before we ask
+      // the scroll view for its new max offset.
+      const t = setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 50);
+      return () => clearTimeout(t);
+    }
+  }, [keyboardInset]);
+
+  const load = useCallback(async () => {
+    if (!client || !id) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const [postRes, repliesRes] = await Promise.all([
+        client.feeds.getPost({ postId: String(id) }),
+        client.feeds.getReplies({ postId: String(id) }).catch(() => null),
+      ]);
+      const doc = postRes?.post || postRes?.object || postRes;
+      setPost(doc);
+      setReplies(repliesRes?.orderedItems || repliesRes?.items || []);
+    } catch (e) {
+      setError(e?.message || "Couldn't load this post.");
+    } finally {
+      setLoading(false);
+    }
   }, [client, id]);
 
+  useEffect(() => {
+    load();
+  }, [load]);
+
   const actor = post?.actor || {};
-  const bodyHtml = post?.body || post?.summary || "";
+  const type = post?.type || "Note";
+  const typeBar = TYPE_BAR[type] || TYPE_BAR.Note;
+  const typeAccent = TYPE_ACCENT[type] || TYPE_ACCENT.Note;
+
+  const typography = {
+    fonts: {
+      regular: resolved.regularFamily,
+      bold: resolved.boldFamily,
+      italic: resolved.italicFamily,
+    },
+    fontSize: resolved.fontSize,
+    lineHeight: resolved.lineHeight,
+  };
 
   return (
-    <SafeAreaView className="flex-1 bg-base-100">
-      <ScrollView contentContainerStyle={{ paddingVertical: 24, paddingBottom: 48 }}>
+    <SafeAreaView
+      className="flex-1 bg-base-100"
+      edges={keyboardInset > 0 ? ["top", "left", "right"] : ["top", "left", "right", "bottom"]}
+    >
+      <ScrollView
+        ref={scrollRef}
+        contentContainerStyle={{ paddingBottom: 48 + keyboardInset }}
+        keyboardShouldPersistTaps="handled"
+      >
         {loading ? (
           <View className="py-20 items-center">
             <ActivityIndicator />
@@ -66,73 +123,100 @@ export default function PostDetail() {
           </View>
         ) : post ? (
           <>
-            {/* Header — fixed chrome margins */}
-            <View className="px-6">
-              <Eyebrow>{post.type || "Post"}</Eyebrow>
+            {/* Type accent bar */}
+            <View className={`h-[3px] ${typeBar}`} />
 
-              {post.title ? (
-                <Text className="font-reading text-3xl text-base-content leading-tight mt-2 mb-3">
-                  {post.title}
+            {/* Header */}
+            <View className="px-5 pt-5">
+              <View className="flex-row items-center justify-between mb-3">
+                <Eyebrow className={typeAccent}>{type}</Eyebrow>
+                <Text className="font-ui text-xs text-base-content/50">
+                  {timeAgo(post.publishedAt || post.createdAt)}
                 </Text>
-              ) : (
-                <View className="mb-3" />
-              )}
+              </View>
 
-              <View className="flex-row items-center mt-1 mb-5">
+              <View className="flex-row items-center mb-5">
                 <Avatar actor={actor} size={40} baseUrl={client?.http?.baseUrl} />
                 <View className="ml-3 flex-1">
-                  <Text className="font-ui text-sm text-base-content">
+                  <Text
+                    className="font-ui text-sm font-bold text-base-content"
+                    numberOfLines={1}
+                  >
                     {actor.name || actor.id}
                   </Text>
-                  <Text className="font-ui text-xs text-base-content/50">
-                    {actor.id} · {timeAgo(post.publishedAt || post.createdAt)}
+                  <Text
+                    className="font-ui text-xs text-base-content/55"
+                    numberOfLines={1}
+                  >
+                    {actor.id}
                   </Text>
                 </View>
               </View>
+
             </View>
 
-            {/* Body — rich HTML, reading-typography applied. Horizontal
-                padding comes from the user's column-width preference. */}
+            {/* Body — typography-aware padding for the column width */}
             <View style={{ paddingHorizontal: resolved.paddingHorizontal }}>
-              {bodyHtml ? (
-                <HtmlContent
-                  html={bodyHtml}
-                  fonts={{
-                    regular: resolved.regularFamily,
-                    bold: resolved.boldFamily,
-                    italic: resolved.italicFamily,
-                  }}
-                  fontSize={resolved.fontSize}
-                  lineHeight={resolved.lineHeight}
-                  selectable
-                />
-              ) : (
-                <Text className="font-reading text-base text-base-content/50">
-                  {post.textPreview || "No content."}
-                </Text>
-              )}
+              <PostBody post={post} typography={typography} />
             </View>
 
-            {/* Footer */}
-            <View className="px-6">
-              <View className="border-t-2 border-base-300 mt-6 pt-3 flex-row">
-                <Text className="font-ui text-xs text-base-content/50 mr-5">
-                  {post.replyCount || 0} replies
-                </Text>
-                <Text className="font-ui text-xs text-base-content/50">
-                  {post.reactCount || 0} reactions
+            {/* Action bar — react + reply count */}
+            <View className="px-5 pt-5">
+              <View className="border-t-2 border-base-300 pt-4 flex-row items-center">
+                <View className="mr-6">
+                  <ReactButton
+                    client={client}
+                    post={post}
+                    onReacted={() => {
+                      // Refresh the post so the server-computed reactSummary
+                      // / preview reflects the new reaction next render.
+                      load();
+                    }}
+                  />
+                </View>
+                <Text className="font-ui text-xs uppercase tracking-[0.16em] text-base-content/55">
+                  {replies.length} {replies.length === 1 ? "reply" : "replies"}
                 </Text>
               </View>
+            </View>
 
-              <Text className="font-ui text-xs text-base-content/40 mt-6 leading-5">
-                Reactions and replies land in the next pass.
-              </Text>
+            {/* Replies */}
+            <View className="px-5 pt-2">
+              {replies.length > 0
+                ? replies.map((reply) => (
+                    <Reply
+                      key={reply.id}
+                      reply={reply}
+                      client={client}
+                      currentUserId={currentUser?.id}
+                      onUpdated={(next) =>
+                        setReplies((arr) =>
+                          arr.map((r) => (r.id === next.id ? next : r))
+                        )
+                      }
+                      onDeleted={(rid) =>
+                        setReplies((arr) => arr.filter((r) => r.id !== rid))
+                      }
+                    />
+                  ))
+                : null}
 
-              <Button
-                label="Back"
-                variant="ghost"
-                onPress={() => router.back()}
-                className="mt-6"
+              <ReplyComposer
+                postId={String(id)}
+                client={client}
+                currentUser={
+                  currentUser
+                    ? {
+                        id: currentUser.id,
+                        name: currentUser.profile?.name,
+                        icon: currentUser.profile?.icon,
+                      }
+                    : null
+                }
+                canReply={post.canReply}
+                onSubmitted={({ duplicated }) => {
+                  if (!duplicated) load();
+                }}
               />
             </View>
           </>

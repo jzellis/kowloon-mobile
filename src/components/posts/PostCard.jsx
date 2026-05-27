@@ -10,6 +10,7 @@ import { useRouter } from "expo-router";
 import { Avatar } from "./Avatar.jsx";
 import { AudioAttachment } from "./AudioAttachment.jsx";
 import { VideoAttachment } from "./VideoAttachment.jsx";
+import { LocationLine } from "./LocationLine.jsx";
 import { HtmlContent } from "../HtmlContent.jsx";
 import { kowloonPostIdFromUrl } from "../../lib/parseKowloonUrl.js";
 import { timeAgo } from "../../lib/timeAgo.js";
@@ -48,38 +49,6 @@ const TYPE_META = {
   Link: { label: "Link", accent: "text-post-link", bar: "bg-post-link" },
   Event: { label: "Event", accent: "text-post-event", bar: "bg-post-event" },
 };
-
-// Geotag display. Compact by default — uppercase tiny line under the title /
-// attribution. `prominent` is used for Events, where the location is part of
-// the event's core identity and deserves the same weight as the title.
-function LocationLine({ post, prominent = false }) {
-  const name = post?.location?.name;
-  if (!name) return null;
-  if (prominent) {
-    return (
-      <View className="flex-row items-center mb-2">
-        <Text className="font-ui text-base text-base-content/70 mr-1.5">📍</Text>
-        <Text
-          className="font-ui text-base font-bold tracking-wide text-base-content flex-1"
-          numberOfLines={2}
-        >
-          {name}
-        </Text>
-      </View>
-    );
-  }
-  return (
-    <View className="flex-row items-center mb-2">
-      <Text className="font-ui text-[11px] text-base-content/55 mr-1">📍</Text>
-      <Text
-        className="font-ui text-[11px] uppercase tracking-[0.14em] text-base-content/55 flex-1"
-        numberOfLines={1}
-      >
-        {name}
-      </Text>
-    </View>
-  );
-}
 
 function hostOf(url) {
   if (!url) return "";
@@ -177,7 +146,7 @@ export function PostCard({ post }) {
                 {title}
               </Text>
             ) : null}
-            <LocationLine post={post} />
+            <LocationLine location={post?.location} />
             {plainPreview ? (
               <Text className="font-reading text-[15px] text-base-content/80 leading-6 mb-3">
                 {decodeEntities(plainPreview)}
@@ -266,7 +235,7 @@ export function PostCard({ post }) {
                 </Text>
               </Pressable>
             ) : null}
-            <LocationLine post={post} />
+            <LocationLine location={post?.location} />
             {linkHost ? (
               <Text className="font-ui text-xs text-base-content/45 mb-2">
                 {linkHost}
@@ -291,7 +260,7 @@ export function PostCard({ post }) {
             {/* Notes have no title, so the LocationLine here sits directly
                 between the author row and the body. Articles get a tiny
                 line under the title; Events get the prominent treatment. */}
-            <LocationLine post={post} prominent={post?.type === "Event"} />
+            <LocationLine location={post?.location} prominent={post?.type === "Event"} />
 
             {linkHost ? (
               <Text className={`font-ui text-xs mb-1.5 ${meta.accent}`}>
