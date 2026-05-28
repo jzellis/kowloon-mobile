@@ -7,6 +7,7 @@
 // React uses the existing ReactButton (which carries the picker + optimistic
 // count). The other actions take callbacks or do their own thing inline.
 
+import { useState } from "react";
 import { Alert, Pressable, Share, Text, View } from "react-native";
 import {
   Bookmark,
@@ -18,6 +19,7 @@ import {
 import { useRouter } from "expo-router";
 
 import { ReactButton } from "./ReactButton.jsx";
+import { BookmarkComposer } from "../bookmarks/BookmarkComposer.jsx";
 
 const ICON_COLOR = "rgba(26,26,32,0.55)";
 const ICON_STROKE = 1.75;
@@ -83,6 +85,46 @@ function postShareUrl(client, post) {
   return `${baseUrl.replace(/\/$/, "")}/posts/${encodeURIComponent(id)}`;
 }
 
+// A bookmark needs a title, but Notes have none — derive a sensible one from
+// the post we already hold rather than round-tripping through link-preview
+// (which the SSRF guard blocks for local URLs anyway).
+function deriveBookmarkTitle(post) {
+  const explicit = post?.title || post?.name;
+  if (explicit) return explicit;
+  const text = (post?.textPreview || stripHtml(post?.summary || post?.body || "")).trim();
+  if (text) {
+    const firstLine = text.split("\n")[0].trim();
+    return firstLine.length > 80
+      ? firstLine.slice(0, 80).replace(/\s+\S*$/, "") + "…"
+      : firstLine;
+  }
+  const author = post?.actor?.name || post?.actor?.id || "Unknown";
+  return `Post by ${author}`;
+}
+
+// Seed the bookmark's notes with the original post's summary/excerpt as plain
+// text — the user can edit before saving. Stored as Markdown source, rendered
+// to the bookmark's body by the server.
+function deriveBookmarkNotes(post) {
+  const text =
+    (post?.summary ? stripHtml(post.summary) : "") ||
+    post?.textPreview ||
+    stripHtml(post?.body || "");
+  return text.trim() || undefined;
+}
+
+// Hero image, falling back to the first image attachment for Media posts.
+function deriveBookmarkImage(post) {
+  if (post?.featuredImage) return post.featuredImage;
+  if (post?.image) return post.image;
+  const firstImage = Array.isArray(post?.attachments)
+    ? post.attachments.find((a) =>
+        (a?.mediaType || "").toLowerCase().startsWith("image/")
+      )
+    : null;
+  return firstImage?.url || undefined;
+}
+
 export function PostActionBar({
   post,
   client,
@@ -93,6 +135,7 @@ export function PostActionBar({
   className = "",
 }) {
   const router = useRouter();
+  const [bookmarking, setBookmarking] = useState(false);
   const shareUrl = postShareUrl(client, post);
   const canShare = !!shareUrl && isPublicPost(post);
 
@@ -145,14 +188,18 @@ export function PostActionBar({
 
   function handleBookmark() {
     if (!currentUser) return;
-    // BookmarkComposer mobile screen isn't built yet — see CLAUDE.md TODO.
-    Alert.alert(
-      "Bookmarks",
-      "Bookmark composer coming soon. For now use the web frontend to bookmark posts."
-    );
+    setBookmarking(true);
   }
 
+  const bookmarkInitial = {
+    href: shareUrl || undefined,
+    title: deriveBookmarkTitle(post),
+    image: deriveBookmarkImage(post),
+    notes: deriveBookmarkNotes(post),
+  };
+
   return (
+    <>
     <View
       className={`flex-row items-center ${className}`}
       style={{ gap: size === "sm" ? 20 : 24 }}
@@ -210,6 +257,17 @@ export function PostActionBar({
         />
       ) : null}
     </View>
+
+    {currentUser ? (
+      <BookmarkComposer
+        visible={bookmarking}
+        onClose={() => setBookmarking(false)}
+        initialValues={bookmarkInitial}
+        client={client}
+        currentUser={currentUser}
+      />
+    ) : null}
+    </>
   );
 }
 
