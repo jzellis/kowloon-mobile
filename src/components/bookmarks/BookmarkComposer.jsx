@@ -22,13 +22,7 @@ import { FolderPlus, X } from "lucide-react-native";
 
 import { AudienceSelector } from "../posts/AudienceSelector.jsx";
 import { useKeyboardInset } from "../../lib/useKeyboardInset.js";
-
-function resolveImageUrl(value, baseUrl) {
-  if (!value || typeof value !== "string") return null;
-  if (/^https?:\/\//i.test(value)) return value;
-  if (!baseUrl) return value;
-  return `${baseUrl.replace(/\/$/, "")}/${value.replace(/^\//, "")}`;
-}
+import { resolveImageUrl } from "../../lib/resolveImageUrl.js";
 
 function FieldLabel({ children }) {
   return (

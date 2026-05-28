@@ -37,6 +37,7 @@ import {
 } from "lucide-react-native";
 
 import { useActiveClient } from "../../lib/useActiveClient.js";
+import { resolveImageUrl } from "../../lib/resolveImageUrl.js";
 import { POST_TYPES } from "../../lib/postTypes.js";
 
 const DRAWER_WIDTH_PCT = 0.85;
@@ -62,18 +63,6 @@ function stripHtml(html) {
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
     .trim();
-}
-
-// Resolve a stored icon/image string into a full URL.
-// Handles:
-//   - Full URLs (http://, https://) — used as-is
-//   - Relative paths (/images/..., /files/...) — prepended with baseUrl
-//   - Bare values — prepended with baseUrl
-function resolveImageUrl(value, baseUrl) {
-  if (!value) return null;
-  if (/^https?:\/\//i.test(value)) return value;
-  if (!baseUrl) return value;
-  return `${baseUrl.replace(/\/$/, "")}/${String(value).replace(/^\//, "")}`;
 }
 
 function relativeTime(iso) {
