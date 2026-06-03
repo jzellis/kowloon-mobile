@@ -1,9 +1,10 @@
 // Feed data hook — loads posts for the active filter selection.
 //
 // `viewKey` chooses the source:
-//   "public"           → GET /posts?to=public  (public firehose, page-based)
-//   "server"           → GET /posts?to=server  (server-only,    page-based)
-//   "circle:<id>@..."  → GET /circles/:id/posts (circle posts,  cursor-based)
+//   "public"           → GET /posts?to=public    (public firehose, page-based)
+//   "server"           → GET /posts?to=server    (server-only,     page-based)
+//   "circle:<id>@..."  → GET /circles/:id/posts  (circle posts,    cursor-based)
+//   "group:<id>@..."   → GET /groups/:id/posts   (group posts,     page-based)
 //
 // `activeTypes` filters by post type (empty = all types).
 //
@@ -26,6 +27,10 @@ function dedupeById(list) {
 
 function isCircle(viewKey) {
   return typeof viewKey === "string" && viewKey.startsWith("circle:");
+}
+
+function isGroup(viewKey) {
+  return typeof viewKey === "string" && viewKey.startsWith("group:");
 }
 
 export function useFeed({ viewKey = "public", activeTypes = [] } = {}) {
@@ -74,6 +79,26 @@ export function useFeed({ viewKey = "public", activeTypes = [] } = {}) {
           // No total available — assume more if we got a full-ish page.
           setHasMore(items.length >= 15);
           cursor.current = nextCursor;
+          setPosts((prev) =>
+            mode === "more" ? dedupeById([...prev, ...items]) : dedupeById(items)
+          );
+        } else if (isGroup(viewKey)) {
+          // Group feed — page-based. getGroupPosts takes a single `type`,
+          // not an array, so when filtering pass the first active type only
+          // (the picker is single-select for groups today).
+          const page =
+            mode === "more"
+              ? (typeof cursor.current === "number" ? cursor.current : 0) + 1
+              : 1;
+          res = await client.feeds.getGroupPosts({
+            groupId: viewKey,
+            type: activeTypes?.[0],
+            page,
+          });
+          const items = res?.orderedItems || res?.items || [];
+          const totalPages = Number(res?.totalPages) || 1;
+          setHasMore(page < totalPages);
+          cursor.current = page;
           setPosts((prev) =>
             mode === "more" ? dedupeById([...prev, ...items]) : dedupeById(items)
           );

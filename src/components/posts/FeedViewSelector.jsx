@@ -16,6 +16,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useSelector } from "react-redux";
 
 import { useActiveClient } from "../../lib/useActiveClient.js";
+import { useJoinedGroups } from "../../lib/useJoinedGroups.js";
 import { selectActiveAccount } from "../../state/accountsSlice.js";
 
 export function FeedViewSelector({ value, onChange }) {
@@ -23,6 +24,7 @@ export function FeedViewSelector({ value, onChange }) {
   const client = useActiveClient();
   const [open, setOpen] = useState(false);
   const [circles, setCircles] = useState([]);
+  const { groups } = useJoinedGroups();
 
   const serverViews = useMemo(
     () => [
@@ -62,6 +64,7 @@ export function FeedViewSelector({ value, onChange }) {
   const currentLabel =
     serverViews.find((v) => v.value === value)?.label ||
     circles.find((c) => c.id === value)?.name ||
+    groups.find((g) => g.id === value)?.name ||
     "Public";
 
   function select(v) {
@@ -125,6 +128,22 @@ export function FeedViewSelector({ value, onChange }) {
                           summary={c.summary}
                           selected={value === c.id}
                           onPress={() => select(c.id)}
+                        />
+                      ))}
+                    </View>
+                  ) : null}
+
+                  {groups.length > 0 ? (
+                    <View className="border-t-2 border-base-300 mt-1 pt-1">
+                      <Text className="font-ui uppercase tracking-[0.18em] text-[10px] text-base-content/40 px-5 py-2">
+                        Your groups
+                      </Text>
+                      {groups.map((g) => (
+                        <Row
+                          key={g.id}
+                          label={g.name}
+                          selected={value === g.id}
+                          onPress={() => select(g.id)}
                         />
                       ))}
                     </View>

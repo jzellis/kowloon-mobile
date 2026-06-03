@@ -4,7 +4,7 @@
 // Cards show previews only; tapping a card opens the post detail screen.
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useFocusEffect, useRouter } from "expo-router";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useDispatch, useSelector } from "react-redux";
 import {
   ActivityIndicator,
@@ -35,8 +35,12 @@ export default function Feed() {
   const dispatch = useDispatch();
   const account = useSelector(selectActiveAccount);
   const client = useActiveClient();
+  const params = useLocalSearchParams();
   const [menuOpen, setMenuOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  // Override the persisted view once when arriving via /feed?view=<key>
+  // (e.g. tapping "View posts" on a circle or group detail screen).
+  const viewOverrideRef = useRef(null);
 
   // User's server-side filter defaults — used as the fallback for
   // usePersistedFilter on a fresh device (where AsyncStorage is empty for
@@ -71,10 +75,22 @@ export default function Feed() {
       }
     : undefined;
 
-  // Persisted filter state — viewKey (public/server/circleId) + activeTypes.
-  // Falls back to the user's saved server-side defaults on first hydration.
+  // Persisted filter state — viewKey (public/server/circleId/groupId) +
+  // activeTypes. Falls back to the user's saved server-side defaults on first
+  // hydration.
   const { viewKey, setViewKey, activeTypes, setActiveTypes } =
     usePersistedFilter(account?.id, fallbackDefaults);
+
+  // If we arrived via `?view=...`, apply it once (then leave the persisted
+  // viewKey alone so subsequent normal navigations don't re-fire this).
+  useEffect(() => {
+    const requested = typeof params.view === "string" ? params.view : null;
+    if (!requested) return;
+    if (viewOverrideRef.current === requested) return;
+    viewOverrideRef.current = requested;
+    if (requested !== viewKey) setViewKey(requested);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.view]);
 
   // Auto-sync: every user-driven filter change writes to user.prefs (debounced).
   // The pending value is held in a ref so a quick succession of taps coalesces
