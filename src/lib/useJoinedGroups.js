@@ -35,7 +35,11 @@ export function useJoinedGroups() {
             user = null;
           }
         }
-        const groupsCircleId = user?.circles?.groups;
+        // Auth payload flattens the user's system-circle IDs to the top of
+        // the user object (alongside following / blocked / muted). Fall back
+        // to user.circles.groups in case the server ever switches back to
+        // the nested shape.
+        const groupsCircleId = user?.groups || user?.circles?.groups;
         if (!groupsCircleId) {
           setGroups([]);
           return;
