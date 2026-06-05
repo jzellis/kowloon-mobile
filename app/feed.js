@@ -24,6 +24,7 @@ import { LeftDrawer } from "../src/components/drawer/LeftDrawer.jsx";
 import { Menu } from "lucide-react-native";
 import { useFeed } from "../src/lib/useFeed.js";
 import { useActiveClient } from "../src/lib/useActiveClient.js";
+import { useUnreadCount } from "../src/lib/UnreadCountContext.js";
 import { usePersistedFilter } from "../src/lib/usePersistedFilter.js";
 import {
   selectActiveAccount,
@@ -35,6 +36,7 @@ export default function Feed() {
   const dispatch = useDispatch();
   const account = useSelector(selectActiveAccount);
   const client = useActiveClient();
+  const { count: unreadCount } = useUnreadCount();
   const params = useLocalSearchParams();
   const [menuOpen, setMenuOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -222,15 +224,24 @@ export default function Feed() {
           hitSlop={8}
           android_ripple={{ color: "rgba(0,0,0,0.06)", borderless: true }}
         >
-          <Avatar
-            actor={{
-              name: account.profile?.name || account.username,
-              icon: account.profile?.icon || null,
-              id: account.id,
-            }}
-            size={38}
-            baseUrl={account.baseUrl}
-          />
+          <View className="relative">
+            <Avatar
+              actor={{
+                name: account.profile?.name || account.username,
+                icon: account.profile?.icon || null,
+                id: account.id,
+              }}
+              size={38}
+              baseUrl={account.baseUrl}
+            />
+            {unreadCount > 0 ? (
+              <View className="absolute -top-1 -right-1 bg-primary border-2 border-base-100 min-w-[20px] h-5 items-center justify-center px-1">
+                <Text className="font-ui text-[10px] font-bold text-primary-content">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </Text>
+              </View>
+            ) : null}
+          </View>
         </Pressable>
       </View>
 

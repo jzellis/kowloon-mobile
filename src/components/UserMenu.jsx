@@ -10,26 +10,34 @@ import { useRouter } from "expo-router";
 import { useDispatch, useSelector } from "react-redux";
 
 import { Avatar } from "./posts/Avatar.jsx";
+import { useUnreadCount } from "../lib/UnreadCountContext.js";
 import {
   selectAccounts,
   selectActiveAccount,
   signOutAccount,
 } from "../state/accountsSlice.js";
 
-function MenuRow({ label, onPress, destructive = false }) {
+function MenuRow({ label, onPress, destructive = false, badge }) {
   return (
     <Pressable
       onPress={onPress}
       android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-      className="px-4 py-3.5 border-t-2 border-base-300"
+      className="px-4 py-3.5 border-t-2 border-base-300 flex-row items-center"
     >
       <Text
-        className={`font-ui text-sm uppercase tracking-[0.14em] ${
+        className={`font-ui text-sm uppercase tracking-[0.14em] flex-1 ${
           destructive ? "text-error" : "text-base-content"
         }`}
       >
         {label}
       </Text>
+      {typeof badge === "number" && badge > 0 ? (
+        <View className="bg-primary min-w-[20px] h-5 items-center justify-center px-1.5 ml-2">
+          <Text className="font-ui text-[10px] font-bold text-primary-content">
+            {badge > 99 ? "99+" : badge}
+          </Text>
+        </View>
+      ) : null}
     </Pressable>
   );
 }
@@ -39,6 +47,7 @@ export function UserMenu({ visible, onClose }) {
   const dispatch = useDispatch();
   const account = useSelector(selectActiveAccount);
   const accounts = useSelector(selectAccounts);
+  const { count: unreadCount } = useUnreadCount();
 
   if (!account) return null;
 
@@ -101,6 +110,11 @@ export function UserMenu({ visible, onClose }) {
             </Pressable>
 
             <MenuRow label="Profile" onPress={() => go("/profile")} />
+            <MenuRow
+              label="Notifications"
+              onPress={() => go("/notifications")}
+              badge={unreadCount}
+            />
             <MenuRow label="Circles" onPress={() => go("/circles")} />
             <MenuRow label="Groups" onPress={() => go("/groups")} />
             <MenuRow label="Settings" onPress={() => go("/settings")} />

@@ -20,6 +20,7 @@ import { store } from "../src/state/store.js";
 import { hydrateAccounts } from "../src/state/accountsSlice.js";
 import { FONT_ASSETS } from "../src/lib/typography.js";
 import { TypographyProvider } from "../src/lib/TypographyContext.js";
+import { UnreadCountProvider } from "../src/lib/UnreadCountContext.js";
 
 // Hold the native splash screen until fonts are ready — no flash of fallback
 // text. preventAutoHideAsync can reject during fast-refresh; ignore that.
@@ -53,14 +54,16 @@ export default function RootLayout() {
       <GestureHandlerRootView style={{ flex: 1 }}>
         <SafeAreaProvider>
           <TypographyProvider>
-            <StatusBar style="auto" />
-            <HydrationBoot />
-            <Stack
-              screenOptions={{
-                headerShown: false,
-                contentStyle: { backgroundColor: "#FAF4E8" },
-              }}
-            />
+            <UnreadCountProvider>
+              <StatusBar style="auto" />
+              <HydrationBoot />
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                  contentStyle: { backgroundColor: "#FAF4E8" },
+                }}
+              />
+            </UnreadCountProvider>
           </TypographyProvider>
         </SafeAreaProvider>
       </GestureHandlerRootView>
