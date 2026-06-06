@@ -110,24 +110,34 @@ export function PostCard({ post }) {
       <View className={`h-[3px] ${meta.bar}`} />
 
       <View className="px-5 py-4">
-        {/* Author row */}
+        {/* Author row — left side (avatar + name/handle) navigates to the
+            user's profile; the type/time on the right stays inside the parent
+            Pressable so a tap there still opens the post. */}
         <View className="flex-row items-center mb-3">
-          <Avatar actor={actor} size={38} />
-          <View className="flex-1 ml-3">
-            <Text
-              className="font-ui text-sm text-base-content"
-              numberOfLines={1}
-            >
-              {name}
-            </Text>
-            <Text
-              className="font-ui text-xs text-base-content/50"
-              numberOfLines={1}
-            >
-              {handle}
-            </Text>
-          </View>
-          <View className="items-end">
+          <Pressable
+            onPress={() => {
+              if (handle) router.push(`/user/${encodeURIComponent(handle)}`);
+            }}
+            android_ripple={{ color: "rgba(0,0,0,0.05)" }}
+            className="flex-row items-center flex-1 min-w-0"
+          >
+            <Avatar actor={actor} size={38} />
+            <View className="flex-1 ml-3">
+              <Text
+                className="font-ui text-sm text-base-content"
+                numberOfLines={1}
+              >
+                {name}
+              </Text>
+              <Text
+                className="font-ui text-xs text-base-content/50"
+                numberOfLines={1}
+              >
+                {handle}
+              </Text>
+            </View>
+          </Pressable>
+          <View className="items-end ml-2">
             <Text
               className={`font-ui text-[10px] uppercase tracking-[0.16em] ${meta.accent}`}
             >

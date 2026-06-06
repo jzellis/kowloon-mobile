@@ -5,21 +5,22 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ActivityIndicator, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Pencil, Trash2 } from "lucide-react-native";
 
-import { Avatar } from "../../src/components/posts/Avatar.jsx";
-import { BackLink } from "../../src/components/ui/BackLink.jsx";
-import { Button } from "../../src/components/ui/Button.jsx";
-import { Eyebrow } from "../../src/components/ui/Heading.jsx";
-import { PostActionBar } from "../../src/components/posts/PostActionBar.jsx";
-import { PostBody } from "../../src/components/posts/PostBody.jsx";
-import { Reply } from "../../src/components/posts/Reply.jsx";
-import { ReplyComposer } from "../../src/components/posts/ReplyComposer.jsx";
-import { useActiveClient } from "../../src/lib/useActiveClient.js";
-import { useKeyboardInset } from "../../src/lib/useKeyboardInset.js";
-import { useTypography } from "../../src/lib/TypographyContext.js";
-import { timeAgo } from "../../src/lib/timeAgo.js";
+import { Avatar } from "../../../src/components/posts/Avatar.jsx";
+import { BackLink } from "../../../src/components/ui/BackLink.jsx";
+import { Button } from "../../../src/components/ui/Button.jsx";
+import { Eyebrow } from "../../../src/components/ui/Heading.jsx";
+import { PostActionBar } from "../../../src/components/posts/PostActionBar.jsx";
+import { PostBody } from "../../../src/components/posts/PostBody.jsx";
+import { Reply } from "../../../src/components/posts/Reply.jsx";
+import { ReplyComposer } from "../../../src/components/posts/ReplyComposer.jsx";
+import { useActiveClient } from "../../../src/lib/useActiveClient.js";
+import { useKeyboardInset } from "../../../src/lib/useKeyboardInset.js";
+import { useTypography } from "../../../src/lib/TypographyContext.js";
+import { timeAgo } from "../../../src/lib/timeAgo.js";
 
 // Same accent palette as the feed card — keep these in sync.
 const TYPE_BAR = {
@@ -91,9 +92,36 @@ export default function PostDetail() {
   }, [load]);
 
   const actor = post?.actor || {};
+  const ownerId = post?.actorId || post?.actor?.id;
+  const isOwner = !!currentUser?.id && ownerId === currentUser.id;
   const type = post?.type || "Note";
   const typeBar = TYPE_BAR[type] || TYPE_BAR.Note;
   const typeAccent = TYPE_ACCENT[type] || TYPE_ACCENT.Note;
+  const [deleting, setDeleting] = useState(false);
+
+  function confirmDelete() {
+    Alert.alert(
+      "Delete post?",
+      "This can't be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Delete", style: "destructive", onPress: handleDelete },
+      ],
+      { cancelable: true }
+    );
+  }
+
+  async function handleDelete() {
+    if (deleting) return;
+    setDeleting(true);
+    try {
+      await client.activities.deletePost({ postId: String(id) });
+      router.back();
+    } catch (e) {
+      setDeleting(false);
+      Alert.alert("Couldn't delete", e?.message || "Please try again.");
+    }
+  }
 
   const typography = {
     fonts: {
@@ -144,7 +172,14 @@ export default function PostDetail() {
                 </Text>
               </View>
 
-              <View className="flex-row items-center mb-5">
+              <Pressable
+                onPress={() => {
+                  if (actor.id)
+                    router.push(`/user/${encodeURIComponent(actor.id)}`);
+                }}
+                android_ripple={{ color: "rgba(0,0,0,0.05)" }}
+                className="flex-row items-center mb-5"
+              >
                 <Avatar actor={actor} size={40} baseUrl={client?.http?.baseUrl} />
                 <View className="ml-3 flex-1">
                   <Text
@@ -160,7 +195,7 @@ export default function PostDetail() {
                     {actor.id}
                   </Text>
                 </View>
-              </View>
+              </Pressable>
 
             </View>
 
@@ -183,6 +218,41 @@ export default function PostDetail() {
                   onReacted={load}
                 />
               </View>
+
+              {/* Owner actions */}
+              {isOwner ? (
+                <View className="flex-row items-center mt-4" style={{ gap: 8 }}>
+                  <Pressable
+                    onPress={() =>
+                      router.push(
+                        `/post/${encodeURIComponent(String(id))}/edit`
+                      )
+                    }
+                    android_ripple={{ color: "rgba(0,0,0,0.06)" }}
+                    className="flex-row items-center border-2 border-base-content px-3 py-2"
+                  >
+                    <Pencil
+                      size={13}
+                      color="rgba(26,26,32,0.85)"
+                      strokeWidth={1.75}
+                    />
+                    <Text className="font-ui uppercase tracking-[0.14em] text-[11px] text-base-content ml-1.5">
+                      Edit
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={confirmDelete}
+                    disabled={deleting}
+                    android_ripple={{ color: "rgba(0,0,0,0.06)" }}
+                    className="flex-row items-center border-2 border-error px-3 py-2"
+                  >
+                    <Trash2 size={13} color="#CC272E" strokeWidth={1.75} />
+                    <Text className="font-ui uppercase tracking-[0.14em] text-[11px] text-error ml-1.5">
+                      {deleting ? "Deleting…" : "Delete"}
+                    </Text>
+                  </Pressable>
+                </View>
+              ) : null}
             </View>
 
             {/* Replies */}

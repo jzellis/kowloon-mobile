@@ -88,7 +88,7 @@ export function UserMenu({ visible, onClose }) {
           >
             {/* Header → own profile */}
             <Pressable
-              onPress={() => go("/profile")}
+              onPress={() => go(`/user/${encodeURIComponent(account.id)}`)}
               android_ripple={{ color: "rgba(0,0,0,0.06)" }}
               className="flex-row items-center p-4"
             >
@@ -109,7 +109,10 @@ export function UserMenu({ visible, onClose }) {
               </View>
             </Pressable>
 
-            <MenuRow label="Profile" onPress={() => go("/profile")} />
+            <MenuRow
+              label="Profile"
+              onPress={() => go(`/user/${encodeURIComponent(account.id)}`)}
+            />
             <MenuRow
               label="Notifications"
               onPress={() => go("/notifications")}
