@@ -3,7 +3,7 @@
 // gates Circles and Bookmarks to the profile owner — non-owners just see
 // empty tabs there, which we render with a discreet "private" empty state.
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useSelector } from "react-redux";
 import {
@@ -11,6 +11,7 @@ import {
   FlatList,
   Pressable,
   RefreshControl,
+  ScrollView,
   Text,
   View,
 } from "react-native";
@@ -19,7 +20,12 @@ import { MapPin } from "lucide-react-native";
 
 import { Avatar } from "../../../src/components/posts/Avatar.jsx";
 import { BackLink } from "../../../src/components/ui/BackLink.jsx";
-import { BookmarkCard } from "../../../src/components/bookmarks/BookmarkCard.jsx";
+import { BookmarkComposer } from "../../../src/components/bookmarks/BookmarkComposer.jsx";
+import { BookmarkTree } from "../../../src/components/bookmarks/BookmarkTree.jsx";
+import {
+  BookmarkActionSheet,
+  FolderCreateModal,
+} from "../../../src/components/bookmarks/BookmarkActionSheet.jsx";
 import { Button } from "../../../src/components/ui/Button.jsx";
 import { CircleCard } from "../../../src/components/circles/CircleCard.jsx";
 import { HtmlContent } from "../../../src/components/HtmlContent.jsx";
@@ -62,13 +68,18 @@ export default function UserProfile() {
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
   const [circles, setCircles] = useState([]);
-  const [bookmarks, setBookmarks] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
 
   const [tab, setTab] = useState("posts");
+
+  // Bookmarks load lazily on tap; the tree owns its own data.
+  const treeRef = useRef(null);
+  const [menuTarget, setMenuTarget] = useState(null); // { node, onComplete }
+  const [composingBookmark, setComposingBookmark] = useState(false);
+  const [composingFolder, setComposingFolder] = useState(false);
 
   const userId = String(id || "");
   const isSelf = !!account?.id && account.id === userId;
@@ -80,13 +91,10 @@ export default function UserProfile() {
       else setLoading(true);
       setError(null);
       try {
-        const [userRes, postsRes, circlesRes, bookmarksRes] = await Promise.all([
+        const [userRes, postsRes, circlesRes] = await Promise.all([
           client.feeds.getUser({ userId }),
           client.feeds.getUserPosts({ userId }).catch(() => null),
           client.feeds.getUserCircles({ userId }).catch(() => null),
-          client.feeds
-            .getUserBookmarks({ userId, type: "Bookmark" })
-            .catch(() => null),
         ]);
         setUser(userRes?.item || userRes?.user || userRes || null);
         setPosts(postsRes?.orderedItems || postsRes?.items || []);
@@ -95,7 +103,8 @@ export default function UserProfile() {
             (c) => c?.type !== "System"
           )
         );
-        setBookmarks(bookmarksRes?.orderedItems || bookmarksRes?.items || []);
+        // Bookmarks load lazily inside BookmarkTree; pull-to-refresh
+        // (below) tells the tree to reload the root level separately.
       } catch (e) {
         setError(e?.message || "Couldn't load this profile.");
       } finally {
@@ -183,7 +192,9 @@ export default function UserProfile() {
     );
   }
 
-  // Pick the data + renderer + key for the active tab.
+  // Pick the data + renderer + key for the flat-list tabs (posts, circles).
+  // Bookmarks goes through a separate ScrollView path below so the tree can
+  // own its own lazy-loaded state.
   const view = (() => {
     if (tab === "posts") {
       return {
@@ -196,38 +207,30 @@ export default function UserProfile() {
           : "When this person posts something, you'll see it here.",
       };
     }
-    if (tab === "circles") {
-      return {
-        data: circles,
-        keyExtractor: (c) => c.id,
-        renderItem: ({ item }) => (
-          <CircleCard
-            circle={item}
-            serverDomain={account?.server}
-            baseUrl={account?.baseUrl}
-            onPress={() =>
-              router.push(`/circle/${encodeURIComponent(item.id)}`)
-            }
-          />
-        ),
-        emptyTitle: isSelf ? "No circles yet." : "Private.",
-        emptyBody: isSelf
-          ? "Circles you create show up here."
-          : "Someone's circles are visible only to themselves.",
-      };
-    }
     return {
-      data: bookmarks,
-      keyExtractor: (b) => b.id,
+      data: circles,
+      keyExtractor: (c) => c.id,
       renderItem: ({ item }) => (
-        <BookmarkCard bookmark={item} baseUrl={account?.baseUrl} />
+        <CircleCard
+          circle={item}
+          serverDomain={account?.server}
+          baseUrl={account?.baseUrl}
+          onPress={() =>
+            router.push(`/circle/${encodeURIComponent(item.id)}`)
+          }
+        />
       ),
-      emptyTitle: isSelf ? "No bookmarks yet." : "Private.",
+      emptyTitle: isSelf ? "No circles yet." : "Private.",
       emptyBody: isSelf
-        ? "Save a link from a post and it lands here."
-        : "Someone's bookmarks are visible only to themselves.",
+        ? "Circles you create show up here."
+        : "Someone's circles are visible only to themselves.",
     };
   })();
+
+  function refreshActive() {
+    load({ isRefresh: true });
+    if (tab === "bookmarks") treeRef.current?.refreshRoot?.();
+  }
 
   if (loading) {
     return (
@@ -256,28 +259,102 @@ export default function UserProfile() {
 
   return (
     <SafeAreaView className="flex-1 bg-base-100" edges={["top", "left", "right"]}>
-      <FlatList
-        data={view.data}
-        keyExtractor={view.keyExtractor}
-        renderItem={view.renderItem}
-        ListHeaderComponent={header()}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={() => load({ isRefresh: true })}
+      {tab === "bookmarks" ? (
+        <ScrollView
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={refreshActive} />
+          }
+        >
+          {header()}
+          {isSelf ? (
+            <View className="flex-row items-center px-5 py-2 border-b border-base-300 bg-base-200">
+              <Pressable
+                onPress={() => setComposingBookmark(true)}
+                android_ripple={{ color: "rgba(0,0,0,0.06)" }}
+                className="px-3 py-1.5 border-2 border-base-300 mr-2 bg-base-100"
+              >
+                <Text className="font-ui uppercase tracking-[0.14em] text-[11px] text-base-content/70">
+                  + Bookmark
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={() => setComposingFolder(true)}
+                android_ripple={{ color: "rgba(0,0,0,0.06)" }}
+                className="px-3 py-1.5 border-2 border-base-300 bg-base-100"
+              >
+                <Text className="font-ui uppercase tracking-[0.14em] text-[11px] text-base-content/70">
+                  + Folder
+                </Text>
+              </Pressable>
+            </View>
+          ) : null}
+          <BookmarkTree
+            ref={treeRef}
+            userId={userId}
+            client={client}
+            isOwner={isSelf}
+            account={account}
+            onMenu={setMenuTarget}
           />
-        }
-        ListEmptyComponent={
-          <View className="px-6 py-16 items-center">
-            <Text className="font-reading text-lg text-base-content/70 text-center mb-2">
-              {view.emptyTitle}
-            </Text>
-            <Text className="font-reading text-sm text-base-content/55 text-center leading-6">
-              {view.emptyBody}
-            </Text>
-          </View>
-        }
+        </ScrollView>
+      ) : (
+        <FlatList
+          data={view.data}
+          keyExtractor={view.keyExtractor}
+          renderItem={view.renderItem}
+          ListHeaderComponent={header()}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={refreshActive} />
+          }
+          ListEmptyComponent={
+            <View className="px-6 py-16 items-center">
+              <Text className="font-reading text-lg text-base-content/70 text-center mb-2">
+                {view.emptyTitle}
+              </Text>
+              <Text className="font-reading text-sm text-base-content/55 text-center leading-6">
+                {view.emptyBody}
+              </Text>
+            </View>
+          }
+        />
+      )}
+
+      <BookmarkActionSheet
+        target={menuTarget}
+        client={client}
+        account={account}
+        onClose={() => setMenuTarget(null)}
+        onMutated={() => {
+          menuTarget?.onComplete?.();
+          treeRef.current?.refreshRoot?.();
+          setMenuTarget(null);
+        }}
       />
+
+      {isSelf ? (
+        <>
+          <BookmarkComposer
+            visible={composingBookmark}
+            onClose={() => setComposingBookmark(false)}
+            initialValues={{}}
+            client={client}
+            currentUser={user}
+            onSaved={() => {
+              treeRef.current?.refreshRoot?.();
+              setComposingBookmark(false);
+            }}
+          />
+          <FolderCreateModal
+            visible={composingFolder}
+            client={client}
+            onClose={() => setComposingFolder(false)}
+            onCreated={() => {
+              treeRef.current?.refreshRoot?.();
+              setComposingFolder(false);
+            }}
+          />
+        </>
+      ) : null}
     </SafeAreaView>
   );
 }
