@@ -1,0 +1,289 @@
+// Profile editing screen.
+// Fields: avatar, display name, bio, pronouns, up to 3 URLs.
+// Submits via client.activities.updateProfile() and patches the Redux
+// account store so the feed header updates immediately without a re-login.
+
+import { useState } from "react";
+import { useRouter } from "expo-router";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import * as ImagePicker from "expo-image-picker";
+
+import { Avatar } from "../../src/components/posts/Avatar.jsx";
+import { Eyebrow, Heading } from "../../src/components/ui/Heading.jsx";
+import { Button } from "../../src/components/ui/Button.jsx";
+import { useActiveClient } from "../../src/lib/useActiveClient.js";
+import {
+  selectActiveAccount,
+  updateAccountAndPersist,
+} from "../../src/state/accountsSlice.js";
+import { uploadFile } from "../../src/lib/uploadFile.js";
+
+function Field({ label, children }) {
+  return (
+    <View className="mb-5">
+      <Text className="font-ui text-xs font-semibold tracking-widest uppercase text-base-content/50 mb-1.5">
+        {label}
+      </Text>
+      {children}
+    </View>
+  );
+}
+
+const INPUT_CLASS =
+  "border-2 border-base-300 bg-base-100 px-3 py-2.5 font-ui text-base text-base-content";
+
+export default function ProfileSettings() {
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const client = useActiveClient();
+  const account = useSelector(selectActiveAccount);
+
+  const profile = account?.profile || {};
+
+  const [displayName, setDisplayName] = useState(profile.name || "");
+  const [bio, setBio] = useState(profile.description || "");
+  const [pronouns, setPronouns] = useState(profile.pronouns || "");
+  const [urls, setUrls] = useState(profile.urls || []);
+  const [urlInput, setUrlInput] = useState("");
+
+  // avatarPick — local uri to display + upload on save; null = no change
+  const [avatarPick, setAvatarPick] = useState(null);
+
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
+
+  async function pickAvatar() {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: "images",
+        quality: 0.85,
+        allowsEditing: true,
+        aspect: [1, 1],
+      });
+      if (result.canceled || !result.assets?.[0]) return;
+      const asset = result.assets[0];
+      setAvatarPick({
+        uri: asset.uri,
+        name: asset.fileName || `avatar-${Date.now()}.jpg`,
+        mimeType: asset.mimeType || "image/jpeg",
+      });
+    } catch (e) {
+      setError(e?.message || "Couldn't open the photo library.");
+    }
+  }
+
+  function addUrl() {
+    const trimmed = urlInput.trim();
+    if (!trimmed || urls.includes(trimmed) || urls.length >= 3) return;
+    setUrls([...urls, trimmed]);
+    setUrlInput("");
+  }
+
+  function removeUrl(url) {
+    setUrls(urls.filter((u) => u !== url));
+  }
+
+  async function save() {
+    if (!client || !account) return;
+    setSaving(true);
+    setError(null);
+    try {
+      let iconUrl = profile.icon;
+
+      if (avatarPick) {
+        const upload = await uploadFile(client, {
+          uri: avatarPick.uri,
+          name: avatarPick.name,
+          mimeType: avatarPick.mimeType,
+          to: "@public",
+          generateThumbnail: true,
+          thumbnailSizes: [200],
+        });
+        iconUrl = upload?.file?.url || iconUrl;
+      }
+
+      await client.activities.updateProfile({
+        profile: {
+          name: displayName.trim(),
+          description: bio.trim(),
+          pronouns: pronouns.trim(),
+          urls,
+          icon: iconUrl,
+        },
+      });
+
+      await dispatch(
+        updateAccountAndPersist(account.id, {
+          profile: {
+            ...profile,
+            name: displayName.trim(),
+            description: bio.trim(),
+            pronouns: pronouns.trim(),
+            urls,
+            icon: iconUrl,
+          },
+        })
+      );
+
+      router.back();
+    } catch (e) {
+      setError(e?.message || "Couldn't save profile.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const avatarActor = {
+    name: displayName || profile.name,
+    icon: avatarPick?.uri || profile.icon,
+  };
+
+  return (
+    <SafeAreaView className="flex-1 bg-base-100">
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 60 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View className="px-6 pt-10">
+          <Eyebrow>Settings</Eyebrow>
+          <Heading className="text-4xl mt-2 mb-6 leading-tight">
+            Edit Profile
+          </Heading>
+
+          {/* Avatar */}
+          <Field label="Avatar">
+            <View className="flex-row items-center gap-4">
+              <Avatar actor={avatarActor} size={72} baseUrl={account?.baseUrl} />
+              <Pressable
+                onPress={pickAvatar}
+                className="border-2 border-base-content px-4 py-2"
+                android_ripple={{ color: "rgba(0,0,0,0.06)" }}
+              >
+                <Text className="font-ui text-xs uppercase tracking-widest text-base-content">
+                  Change photo
+                </Text>
+              </Pressable>
+            </View>
+          </Field>
+
+          {/* Display name */}
+          <Field label="Display name">
+            <TextInput
+              className={INPUT_CLASS}
+              value={displayName}
+              onChangeText={setDisplayName}
+              placeholder="Your name"
+              placeholderTextColor="rgba(26,26,32,0.35)"
+              autoCorrect={false}
+            />
+          </Field>
+
+          {/* Bio */}
+          <Field label="Bio">
+            <TextInput
+              className={INPUT_CLASS}
+              value={bio}
+              onChangeText={setBio}
+              placeholder="A little about yourself…"
+              placeholderTextColor="rgba(26,26,32,0.35)"
+              multiline
+              numberOfLines={3}
+              style={{ minHeight: 80, textAlignVertical: "top" }}
+            />
+          </Field>
+
+          {/* Pronouns */}
+          <Field label="Pronouns">
+            <TextInput
+              className={INPUT_CLASS}
+              value={pronouns}
+              onChangeText={setPronouns}
+              placeholder="e.g. they/them"
+              placeholderTextColor="rgba(26,26,32,0.35)"
+              autoCorrect={false}
+            />
+          </Field>
+
+          {/* URLs */}
+          <Field label={`Links (${urls.length}/3)`}>
+            {urls.map((url) => (
+              <View
+                key={url}
+                className="flex-row items-center border-2 border-base-300 bg-base-100 px-3 mb-2"
+              >
+                <Text
+                  className="flex-1 font-ui text-sm text-base-content py-2.5"
+                  numberOfLines={1}
+                >
+                  {url}
+                </Text>
+                <Pressable onPress={() => removeUrl(url)} hitSlop={8}>
+                  <Text className="font-ui text-base text-base-content/40 pl-3">
+                    ×
+                  </Text>
+                </Pressable>
+              </View>
+            ))}
+            {urls.length < 3 && (
+              <View className="flex-row gap-2">
+                <TextInput
+                  className={`${INPUT_CLASS} flex-1`}
+                  value={urlInput}
+                  onChangeText={setUrlInput}
+                  onSubmitEditing={addUrl}
+                  placeholder="https://example.com"
+                  placeholderTextColor="rgba(26,26,32,0.35)"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  keyboardType="url"
+                  returnKeyType="done"
+                />
+                <Pressable
+                  onPress={addUrl}
+                  className="border-2 border-base-content px-3 items-center justify-center"
+                  android_ripple={{ color: "rgba(0,0,0,0.06)" }}
+                >
+                  <Text className="font-ui text-xl text-base-content leading-none">
+                    +
+                  </Text>
+                </Pressable>
+              </View>
+            )}
+          </Field>
+
+          {error ? (
+            <Text className="font-ui text-sm text-error mb-4">{error}</Text>
+          ) : null}
+
+          <Pressable
+            onPress={save}
+            disabled={saving}
+            className="bg-primary items-center justify-center h-12 mb-3"
+            android_ripple={{ color: "rgba(255,255,255,0.15)" }}
+            style={{ opacity: saving ? 0.5 : 1 }}
+          >
+            {saving ? (
+              <ActivityIndicator color="#FAF4E8" />
+            ) : (
+              <Text className="font-ui uppercase tracking-[0.14em] text-sm text-primary-content">
+                Save
+              </Text>
+            )}
+          </Pressable>
+
+          <Button label="Cancel" variant="ghost" onPress={() => router.back()} />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}

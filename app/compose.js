@@ -7,8 +7,6 @@
 // keyboard position. The bottom controls clear the keyboard via an explicit
 // measured inset.
 //
-// Note + Article are composable today; Media/Link/Event show in the picker
-// but their input UI isn't built, so selecting one shows a placeholder.
 //
 // On submit: pull the editor's ProseMirror JSON, convert to Markdown (the
 // server stores Markdown source), createPost() via @kowloon/client.
@@ -777,32 +775,6 @@ export default function Compose() {
               </Pressable>
             </View>
           </>
-        ) : (
-          /* Fallback for any post type not yet in COMPOSABLE_TYPES. */
-          <View className="flex-1 px-8 items-center justify-center">
-            <PostTypeIcon type={type} size={64} />
-            <Text className="font-reading text-2xl text-base-content mt-4 mb-2">
-              {POST_TYPES[type]?.label} posts
-            </Text>
-            <Text className="font-reading text-base text-base-content/60 text-center leading-6 mb-8">
-              The {POST_TYPES[type]?.label.toLowerCase()} composer is coming in a
-              later pass. For now you can post Notes and Articles.
-            </Text>
-            <Pressable
-              onPress={() => setType("Note")}
-              className="border-2 border-base-content px-5 py-2.5 mb-3"
-              android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-            >
-              <Text className="font-ui uppercase tracking-[0.14em] text-xs text-base-content">
-                Write a Note instead
-              </Text>
-            </Pressable>
-            <Pressable onPress={() => router.back()} hitSlop={8}>
-              <Text className="font-ui uppercase tracking-[0.14em] text-xs text-base-content/50">
-                Cancel
-              </Text>
-            </Pressable>
-          </View>
         )}
       </View>
     </SafeAreaView>

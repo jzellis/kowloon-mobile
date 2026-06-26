@@ -62,6 +62,11 @@ export default function Settings() {
           )}
 
           <Row
+            label="Profile"
+            hint="Avatar, display name, bio, links"
+            onPress={() => router.push("/settings/profile")}
+          />
+          <Row
             label="Typography"
             hint="Reading font, size, spacing, margins"
             onPress={() => router.push("/settings/typography")}
