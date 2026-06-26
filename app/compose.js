@@ -484,7 +484,7 @@ export default function Compose() {
         {/* Post type picker — across the top */}
         <PostTypeSelector value={type} onChange={setType} />
 
-        {composable ? (
+        {composable && (
           <>
             {/* Hidden keyboard-kicker — a real focusable input that raises the
                 soft keyboard on mount; the handoff effect above then moves
