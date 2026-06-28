@@ -9,7 +9,7 @@ export function Avatar({ actor, size = 38, baseUrl }) {
   const [failed, setFailed] = useState(false);
   const rawIcon = actor?.icon;
   const icon =
-    rawIcon && !/^https?:\/\//i.test(rawIcon) && baseUrl
+    rawIcon && !/^(https?|file):\/\//i.test(rawIcon) && baseUrl
       ? `${baseUrl.replace(/\/$/, "")}/${rawIcon.replace(/^\//, "")}`
       : rawIcon;
   const name = actor?.name || actor?.id || "?";
