@@ -151,126 +151,129 @@ export default function ProfileSettings() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-base-100">
+    <SafeAreaView className="flex-1 bg-base-100" edges={["top", "bottom"]}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-      <ScrollView
-        contentContainerStyle={{ paddingBottom: 60 }}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View className="px-6 pt-10">
-          <Eyebrow>Settings</Eyebrow>
-          <Heading className="text-4xl mt-2 mb-6 leading-tight">
-            Edit Profile
-          </Heading>
+        <ScrollView
+          contentContainerStyle={{ paddingBottom: 24 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View className="px-6 pt-10">
+            <Eyebrow>Settings</Eyebrow>
+            <Heading className="text-4xl mt-2 mb-6 leading-tight">
+              Edit Profile
+            </Heading>
 
-          {/* Avatar */}
-          <Field label="Avatar">
-            <View className="flex-row items-center gap-4">
-              <Avatar actor={avatarActor} size={72} baseUrl={account?.baseUrl} />
-              <Pressable
-                onPress={pickAvatar}
-                className="border-2 border-base-content px-4 py-2"
-                android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-              >
-                <Text className="font-ui text-xs uppercase tracking-widest text-base-content">
-                  Change photo
-                </Text>
-              </Pressable>
-            </View>
-          </Field>
-
-          {/* Display name */}
-          <Field label="Display name">
-            <TextInput
-              className={INPUT_CLASS}
-              value={displayName}
-              onChangeText={setDisplayName}
-              placeholder="Your name"
-              placeholderTextColor="rgba(26,26,32,0.35)"
-              autoCorrect={false}
-            />
-          </Field>
-
-          {/* Bio */}
-          <Field label="Bio">
-            <TextInput
-              className={INPUT_CLASS}
-              value={bio}
-              onChangeText={setBio}
-              placeholder="A little about yourself…"
-              placeholderTextColor="rgba(26,26,32,0.35)"
-              multiline
-              numberOfLines={3}
-              style={{ minHeight: 80, textAlignVertical: "top" }}
-            />
-          </Field>
-
-          {/* Pronouns */}
-          <Field label="Pronouns">
-            <TextInput
-              className={INPUT_CLASS}
-              value={pronouns}
-              onChangeText={setPronouns}
-              placeholder="e.g. they/them"
-              placeholderTextColor="rgba(26,26,32,0.35)"
-              autoCorrect={false}
-            />
-          </Field>
-
-          {/* URLs */}
-          <Field label={`Links (${urls.length}/3)`}>
-            {urls.map((url) => (
-              <View
-                key={url}
-                className="flex-row items-center border-2 border-base-300 bg-base-100 px-3 mb-2"
-              >
-                <Text
-                  className="flex-1 font-ui text-sm text-base-content py-2.5"
-                  numberOfLines={1}
-                >
-                  {url}
-                </Text>
-                <Pressable onPress={() => removeUrl(url)} hitSlop={8}>
-                  <Text className="font-ui text-base text-base-content/40 pl-3">
-                    ×
-                  </Text>
-                </Pressable>
-              </View>
-            ))}
-            {urls.length < 3 && (
-              <View className="flex-row gap-2">
-                <TextInput
-                  className={`${INPUT_CLASS} flex-1`}
-                  value={urlInput}
-                  onChangeText={setUrlInput}
-                  onSubmitEditing={addUrl}
-                  placeholder="https://example.com"
-                  placeholderTextColor="rgba(26,26,32,0.35)"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  keyboardType="url"
-                  returnKeyType="done"
-                />
+            {/* Avatar */}
+            <Field label="Avatar">
+              <View className="flex-row items-center gap-4">
+                <Avatar actor={avatarActor} size={72} baseUrl={account?.baseUrl} />
                 <Pressable
-                  onPress={addUrl}
-                  className="border-2 border-base-content px-3 items-center justify-center"
+                  onPress={pickAvatar}
+                  className="border-2 border-base-content px-4 py-2"
                   android_ripple={{ color: "rgba(0,0,0,0.06)" }}
                 >
-                  <Text className="font-ui text-xl text-base-content leading-none">
-                    +
+                  <Text className="font-ui text-xs uppercase tracking-widest text-base-content">
+                    Change photo
                   </Text>
                 </Pressable>
               </View>
-            )}
-          </Field>
+            </Field>
 
+            {/* Display name */}
+            <Field label="Display name">
+              <TextInput
+                className={INPUT_CLASS}
+                value={displayName}
+                onChangeText={setDisplayName}
+                placeholder="Your name"
+                placeholderTextColor="rgba(26,26,32,0.35)"
+                autoCorrect={false}
+              />
+            </Field>
+
+            {/* Bio */}
+            <Field label="Bio">
+              <TextInput
+                className={INPUT_CLASS}
+                value={bio}
+                onChangeText={setBio}
+                placeholder="A little about yourself…"
+                placeholderTextColor="rgba(26,26,32,0.35)"
+                multiline
+                numberOfLines={3}
+                style={{ minHeight: 80, textAlignVertical: "top" }}
+              />
+            </Field>
+
+            {/* Pronouns */}
+            <Field label="Pronouns">
+              <TextInput
+                className={INPUT_CLASS}
+                value={pronouns}
+                onChangeText={setPronouns}
+                placeholder="e.g. they/them"
+                placeholderTextColor="rgba(26,26,32,0.35)"
+                autoCorrect={false}
+              />
+            </Field>
+
+            {/* URLs */}
+            <Field label={`Links (${urls.length}/3)`}>
+              {urls.map((url) => (
+                <View
+                  key={url}
+                  className="flex-row items-center border-2 border-base-300 bg-base-100 px-3 mb-2"
+                >
+                  <Text
+                    className="flex-1 font-ui text-sm text-base-content py-2.5"
+                    numberOfLines={1}
+                  >
+                    {url}
+                  </Text>
+                  <Pressable onPress={() => removeUrl(url)} hitSlop={8}>
+                    <Text className="font-ui text-base text-base-content/40 pl-3">
+                      ×
+                    </Text>
+                  </Pressable>
+                </View>
+              ))}
+              {urls.length < 3 && (
+                <View className="flex-row gap-2">
+                  <TextInput
+                    className={`${INPUT_CLASS} flex-1`}
+                    value={urlInput}
+                    onChangeText={setUrlInput}
+                    onSubmitEditing={addUrl}
+                    placeholder="https://example.com"
+                    placeholderTextColor="rgba(26,26,32,0.35)"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    keyboardType="url"
+                    returnKeyType="done"
+                  />
+                  <Pressable
+                    onPress={addUrl}
+                    className="border-2 border-base-content px-3 items-center justify-center"
+                    android_ripple={{ color: "rgba(0,0,0,0.06)" }}
+                  >
+                    <Text className="font-ui text-xl text-base-content leading-none">
+                      +
+                    </Text>
+                  </Pressable>
+                </View>
+              )}
+            </Field>
+          </View>
+        </ScrollView>
+
+        {/* Sticky footer — always visible above keyboard */}
+        <View className="px-6 pt-3 pb-2 bg-base-100 border-t-2 border-base-300">
           {error ? (
-            <Text className="font-ui text-sm text-error mb-4">{error}</Text>
+            <Text className="font-ui text-sm text-error mb-3">{error}</Text>
           ) : null}
-
           <Pressable
             onPress={save}
             disabled={saving}
@@ -286,10 +289,8 @@ export default function ProfileSettings() {
               </Text>
             )}
           </Pressable>
-
           <Button label="Cancel" variant="ghost" onPress={() => router.back()} />
         </View>
-      </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
