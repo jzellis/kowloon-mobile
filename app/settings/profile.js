@@ -9,6 +9,8 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   ActivityIndicator,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   Text,
@@ -150,6 +152,10 @@ export default function ProfileSettings() {
 
   return (
     <SafeAreaView className="flex-1 bg-base-100">
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
       <ScrollView
         contentContainerStyle={{ paddingBottom: 60 }}
         keyboardShouldPersistTaps="handled"
@@ -284,6 +290,7 @@ export default function ProfileSettings() {
           <Button label="Cancel" variant="ghost" onPress={() => router.back()} />
         </View>
       </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
