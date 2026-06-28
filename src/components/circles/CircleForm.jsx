@@ -83,6 +83,9 @@ export function CircleForm({
   const memberIds = new Set(members.map((m) => m.id));
 
   // Debounced member search.
+  // Suppress auto-search for partial federated handles (@user@partial) — wait
+  // until the domain part contains a dot (@user@host.tld) before hitting the
+  // network, to avoid spamming WebFinger with incomplete domain names.
   useEffect(() => {
     clearTimeout(debounceRef.current);
     const q = query.trim();
@@ -91,6 +94,10 @@ export function CircleForm({
       setSearching(false);
       return;
     }
+    const parts = q.replace(/^@/, "").split("@");
+    const isPartialFederated = parts.length === 2 && !parts[1].includes(".");
+    if (isPartialFederated) return;
+
     debounceRef.current = setTimeout(async () => {
       setSearching(true);
       try {
@@ -274,7 +281,7 @@ export function CircleForm({
           <TextInput
             value={query}
             onChangeText={setQuery}
-            placeholder="Search people to add…"
+            placeholder="Name, @handle, or @user@other.server"
             placeholderTextColor="rgba(26,26,32,0.35)"
             autoCapitalize="none"
             autoCorrect={false}
