@@ -133,8 +133,19 @@ export default function UserProfile() {
   function header() {
     return (
       <View>
-        <View className="px-5 pt-3 pb-2">
+        <View className="px-5 pt-3 pb-2 flex-row items-center justify-between">
           <BackLink />
+          {isSelf ? (
+            <Pressable
+              onPress={() => router.push("/settings/profile")}
+              android_ripple={{ color: "rgba(0,0,0,0.06)" }}
+              className="border-2 border-base-content px-3 py-1.5"
+            >
+              <Text className="font-ui text-[11px] uppercase tracking-widest text-base-content">
+                Edit Profile
+              </Text>
+            </Pressable>
+          ) : null}
         </View>
         <View className="px-5 pt-2 pb-5 border-b-2 border-base-300">
           <View className="flex-row items-start">
