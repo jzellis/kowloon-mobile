@@ -14,7 +14,7 @@ import {
   Text,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { PostCard } from "../src/components/posts/PostCard.jsx";
 import { Avatar } from "../src/components/posts/Avatar.jsx";
@@ -38,6 +38,7 @@ export default function Feed() {
   const client = useActiveClient();
   const { count: unreadCount } = useUnreadCount();
   const params = useLocalSearchParams();
+  const insets = useSafeAreaInsets();
   const [menuOpen, setMenuOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   // Override the persisted view once when arriving via /feed?view=<key>
@@ -288,7 +289,7 @@ export default function Feed() {
             </View>
           ) : (
             <View className="px-6 py-20 items-center">
-              <Text className="font-reading text-base text-base-content/60 text-center">
+              <Text className="font-ui text-base text-base-content/60 text-center">
                 No posts in your feed yet. Pull to refresh.
               </Text>
             </View>
@@ -303,10 +304,13 @@ export default function Feed() {
         }
       />
 
-      {/* Compose — square editorial FAB */}
+      {/* Compose — square editorial FAB. Bottom offset accounts for the Android
+          nav bar: absolute children of SafeAreaView are positioned relative to
+          the physical screen edge, so we add insets.bottom to clear the bar. */}
       <Pressable
         onPress={() => router.push("/compose")}
-        className="absolute bottom-8 right-5 w-14 h-14 bg-primary border-2 border-base-content items-center justify-center"
+        style={{ bottom: (insets.bottom || 0) + 32, right: 20 }}
+        className="absolute w-14 h-14 bg-primary border-2 border-base-content items-center justify-center"
         android_ripple={{ color: "rgba(255,255,255,0.15)" }}
       >
         <Text className="text-primary-content text-3xl leading-none mt-[-2px]">

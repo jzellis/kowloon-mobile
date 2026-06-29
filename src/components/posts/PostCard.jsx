@@ -14,6 +14,7 @@ import { LocationLine } from "./LocationLine.jsx";
 import { PostActionBar } from "./PostActionBar.jsx";
 import { HtmlContent } from "../HtmlContent.jsx";
 import { useActiveClient } from "../../lib/useActiveClient.js";
+import { useTypography } from "../../lib/TypographyContext.js";
 import { kowloonPostIdFromUrl } from "../../lib/parseKowloonUrl.js";
 import { timeAgo } from "../../lib/timeAgo.js";
 
@@ -64,6 +65,14 @@ export function PostCard({ post }) {
   const client = useActiveClient();
   const currentUser = client?.auth?.getUser?.() || null;
   const meta = TYPE_META[post?.type] || TYPE_META.Note;
+  const { resolved } = useTypography();
+  // Font family from the user's reading preference, applied to content text.
+  // UI chrome (titles, labels, timestamps) stays in font-ui regardless.
+  const contentFonts = {
+    regular: resolved.regularFamily,
+    bold: resolved.boldFamily,
+    italic: resolved.italicFamily,
+  };
 
   const actor = post?.actor || {};
   const handle = actor.id || post?.actorId || "";
@@ -156,13 +165,16 @@ export function PostCard({ post }) {
              field for older posts that pre-date attachments. */
           <>
             {title ? (
-              <Text className="font-reading text-xl text-base-content leading-tight mb-1.5">
+              <Text className="font-ui text-xl text-base-content leading-tight mb-1.5">
                 {title}
               </Text>
             ) : null}
             <LocationLine location={post?.location} />
             {plainPreview ? (
-              <Text className="font-reading text-[15px] text-base-content/80 leading-6 mb-3">
+              <Text
+                className="text-[15px] text-base-content/80 leading-6 mb-3"
+                style={{ fontFamily: resolved.regularFamily }}
+              >
                 {decodeEntities(plainPreview)}
               </Text>
             ) : null}
@@ -244,7 +256,7 @@ export function PostCard({ post }) {
             ) : null}
             {title ? (
               <Pressable onPress={openExternal}>
-                <Text className={`font-reading text-xl ${meta.accent} leading-tight mb-1`}>
+                <Text className={`font-ui text-xl ${meta.accent} leading-tight mb-1`}>
                   {title}
                 </Text>
               </Pressable>
@@ -256,7 +268,10 @@ export function PostCard({ post }) {
               </Text>
             ) : null}
             {plainPreview ? (
-              <Text className="font-reading text-[15px] text-base-content/80 leading-6">
+              <Text
+                className="text-[15px] text-base-content/80 leading-6"
+                style={{ fontFamily: resolved.regularFamily }}
+              >
                 {decodeEntities(plainPreview)}
               </Text>
             ) : null}
@@ -266,7 +281,7 @@ export function PostCard({ post }) {
              for Note, Article, and Event. */
           <>
             {title ? (
-              <Text className="font-reading text-xl text-base-content leading-tight mb-1.5">
+              <Text className="font-ui text-xl text-base-content leading-tight mb-1.5">
                 {title}
               </Text>
             ) : null}
@@ -283,10 +298,11 @@ export function PostCard({ post }) {
             ) : null}
 
             {previewHtml ? (
-              <HtmlContent html={previewHtml} fontSize={15} />
+              <HtmlContent html={previewHtml} fontSize={15} fonts={contentFonts} />
             ) : plainPreview ? (
               <Text
-                className="font-reading text-[15px] text-base-content/80 leading-6"
+                className="text-[15px] text-base-content/80 leading-6"
+                style={{ fontFamily: resolved.regularFamily }}
                 numberOfLines={title ? 3 : 5}
               >
                 {plainPreview}
@@ -298,7 +314,7 @@ export function PostCard({ post }) {
                 `generateSummary`). When it's present, signal that the card
                 is showing an excerpt. */}
             {post?.summary ? (
-              <Text className="font-reading italic text-base-content/45 mt-2 text-right">
+              <Text className="font-ui italic text-base-content/45 mt-2 text-right">
                 Continue reading…
               </Text>
             ) : null}
