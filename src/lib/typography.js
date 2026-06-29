@@ -19,7 +19,7 @@ export const FONTS = [
     label: "Inter",
     classification: "sans",
     files: {
-      regular: require("../../assets/fonts/Inter-Regular.ttf"),
+      regular: require("../../assets/fonts/Inter-Light.ttf"),
       bold: require("../../assets/fonts/Inter-Bold.ttf"),
       italic: require("../../assets/fonts/Inter-Italic.ttf"),
     },
