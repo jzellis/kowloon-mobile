@@ -124,7 +124,6 @@ export function FeedViewSelector({ value, onChange }) {
         transparent
         animationType="none"
         onRequestClose={close}
-        statusBarTranslucent
       >
         {/* Full-screen dismiss backdrop */}
         <Pressable className="flex-1" onPress={close}>
