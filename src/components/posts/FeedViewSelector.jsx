@@ -80,7 +80,7 @@ export function FeedViewSelector({ value, onChange }) {
         className="flex-row items-center"
       >
         <Text
-          className="font-reading text-2xl text-base-content mr-1.5"
+          className="font-ui text-2xl text-base-content mr-1.5"
           numberOfLines={1}
         >
           {currentLabel}
@@ -174,7 +174,7 @@ function Row({ label, summary, selected, onPress }) {
       </Text>
       {summary ? (
         <Text
-          className={`font-reading text-xs mt-0.5 ${
+          className={`font-ui text-xs mt-0.5 ${
             selected ? "text-secondary-content/70" : "text-base-content/45"
           }`}
         >

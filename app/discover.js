@@ -33,7 +33,7 @@ function CircleCard({ circle, client, router }) {
       <CircleAvatar circle={circle} size={44} baseUrl={circle.baseUrl} />
       <View className="flex-1 min-w-0">
         <Text
-          className="font-reading text-base font-bold text-base-content"
+          className="font-ui text-base font-bold text-base-content"
           numberOfLines={1}
         >
           {circle.name}
@@ -45,7 +45,7 @@ function CircleCard({ circle, client, router }) {
         ) : null}
         {circle.summary ? (
           <Text
-            className="font-reading text-sm text-base-content/70 leading-relaxed"
+            className="font-ui text-sm text-base-content/70 leading-relaxed"
             numberOfLines={2}
           >
             {circle.summary}

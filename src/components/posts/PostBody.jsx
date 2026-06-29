@@ -169,7 +169,7 @@ export function PostBody({ post, typography }) {
         <>
           {title ? (
             <Pressable onPress={openHref}>
-              <Text className="font-reading text-3xl text-post-link leading-tight mb-2">
+              <Text className="font-ui text-3xl text-post-link leading-tight mb-2">
                 {title}
               </Text>
             </Pressable>
@@ -183,7 +183,7 @@ export function PostBody({ post, typography }) {
           ) : null}
         </>
       ) : title ? (
-        <Text className="font-reading text-3xl text-base-content leading-tight mb-3">
+        <Text className="font-ui text-3xl text-base-content leading-tight mb-3">
           {title}
         </Text>
       ) : null}
@@ -204,11 +204,11 @@ export function PostBody({ post, typography }) {
           <Text className="font-ui uppercase tracking-[0.16em] text-[10px] text-base-content/55 mb-1">
             When
           </Text>
-          <Text className="font-reading text-lg font-bold text-base-content leading-snug">
+          <Text className="font-ui text-lg font-bold text-base-content leading-snug">
             {eventRange.primary}
           </Text>
           {eventRange.secondary ? (
-            <Text className="font-reading text-base text-base-content/75 leading-snug mt-0.5">
+            <Text className="font-ui text-base text-base-content/75 leading-snug mt-0.5">
               {eventRange.secondary}
             </Text>
           ) : null}
@@ -253,7 +253,7 @@ export function PostBody({ post, typography }) {
           selectable
         />
       ) : !title ? (
-        <Text className="font-reading text-base text-base-content/50">
+        <Text className="font-ui text-base text-base-content/50">
           No content.
         </Text>
       ) : null}

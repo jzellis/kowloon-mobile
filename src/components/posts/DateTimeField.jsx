@@ -73,7 +73,7 @@ export function DateTimeField({
           <Text className="font-ui uppercase tracking-[0.12em] text-[10px] text-base-content/45 mb-0.5">
             Date
           </Text>
-          <Text className="font-reading text-base text-base-content">
+          <Text className="font-ui text-base text-base-content">
             {dateValue || "—"}
           </Text>
         </Pressable>
@@ -85,7 +85,7 @@ export function DateTimeField({
           <Text className="font-ui uppercase tracking-[0.12em] text-[10px] text-base-content/45 mb-0.5">
             Time
           </Text>
-          <Text className="font-reading text-base text-base-content">
+          <Text className="font-ui text-base text-base-content">
             {timeValue || "—"}
           </Text>
         </Pressable>

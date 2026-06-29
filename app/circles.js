@@ -68,7 +68,7 @@ export default function Circles() {
       <View className="px-5 pt-3 pb-3 border-b-2 border-base-content">
         <BackLink />
         <View className="flex-row items-end justify-between mt-2">
-          <Text className="font-reading text-3xl text-base-content">Circles</Text>
+          <Text className="font-ui text-3xl text-base-content">Circles</Text>
           <Pressable
             onPress={() => router.push("/circle/new")}
             hitSlop={8}
@@ -109,7 +109,7 @@ export default function Circles() {
             </View>
           ) : error ? (
             <View className="px-6 py-20 items-center">
-              <Text className="font-reading text-base text-error text-center mb-4">
+              <Text className="font-ui text-base text-error text-center mb-4">
                 {error}
               </Text>
               <Pressable
@@ -124,10 +124,10 @@ export default function Circles() {
             </View>
           ) : (
             <View className="px-6 py-20 items-center">
-              <Text className="font-reading text-lg text-base-content/70 text-center mb-2">
+              <Text className="font-ui text-lg text-base-content/70 text-center mb-2">
                 No circles yet.
               </Text>
-              <Text className="font-reading text-sm text-base-content/55 text-center leading-6">
+              <Text className="font-ui text-sm text-base-content/55 text-center leading-6">
                 Circles are curated lists of people whose posts you want to
                 read. Create one to get started.
               </Text>

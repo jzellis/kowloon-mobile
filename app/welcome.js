@@ -21,7 +21,7 @@ export default function Welcome() {
           <Heading className="text-5xl mt-3 leading-[1.05]">
             Welcome.
           </Heading>
-          <Text className="font-reading text-base text-base-content/70 mt-4 leading-6">
+          <Text className="font-ui text-base text-base-content/70 mt-4 leading-6">
             Federated, circle-based social media. To get started, sign in to a
             server you already have an account on, or join a new one.
           </Text>

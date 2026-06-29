@@ -230,7 +230,7 @@ export function BookmarkComposer({
         >
           {/* Header */}
           <View className="flex-row items-center justify-between px-5 py-3 border-b-2 border-base-300 bg-secondary">
-            <Text className="font-reading text-2xl text-secondary-content">
+            <Text className="font-ui text-2xl text-secondary-content">
               Add Bookmark
             </Text>
             <Pressable
@@ -298,7 +298,7 @@ export function BookmarkComposer({
                   fetchingPreview ? "Fetching…" : "Bookmark title"
                 }
                 placeholderTextColor="rgba(26,26,32,0.35)"
-                className="border-2 border-base-300 bg-white px-3 py-2.5 font-reading text-base text-base-content"
+                className="border-2 border-base-300 bg-white px-3 py-2.5 font-ui text-base text-base-content"
               />
             </View>
 
@@ -311,7 +311,7 @@ export function BookmarkComposer({
                 multiline
                 placeholder="Why are you saving this?"
                 placeholderTextColor="rgba(26,26,32,0.35)"
-                className="border-2 border-base-300 bg-white px-3 py-2.5 font-reading text-base text-base-content min-h-20"
+                className="border-2 border-base-300 bg-white px-3 py-2.5 font-ui text-base text-base-content min-h-20"
               />
             </View>
 

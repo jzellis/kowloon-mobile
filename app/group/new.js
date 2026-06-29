@@ -78,7 +78,7 @@ export default function NewGroup() {
     <SafeAreaView className="flex-1 bg-base-100" edges={["top", "left", "right"]}>
       <View className="px-5 pt-3 pb-3 border-b-2 border-base-content">
         <BackLink />
-        <Text className="font-reading text-3xl text-base-content mt-2">
+        <Text className="font-ui text-3xl text-base-content mt-2">
           New Group
         </Text>
       </View>

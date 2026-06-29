@@ -182,7 +182,7 @@ export default function GroupDetail() {
           </View>
         ) : error ? (
           <View className="py-20 items-center px-6">
-            <Text className="font-reading text-base text-error text-center mb-4">
+            <Text className="font-ui text-base text-error text-center mb-4">
               {error}
             </Text>
             <Button label="Back" variant="ghost" onPress={() => router.back()} />
@@ -194,7 +194,7 @@ export default function GroupDetail() {
               <View className="flex-row items-center">
                 <GroupAvatar group={group} size={60} baseUrl={account?.baseUrl} />
                 <View className="flex-1 ml-4 min-w-0">
-                  <Text className="font-reading text-2xl text-base-content leading-tight">
+                  <Text className="font-ui text-2xl text-base-content leading-tight">
                     {group.name}
                   </Text>
                   <Text className="font-ui text-[11px] uppercase tracking-[0.16em] text-base-content/55 mt-1">
@@ -209,7 +209,7 @@ export default function GroupDetail() {
               </View>
 
               {group.description ? (
-                <Text className="font-reading text-base text-base-content/80 leading-relaxed mt-4">
+                <Text className="font-ui text-base text-base-content/80 leading-relaxed mt-4">
                   {group.description}
                 </Text>
               ) : null}
@@ -344,7 +344,7 @@ export default function GroupDetail() {
               </Text>
 
               {members.length === 0 ? (
-                <Text className="font-reading text-sm text-base-content/55 leading-6">
+                <Text className="font-ui text-sm text-base-content/55 leading-6">
                   No members yet.
                 </Text>
               ) : (

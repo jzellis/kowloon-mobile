@@ -1,0 +1,416 @@
+// Search — local, viewer-scoped search across People, Posts, Groups, and
+// Bookmarks. The server gates every result through the same visibility rules as
+// the timeline (see server routes/search). Bookmarks are personal: that tab
+// only ever surfaces your own saved bookmarks.
+//
+// "All" shows a few of each type with a "See all" jump; each type tab is a
+// paginated list. Matching is whole-word (Mongo $text) for now — prefix /
+// wildcard search is a later enhancement.
+
+import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "expo-router";
+import { useSelector } from "react-redux";
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Search as SearchIcon, X } from "lucide-react-native";
+
+import { BackLink } from "../src/components/ui/BackLink.jsx";
+import { Avatar } from "../src/components/posts/Avatar.jsx";
+import { PostCard } from "../src/components/posts/PostCard.jsx";
+import { GroupCard } from "../src/components/groups/GroupCard.jsx";
+import { BookmarkCard } from "../src/components/bookmarks/BookmarkCard.jsx";
+import { useActiveClient } from "../src/lib/useActiveClient.js";
+import { selectActiveAccount } from "../src/state/accountsSlice.js";
+
+const MIN_QUERY = 2;
+const ALL_PREVIEW = 4; // results shown per type on the "All" tab
+
+// Tab order. "all" is a grouped overview; the rest are single-type lists.
+const TABS = [
+  { key: "all", label: "All" },
+  { key: "users", label: "People" },
+  { key: "posts", label: "Posts" },
+  { key: "groups", label: "Groups" },
+  { key: "bookmarks", label: "Bookmarks" },
+];
+
+// Run a single-type search via the client's convenience methods.
+function searchByType(client, type, query, page) {
+  switch (type) {
+    case "users":
+      return client.search.searchUsers({ query, page });
+    case "posts":
+      return client.search.searchPosts({ query, page });
+    case "groups":
+      return client.search.searchGroups({ query, page });
+    case "bookmarks":
+      return client.search.searchBookmarks({ query, page });
+    default:
+      return Promise.resolve({ orderedItems: [], totalItems: 0 });
+  }
+}
+
+const itemsOf = (res) => res?.orderedItems || res?.items || [];
+
+export default function Search() {
+  const router = useRouter();
+  const client = useActiveClient();
+  const account = useSelector(selectActiveAccount);
+
+  const [query, setQuery] = useState("");
+  const [debounced, setDebounced] = useState("");
+  const [tab, setTab] = useState("all");
+
+  // "All" tab: a few of each type. Type tabs: a paginated flat list.
+  const [sections, setSections] = useState({ users: [], posts: [], groups: [], bookmarks: [] });
+  const [list, setList] = useState([]);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+
+  const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Debounce the raw input → debounced query that actually drives fetches.
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(query.trim()), 350);
+    return () => clearTimeout(t);
+  }, [query]);
+
+  const tooShort = debounced.length > 0 && debounced.length < MIN_QUERY;
+  const ready = !!client && debounced.length >= MIN_QUERY;
+
+  // Primary fetch — re-runs whenever the query or active tab changes.
+  useEffect(() => {
+    if (!client) return;
+    if (debounced.length < MIN_QUERY) {
+      setSections({ users: [], posts: [], groups: [], bookmarks: [] });
+      setList([]);
+      setTotal(0);
+      setError(null);
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    (async () => {
+      try {
+        if (tab === "all") {
+          const [u, p, g, b] = await Promise.all([
+            searchByType(client, "users", debounced, 1),
+            searchByType(client, "posts", debounced, 1),
+            searchByType(client, "groups", debounced, 1),
+            searchByType(client, "bookmarks", debounced, 1),
+          ]);
+          if (cancelled) return;
+          setSections({
+            users: itemsOf(u),
+            posts: itemsOf(p),
+            groups: itemsOf(g),
+            bookmarks: itemsOf(b),
+          });
+        } else {
+          const res = await searchByType(client, tab, debounced, 1);
+          if (cancelled) return;
+          setList(itemsOf(res));
+          setTotal(res?.totalItems ?? itemsOf(res).length);
+          setPage(1);
+        }
+      } catch (e) {
+        if (!cancelled) setError(e?.message || "Search failed.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [client, debounced, tab]);
+
+  const hasMore = tab !== "all" && list.length < total;
+
+  const loadMore = useCallback(async () => {
+    if (!ready || tab === "all" || loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    try {
+      const next = page + 1;
+      const res = await searchByType(client, tab, debounced, next);
+      const more = itemsOf(res);
+      setList((prev) => {
+        const seen = new Set(prev.map((x) => x.id));
+        return [...prev, ...more.filter((x) => !seen.has(x.id))];
+      });
+      setTotal(res?.totalItems ?? total);
+      setPage(next);
+    } catch {
+      // keep what we have; a failed page just stops the scroll
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [client, debounced, tab, page, total, hasMore, loadingMore, ready]);
+
+  function openItem(type, item) {
+    if (type === "users") router.push(`/user/${encodeURIComponent(item.id)}`);
+    else if (type === "posts") router.push(`/post/${encodeURIComponent(item.id)}`);
+    else if (type === "groups") router.push(`/group/${encodeURIComponent(item.id)}`);
+    // bookmarks open their href directly via BookmarkCard
+  }
+
+  const renderItem = useCallback(
+    (type, item) => {
+      if (type === "users") {
+        return (
+          <UserResultRow
+            user={item}
+            baseUrl={account?.baseUrl}
+            onPress={() => openItem("users", item)}
+          />
+        );
+      }
+      if (type === "posts") return <PostCard post={item} />;
+      if (type === "groups") {
+        return (
+          <GroupCard
+            group={item}
+            serverDomain={account?.server}
+            baseUrl={account?.baseUrl}
+            onPress={() => openItem("groups", item)}
+          />
+        );
+      }
+      if (type === "bookmarks") {
+        return <BookmarkCard bookmark={item} baseUrl={account?.baseUrl} />;
+      }
+      return null;
+    },
+    // openItem is stable enough (only reads router/account)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [account?.baseUrl, account?.server]
+  );
+
+  const allEmpty =
+    sections.users.length === 0 &&
+    sections.posts.length === 0 &&
+    sections.groups.length === 0 &&
+    sections.bookmarks.length === 0;
+
+  return (
+    <SafeAreaView className="flex-1 bg-base-100" edges={["top", "left", "right"]}>
+      {/* Masthead */}
+      <View className="px-5 pt-3 pb-3 border-b-2 border-base-content">
+        <BackLink />
+        <Text className="font-ui text-3xl text-base-content mt-2 mb-3">
+          Search
+        </Text>
+        {/* Search field */}
+        <View className="flex-row items-center border-2 border-base-300 bg-base-100 px-3">
+          <SearchIcon size={16} color="rgba(26,26,32,0.45)" strokeWidth={2} />
+          <TextInput
+            value={query}
+            onChangeText={setQuery}
+            placeholder="Search people, posts, groups..."
+            placeholderTextColor="rgba(26,26,32,0.35)"
+            autoFocus
+            autoCapitalize="none"
+            autoCorrect={false}
+            returnKeyType="search"
+            className="flex-1 py-3 px-2 font-ui text-base text-base-content"
+          />
+          {query.length > 0 ? (
+            <Pressable
+              onPress={() => setQuery("")}
+              hitSlop={8}
+              android_ripple={{ color: "rgba(0,0,0,0.06)", borderless: true }}
+            >
+              <X size={16} color="rgba(26,26,32,0.5)" strokeWidth={2} />
+            </Pressable>
+          ) : null}
+        </View>
+      </View>
+
+      {/* Tabs — horizontally scrollable */}
+      <View className="border-b-2 border-base-300">
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 12 }}
+        >
+          {TABS.map((t) => (
+            <TabButton
+              key={t.key}
+              label={t.label}
+              active={tab === t.key}
+              onPress={() => setTab(t.key)}
+            />
+          ))}
+        </ScrollView>
+      </View>
+
+      {/* Body */}
+      {debounced.length === 0 ? (
+        <Hint primary="Find people, posts, groups, and your bookmarks." secondary="Type at least two letters to begin." />
+      ) : tooShort ? (
+        <Hint primary="Keep typing..." secondary="Searches start at two letters." />
+      ) : loading ? (
+        <View className="py-20 items-center">
+          <ActivityIndicator />
+        </View>
+      ) : error ? (
+        <View className="px-6 py-20 items-center">
+          <Text className="font-ui text-base text-error text-center mb-4">
+            {error}
+          </Text>
+        </View>
+      ) : tab === "all" ? (
+        allEmpty ? (
+          <NoResults query={debounced} />
+        ) : (
+          <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
+            {TABS.filter((t) => t.key !== "all").map((t) => {
+              const items = sections[t.key];
+              if (!items || items.length === 0) return null;
+              return (
+                <View key={t.key}>
+                  <SectionHeader
+                    title={t.label}
+                    showSeeAll={items.length > ALL_PREVIEW}
+                    onSeeAll={() => setTab(t.key)}
+                  />
+                  {items.slice(0, ALL_PREVIEW).map((item) => (
+                    <View key={item.id}>{renderItem(t.key, item)}</View>
+                  ))}
+                </View>
+              );
+            })}
+          </ScrollView>
+        )
+      ) : list.length === 0 ? (
+        <NoResults query={debounced} />
+      ) : (
+        <FlatList
+          data={list}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => renderItem(tab, item)}
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            loadingMore ? (
+              <View className="py-6 items-center">
+                <ActivityIndicator />
+              </View>
+            ) : null
+          }
+        />
+      )}
+    </SafeAreaView>
+  );
+}
+
+// ── User result row ─────────────────────────────────────────────────────────
+// Search returns a lean user shape: { id, username, profile: { name, icon }, url }.
+function UserResultRow({ user, baseUrl, onPress }) {
+  const name = user?.profile?.name || user?.username || user?.id;
+  const actor = { id: user?.id, name, icon: user?.profile?.icon || null };
+  return (
+    <Pressable
+      onPress={onPress}
+      android_ripple={{ color: "rgba(0,0,0,0.05)" }}
+      className="flex-row items-center px-5 py-4 border-b border-base-300 bg-base-100"
+    >
+      <Avatar actor={actor} size={44} baseUrl={baseUrl} />
+      <View className="flex-1 ml-3 min-w-0">
+        <Text
+          className="font-ui text-lg text-base-content leading-tight"
+          numberOfLines={1}
+        >
+          {name}
+        </Text>
+        <Text
+          className="font-ui text-xs text-base-content/55 mt-0.5"
+          numberOfLines={1}
+        >
+          {user?.id}
+        </Text>
+      </View>
+    </Pressable>
+  );
+}
+
+function SectionHeader({ title, showSeeAll, onSeeAll }) {
+  return (
+    <View className="flex-row items-center justify-between px-5 pt-5 pb-2 bg-base-100">
+      <Text className="font-ui uppercase tracking-[0.18em] text-[11px] text-base-content/55">
+        {title}
+      </Text>
+      {showSeeAll ? (
+        <Pressable
+          onPress={onSeeAll}
+          hitSlop={8}
+          android_ripple={{ color: "rgba(0,0,0,0.06)", borderless: true }}
+        >
+          <Text className="font-ui uppercase tracking-[0.16em] text-[11px] text-primary">
+            See all
+          </Text>
+        </Pressable>
+      ) : null}
+    </View>
+  );
+}
+
+function TabButton({ label, active, onPress }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      android_ripple={{ color: "rgba(0,0,0,0.05)" }}
+      className={`px-4 py-3 items-center ${
+        active ? "border-b-2 border-primary -mb-[2px]" : ""
+      }`}
+    >
+      <Text
+        className={`font-ui uppercase tracking-[0.16em] text-[11px] ${
+          active ? "text-base-content" : "text-base-content/50"
+        }`}
+      >
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
+function Hint({ primary, secondary }) {
+  return (
+    <View className="px-8 py-20 items-center">
+      <Text className="font-ui text-lg text-base-content/70 text-center mb-2">
+        {primary}
+      </Text>
+      <Text className="font-ui text-sm text-base-content/55 text-center leading-6">
+        {secondary}
+      </Text>
+    </View>
+  );
+}
+
+function NoResults({ query }) {
+  return (
+    <View className="px-8 py-20 items-center">
+      <Text className="font-ui text-lg text-base-content/70 text-center mb-2">
+        No results for "{query}".
+      </Text>
+      <Text className="font-ui text-sm text-base-content/55 text-center leading-6">
+        Try a different word. Search matches whole words for now.
+      </Text>
+    </View>
+  );
+}

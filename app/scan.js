@@ -68,7 +68,7 @@ export default function Scan() {
             <Heading className="text-4xl mt-2 mb-4 leading-tight">
               Camera access needed.
             </Heading>
-            <Text className="font-reading text-base text-base-content/70 leading-6">
+            <Text className="font-ui text-base text-base-content/70 leading-6">
               {permission.canAskAgain
                 ? "We use your camera only to read invite QR codes — no photos are stored or sent anywhere."
                 : "Camera permission is blocked. Open the system settings for Expo Go (or this app) to allow it, then come back."}
@@ -106,7 +106,7 @@ export default function Scan() {
       >
         <View className="px-6 pt-3 pb-4 bg-black/55">
           <Eyebrow className="text-base-100/80">Scan</Eyebrow>
-          <Text className="font-reading text-xl text-base-100 mt-1">
+          <Text className="font-ui text-xl text-base-100 mt-1">
             Point at an invite QR.
           </Text>
         </View>

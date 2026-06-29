@@ -46,7 +46,7 @@ export function BookmarkCard({ bookmark, baseUrl }) {
       ) : null}
       <View className="flex-1 min-w-0">
         <Text
-          className="font-reading text-base text-base-content leading-snug"
+          className="font-ui text-base text-base-content leading-snug"
           numberOfLines={2}
         >
           {bookmark?.title || bookmark?.href}

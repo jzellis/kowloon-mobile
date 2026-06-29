@@ -81,7 +81,7 @@ export default function Groups() {
       <View className="px-5 pt-3 pb-3 border-b-2 border-base-content">
         <BackLink />
         <View className="flex-row items-end justify-between mt-2">
-          <Text className="font-reading text-3xl text-base-content">Groups</Text>
+          <Text className="font-ui text-3xl text-base-content">Groups</Text>
           <Pressable
             onPress={() => router.push("/group/new")}
             hitSlop={8}
@@ -136,7 +136,7 @@ export default function Groups() {
             </View>
           ) : error ? (
             <View className="px-6 py-20 items-center">
-              <Text className="font-reading text-base text-error text-center mb-4">
+              <Text className="font-ui text-base text-error text-center mb-4">
                 {error}
               </Text>
               <Pressable
@@ -151,10 +151,10 @@ export default function Groups() {
             </View>
           ) : (
             <View className="px-6 py-20 items-center">
-              <Text className="font-reading text-lg text-base-content/70 text-center mb-2">
+              <Text className="font-ui text-lg text-base-content/70 text-center mb-2">
                 {tab === "mine" ? "No groups yet." : "Nothing to browse."}
               </Text>
-              <Text className="font-reading text-sm text-base-content/55 text-center leading-6">
+              <Text className="font-ui text-sm text-base-content/55 text-center leading-6">
                 {tab === "mine"
                   ? "Find a group under Browse, or create your own."
                   : "Be the first to start one."}

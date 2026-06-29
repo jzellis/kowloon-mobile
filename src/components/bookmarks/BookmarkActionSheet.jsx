@@ -31,7 +31,7 @@ function ActionRow({ label, onPress, destructive, muted }) {
       className="px-5 py-3.5 border-b border-base-300"
     >
       <Text
-        className={`font-reading text-base ${
+        className={`font-ui text-base ${
           destructive
             ? "text-error"
             : muted
@@ -137,7 +137,7 @@ export function BookmarkActionSheet({
                 <FileText size={16} color="rgba(255,244,224,0.85)" strokeWidth={1.75} />
               )}
               <Text
-                className="font-reading text-lg text-secondary-content ml-2 flex-1"
+                className="font-ui text-lg text-secondary-content ml-2 flex-1"
                 numberOfLines={1}
               >
                 {node.title || node.href || "Untitled"}
@@ -207,7 +207,7 @@ function EditModal({ node, client, onClose, onSaved }) {
           style={{ maxHeight: "92%" }}
         >
           <View className="flex-row items-center justify-between px-5 py-3 border-b-2 border-base-300 bg-secondary">
-            <Text className="font-reading text-2xl text-secondary-content">
+            <Text className="font-ui text-2xl text-secondary-content">
               {isFolder ? "Edit Folder" : "Edit Bookmark"}
             </Text>
             <Pressable onPress={onClose} hitSlop={8}>
@@ -228,7 +228,7 @@ function EditModal({ node, client, onClose, onSaved }) {
                 onChangeText={setTitle}
                 placeholder={isFolder ? "e.g. Recipes" : "Bookmark title"}
                 placeholderTextColor="rgba(26,26,32,0.35)"
-                className="border-2 border-base-300 bg-white px-3 py-2.5 font-reading text-base text-base-content"
+                className="border-2 border-base-300 bg-white px-3 py-2.5 font-ui text-base text-base-content"
               />
             </View>
 
@@ -255,7 +255,7 @@ function EditModal({ node, client, onClose, onSaved }) {
                     multiline
                     placeholder="A short note about what this is."
                     placeholderTextColor="rgba(26,26,32,0.35)"
-                    className="border-2 border-base-300 bg-white px-3 py-2.5 font-reading text-base text-base-content min-h-20"
+                    className="border-2 border-base-300 bg-white px-3 py-2.5 font-ui text-base text-base-content min-h-20"
                   />
                 </View>
               </>
@@ -352,7 +352,7 @@ export function FolderCreateModal({ visible, client, onClose, onCreated }) {
           className="bg-base-100 border-t-2 border-base-content"
         >
           <View className="flex-row items-center justify-between px-5 py-3 border-b-2 border-base-300 bg-secondary">
-            <Text className="font-reading text-2xl text-secondary-content">
+            <Text className="font-ui text-2xl text-secondary-content">
               New Folder
             </Text>
             <Pressable onPress={onClose} hitSlop={8}>
@@ -374,7 +374,7 @@ export function FolderCreateModal({ visible, client, onClose, onCreated }) {
                 placeholder="e.g. Recipes"
                 placeholderTextColor="rgba(26,26,32,0.35)"
                 autoFocus
-                className="border-2 border-base-300 bg-white px-3 py-2.5 font-reading text-base text-base-content"
+                className="border-2 border-base-300 bg-white px-3 py-2.5 font-ui text-base text-base-content"
               />
             </View>
             <View className="mb-4">
@@ -484,7 +484,7 @@ function MoveModal({ node, client, account, onClose, onMoved }) {
           style={{ maxHeight: "80%" }}
         >
           <View className="flex-row items-center justify-between px-5 py-3 border-b-2 border-base-300 bg-secondary">
-            <Text className="font-reading text-2xl text-secondary-content">
+            <Text className="font-ui text-2xl text-secondary-content">
               Move to…
             </Text>
             <Pressable onPress={onClose} hitSlop={8}>
@@ -504,7 +504,7 @@ function MoveModal({ node, client, account, onClose, onMoved }) {
                 color="rgba(26,26,32,0.55)"
                 strokeWidth={1.75}
               />
-              <Text className="font-reading text-base text-base-content ml-2">
+              <Text className="font-ui text-base text-base-content ml-2">
                 (Top level)
               </Text>
             </Pressable>
@@ -513,7 +513,7 @@ function MoveModal({ node, client, account, onClose, onMoved }) {
                 <ActivityIndicator size="small" />
               </View>
             ) : options.length === 0 ? (
-              <Text className="font-reading text-sm text-base-content/55 px-5 py-6 text-center">
+              <Text className="font-ui text-sm text-base-content/55 px-5 py-6 text-center">
                 No other folders yet.
               </Text>
             ) : (
@@ -532,7 +532,7 @@ function MoveModal({ node, client, account, onClose, onMoved }) {
                     strokeWidth={1.75}
                   />
                   <Text
-                    className="font-reading text-base text-base-content ml-2 flex-1"
+                    className="font-ui text-base text-base-content ml-2 flex-1"
                     numberOfLines={1}
                   >
                     {f.title || "Untitled folder"}

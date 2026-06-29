@@ -185,7 +185,7 @@ export function LocationField({ value, onChange }) {
                 ) : (
                   <Text className="font-ui text-lg mr-3">📍</Text>
                 )}
-                <Text className="font-reading text-base text-base-content flex-1 ml-1">
+                <Text className="font-ui text-base text-base-content flex-1 ml-1">
                   Use current location
                 </Text>
               </Pressable>
@@ -232,7 +232,7 @@ export function LocationField({ value, onChange }) {
                         className="px-5 py-3 border-t border-base-300"
                       >
                         <Text
-                          className="font-reading text-base text-base-content"
+                          className="font-ui text-base text-base-content"
                           numberOfLines={1}
                         >
                           {label}

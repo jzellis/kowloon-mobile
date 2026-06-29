@@ -6,7 +6,7 @@ import { Text } from "react-native";
 export function Heading({ children, className = "", ...props }) {
   return (
     <Text
-      className={`font-reading text-base-content ${className}`}
+      className={`font-ui text-base-content ${className}`}
       {...props}
     >
       {children}

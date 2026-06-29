@@ -118,7 +118,7 @@ export default function PendingRequests() {
     <SafeAreaView className="flex-1 bg-base-100" edges={["top", "left", "right"]}>
       <View className="px-5 pt-3 pb-3 border-b-2 border-base-content">
         <BackLink />
-        <Text className="font-reading text-3xl text-base-content mt-2">
+        <Text className="font-ui text-3xl text-base-content mt-2">
           Pending Requests
         </Text>
       </View>
@@ -138,17 +138,17 @@ export default function PendingRequests() {
           </View>
         ) : error ? (
           <View className="px-6 py-20 items-center">
-            <Text className="font-reading text-base text-error text-center mb-4">
+            <Text className="font-ui text-base text-error text-center mb-4">
               {error}
             </Text>
             <Button label="Back" variant="ghost" onPress={() => router.back()} />
           </View>
         ) : items.length === 0 ? (
           <View className="px-6 py-20 items-center">
-            <Text className="font-reading text-lg text-base-content/70 text-center mb-2">
+            <Text className="font-ui text-lg text-base-content/70 text-center mb-2">
               No pending requests.
             </Text>
-            <Text className="font-reading text-sm text-base-content/55 text-center leading-6">
+            <Text className="font-ui text-sm text-base-content/55 text-center leading-6">
               When someone asks to join, they'll show up here.
             </Text>
           </View>

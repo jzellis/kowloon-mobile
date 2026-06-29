@@ -92,7 +92,7 @@ export default function EditGroup() {
     <SafeAreaView className="flex-1 bg-base-100" edges={["top", "left", "right"]}>
       <View className="px-5 pt-3 pb-3 border-b-2 border-base-content">
         <BackLink />
-        <Text className="font-reading text-3xl text-base-content mt-2">
+        <Text className="font-ui text-3xl text-base-content mt-2">
           Edit Group
         </Text>
       </View>
@@ -103,14 +103,14 @@ export default function EditGroup() {
         </View>
       ) : loadError ? (
         <View className="py-20 items-center px-6">
-          <Text className="font-reading text-base text-error text-center mb-4">
+          <Text className="font-ui text-base text-error text-center mb-4">
             {loadError}
           </Text>
           <Button label="Back" variant="ghost" onPress={() => router.back()} />
         </View>
       ) : !isOwner ? (
         <View className="py-20 items-center px-6">
-          <Text className="font-reading text-base text-base-content/70 text-center mb-4">
+          <Text className="font-ui text-base text-base-content/70 text-center mb-4">
             You can only edit groups you own.
           </Text>
           <Button label="Back" variant="ghost" onPress={() => router.back()} />

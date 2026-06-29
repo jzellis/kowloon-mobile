@@ -157,7 +157,7 @@ function Row({ label, summary, selected, onPress }) {
       </Text>
       {summary ? (
         <Text
-          className={`font-reading text-xs mt-0.5 ${
+          className={`font-ui text-xs mt-0.5 ${
             selected ? "text-secondary-content/70" : "text-base-content/45"
           }`}
         >

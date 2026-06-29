@@ -135,7 +135,7 @@ export default function CircleDetail() {
           </View>
         ) : error ? (
           <View className="py-20 items-center px-6">
-            <Text className="font-reading text-base text-error text-center mb-4">
+            <Text className="font-ui text-base text-error text-center mb-4">
               {error}
             </Text>
             <Button label="Back" variant="ghost" onPress={() => router.back()} />
@@ -151,7 +151,7 @@ export default function CircleDetail() {
                   baseUrl={account?.baseUrl}
                 />
                 <View className="flex-1 ml-4 min-w-0">
-                  <Text className="font-reading text-2xl text-base-content leading-tight">
+                  <Text className="font-ui text-2xl text-base-content leading-tight">
                     {circle.name}
                   </Text>
                   <Text className="font-ui text-[11px] uppercase tracking-[0.16em] text-base-content/55 mt-1">
@@ -166,7 +166,7 @@ export default function CircleDetail() {
               </View>
 
               {circle.summary ? (
-                <Text className="font-reading text-base text-base-content/80 leading-relaxed mt-4">
+                <Text className="font-ui text-base text-base-content/80 leading-relaxed mt-4">
                   {circle.summary}
                 </Text>
               ) : null}
@@ -224,7 +224,7 @@ export default function CircleDetail() {
               </Text>
 
               {members.length === 0 ? (
-                <Text className="font-reading text-sm text-base-content/55 leading-6">
+                <Text className="font-ui text-sm text-base-content/55 leading-6">
                   {isOwner
                     ? "No members yet. Edit the circle to add people."
                     : "This circle's members are private to its owner."}

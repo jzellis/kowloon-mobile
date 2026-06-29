@@ -103,7 +103,7 @@ export function TreeNode({
             style={{ marginLeft: 8 }}
           />
           <Text
-            className="font-reading text-base text-base-content ml-2 flex-1"
+            className="font-ui text-base text-base-content ml-2 flex-1"
             numberOfLines={1}
           >
             {node.title || "Untitled folder"}
@@ -205,14 +205,14 @@ export function TreeNode({
       ) : null}
       <View className="flex-1 min-w-0">
         <Text
-          className="font-reading text-base text-base-content leading-snug"
+          className="font-ui text-base text-base-content leading-snug"
           numberOfLines={2}
         >
           {node?.title || node?.href}
         </Text>
         {node?.summary ? (
           <Text
-            className="font-reading text-sm text-base-content/65 leading-snug mt-1"
+            className="font-ui text-sm text-base-content/65 leading-snug mt-1"
             numberOfLines={3}
           >
             {node.summary}

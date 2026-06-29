@@ -33,7 +33,7 @@ function NavRow({ label, hint, onPress }) {
       android_ripple={{ color: "rgba(0,0,0,0.05)" }}
     >
       <View className="flex-1">
-        <Text className="font-reading text-lg text-base-content">{label}</Text>
+        <Text className="font-ui text-lg text-base-content">{label}</Text>
         {hint ? (
           <Text className="font-ui text-xs text-base-content/50 mt-0.5">
             {hint}

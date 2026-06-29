@@ -545,7 +545,7 @@ export default function Compose() {
                         Preview
                       </Text>
                       <Text
-                        className="font-reading text-sm text-base-content"
+                        className="font-ui text-sm text-base-content"
                         numberOfLines={2}
                       >
                         {linkPreview?.title ||
@@ -584,7 +584,7 @@ export default function Compose() {
                       : "Optional title"
                   }
                   placeholderTextColor="rgba(26,26,32,0.35)"
-                  className="border-2 border-base-300 bg-white px-3 py-3 font-reading text-lg text-base-content"
+                  className="border-2 border-base-300 bg-white px-3 py-3 font-ui text-lg text-base-content"
                 />
               </View>
             ) : null}

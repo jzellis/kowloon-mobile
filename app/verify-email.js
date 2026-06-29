@@ -23,12 +23,12 @@ export default function VerifyEmail() {
           <Heading className="text-4xl mt-2 mb-4 leading-tight">
             Almost there.
           </Heading>
-          <Text className="font-reading text-base text-base-content/70 leading-6 mb-3">
+          <Text className="font-ui text-base text-base-content/70 leading-6 mb-3">
             {email
               ? `We sent a verification link to ${email}. Open it on this device to finish setting up your account on ${server}.`
               : `Open the verification link ${server ? `from ${server} ` : ""}to finish setting up your account.`}
           </Text>
-          <Text className="font-reading text-sm text-base-content/50 leading-5">
+          <Text className="font-ui text-sm text-base-content/50 leading-5">
             Once verified, come back to this app and sign in with your new
             Kowloon ID.
           </Text>

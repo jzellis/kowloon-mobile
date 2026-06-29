@@ -25,7 +25,7 @@ export function GroupCard({ group, serverDomain, baseUrl, onPress }) {
       <GroupAvatar group={group} size={44} baseUrl={baseUrl} />
       <View className="flex-1 ml-3 min-w-0">
         <Text
-          className="font-reading text-lg text-base-content leading-tight"
+          className="font-ui text-lg text-base-content leading-tight"
           numberOfLines={1}
         >
           {group?.name}
@@ -61,7 +61,7 @@ export function GroupCard({ group, serverDomain, baseUrl, onPress }) {
         ) : null}
         {group?.description || group?.summary ? (
           <Text
-            className="font-reading text-xs text-base-content/70 leading-snug mt-1"
+            className="font-ui text-xs text-base-content/70 leading-snug mt-1"
             numberOfLines={2}
           >
             {group.description || group.summary}

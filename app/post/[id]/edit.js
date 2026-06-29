@@ -141,7 +141,7 @@ export default function EditPost() {
     <SafeAreaView className="flex-1 bg-base-100" edges={["top", "left", "right"]}>
       <View className="px-5 pt-3 pb-3 border-b-2 border-base-content">
         <BackLink />
-        <Text className="font-reading text-3xl text-base-content mt-2">
+        <Text className="font-ui text-3xl text-base-content mt-2">
           Edit {type}
         </Text>
       </View>
@@ -152,14 +152,14 @@ export default function EditPost() {
         </View>
       ) : loadError ? (
         <View className="py-20 items-center px-6">
-          <Text className="font-reading text-base text-error text-center mb-4">
+          <Text className="font-ui text-base text-error text-center mb-4">
             {loadError}
           </Text>
           <Button label="Back" variant="ghost" onPress={() => router.back()} />
         </View>
       ) : !isOwner ? (
         <View className="py-20 items-center px-6">
-          <Text className="font-reading text-base text-base-content/70 text-center mb-4">
+          <Text className="font-ui text-base text-base-content/70 text-center mb-4">
             You can only edit your own posts.
           </Text>
           <Button label="Back" variant="ghost" onPress={() => router.back()} />
@@ -181,7 +181,7 @@ export default function EditPost() {
                   onChangeText={setTitle}
                   placeholder={`${type} title`}
                   placeholderTextColor="rgba(26,26,32,0.35)"
-                  className="border-2 border-base-300 bg-white px-3 py-2.5 font-reading text-base text-base-content"
+                  className="border-2 border-base-300 bg-white px-3 py-2.5 font-ui text-base text-base-content"
                 />
               </View>
             ) : null}
@@ -194,7 +194,7 @@ export default function EditPost() {
                 multiline
                 placeholder="Write your post…"
                 placeholderTextColor="rgba(26,26,32,0.35)"
-                className="border-2 border-base-300 bg-white px-3 py-2.5 font-reading text-base text-base-content"
+                className="border-2 border-base-300 bg-white px-3 py-2.5 font-ui text-base text-base-content"
                 style={{ minHeight: 200, textAlignVertical: "top" }}
               />
             </View>

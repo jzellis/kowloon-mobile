@@ -47,7 +47,7 @@ export function NotificationRow({
       <Avatar actor={actor} size={40} baseUrl={baseUrl} />
       <View className="flex-1 ml-3 min-w-0">
         <Text
-          className="font-reading text-[15px] text-base-content leading-snug"
+          className="font-ui text-[15px] text-base-content leading-snug"
           numberOfLines={3}
         >
           {notification?.summary || meta.label}

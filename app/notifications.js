@@ -119,7 +119,7 @@ export default function Notifications() {
       <View className="px-5 pt-3 pb-3 border-b-2 border-base-content">
         <BackLink />
         <View className="flex-row items-end justify-between mt-2">
-          <Text className="font-reading text-3xl text-base-content">
+          <Text className="font-ui text-3xl text-base-content">
             Notifications
           </Text>
           {unreadCount > 0 ? (
@@ -192,7 +192,7 @@ export default function Notifications() {
             </View>
           ) : error ? (
             <View className="px-6 py-20 items-center">
-              <Text className="font-reading text-base text-error text-center mb-4">
+              <Text className="font-ui text-base text-error text-center mb-4">
                 {error}
               </Text>
               <Pressable
@@ -207,12 +207,12 @@ export default function Notifications() {
             </View>
           ) : (
             <View className="px-6 py-20 items-center">
-              <Text className="font-reading text-lg text-base-content/70 text-center mb-2">
+              <Text className="font-ui text-lg text-base-content/70 text-center mb-2">
                 {filter === "all"
                   ? "Nothing here yet."
                   : `No ${NOTIF_TYPES[filter]?.label?.toLowerCase() || filter} notifications.`}
               </Text>
-              <Text className="font-reading text-sm text-base-content/55 text-center leading-6">
+              <Text className="font-ui text-sm text-base-content/55 text-center leading-6">
                 When someone replies to or reacts to your posts, you'll see it
                 here.
               </Text>

@@ -44,7 +44,7 @@ const DRAWER_WIDTH_PCT = 0.85;
 
 function SectionHeader({ children }) {
   return (
-    <Text className="font-reading text-2xl text-base-content leading-none mb-3">
+    <Text className="font-ui text-2xl text-base-content leading-none mb-3">
       {children}
     </Text>
   );
@@ -134,7 +134,7 @@ function ServerInfoSection({ client, onNavigate }) {
           style={{ aspectRatio: 16 / 9 }}
         >
           <Text
-            className="font-reading text-4xl text-secondary-content text-center leading-tight"
+            className="font-ui text-4xl text-secondary-content text-center leading-tight"
             numberOfLines={3}
           >
             {serverName}
@@ -142,7 +142,7 @@ function ServerInfoSection({ client, onNavigate }) {
         </View>
       ) : null}
       {description ? (
-        <Text className="font-reading text-sm text-base-content/80 leading-relaxed mb-3">
+        <Text className="font-ui text-sm text-base-content/80 leading-relaxed mb-3">
           {stripHtml(description)}
         </Text>
       ) : null}
@@ -299,7 +299,7 @@ function PopularCirclesSection({ client, onNavigate }) {
           <CircleAvatar circle={circle} baseUrl={baseUrl} />
           <View className="flex-1 ml-3 min-w-0">
             <Text
-              className="font-reading text-base text-base-content leading-tight"
+              className="font-ui text-base text-base-content leading-tight"
               numberOfLines={1}
             >
               {circle.name}
@@ -311,7 +311,7 @@ function PopularCirclesSection({ client, onNavigate }) {
             ) : null}
             {circle.summary ? (
               <Text
-                className="font-reading text-xs text-base-content/70 leading-snug mt-1"
+                className="font-ui text-xs text-base-content/70 leading-snug mt-1"
                 numberOfLines={2}
               >
                 {stripHtml(circle.summary)}
@@ -414,14 +414,14 @@ function PopularPostsSection({ client, onNavigate }) {
             <View className="flex-1 min-w-0">
               {post.title || post.name ? (
                 <Text
-                  className="font-reading text-base text-base-content leading-tight"
+                  className="font-ui text-base text-base-content leading-tight"
                   numberOfLines={2}
                 >
                   {post.title || post.name}
                 </Text>
               ) : null}
               <Text
-                className={`font-reading text-base-content/70 leading-snug mt-0.5 ${
+                className={`font-ui text-base-content/70 leading-snug mt-0.5 ${
                   post.title || post.name ? "text-xs" : "text-sm"
                 }`}
                 numberOfLines={2}
@@ -523,7 +523,7 @@ function ActiveGroupsSection({ client, onNavigate }) {
             <GroupAvatar group={group} baseUrl={baseUrl} />
             <View className="flex-1 ml-3 min-w-0">
               <Text
-                className="font-reading text-base text-base-content leading-tight"
+                className="font-ui text-base text-base-content leading-tight"
                 numberOfLines={1}
               >
                 {group.name}
@@ -536,7 +536,7 @@ function ActiveGroupsSection({ client, onNavigate }) {
           {group.recentPost ? (
             <View className="mt-2 pl-12">
               <Text
-                className="font-reading text-xs text-base-content/75 leading-snug"
+                className="font-ui text-xs text-base-content/75 leading-snug"
                 numberOfLines={2}
               >
                 {stripHtml(group.recentPost.summary)}

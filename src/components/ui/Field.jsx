@@ -41,7 +41,7 @@ export function Field({
           autoCorrect={autoCorrect}
           secureTextEntry={isSecure}
           keyboardType={keyboardType}
-          className={`border-2 border-base-300 bg-base-100 px-3 py-3 font-reading text-base text-base-content ${
+          className={`border-2 border-base-300 bg-base-100 px-3 py-3 font-ui text-base text-base-content ${
             secureTextEntry ? "pr-11" : ""
           }`}
         />

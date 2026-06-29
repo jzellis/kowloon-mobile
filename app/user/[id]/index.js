@@ -152,7 +152,7 @@ export default function UserProfile() {
             <Avatar actor={me} size={72} baseUrl={account?.baseUrl} />
             <View className="flex-1 ml-4 min-w-0">
               <Text
-                className="font-reading text-2xl text-base-content leading-tight"
+                className="font-ui text-2xl text-base-content leading-tight"
                 numberOfLines={1}
               >
                 {name}
@@ -259,7 +259,7 @@ export default function UserProfile() {
       <SafeAreaView className="flex-1 bg-base-100" edges={["top", "left", "right"]}>
         {header()}
         <View className="py-20 items-center px-6">
-          <Text className="font-reading text-base text-error text-center mb-4">
+          <Text className="font-ui text-base text-error text-center mb-4">
             {error}
           </Text>
           <Button label="Back" variant="ghost" onPress={() => router.back()} />
@@ -319,10 +319,10 @@ export default function UserProfile() {
           }
           ListEmptyComponent={
             <View className="px-6 py-16 items-center">
-              <Text className="font-reading text-lg text-base-content/70 text-center mb-2">
+              <Text className="font-ui text-lg text-base-content/70 text-center mb-2">
                 {view.emptyTitle}
               </Text>
-              <Text className="font-reading text-sm text-base-content/55 text-center leading-6">
+              <Text className="font-ui text-sm text-base-content/55 text-center leading-6">
                 {view.emptyBody}
               </Text>
             </View>

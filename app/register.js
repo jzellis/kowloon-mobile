@@ -222,7 +222,7 @@ export default function Register() {
             <Heading className="text-4xl mt-2 mb-2 leading-tight">
               Join a server.
             </Heading>
-            <Text className="font-reading text-base text-base-content/70 leading-6 mb-6">
+            <Text className="font-ui text-base text-base-content/70 leading-6 mb-6">
               Every Kowloon server is its own community. Pick the one you want
               to join — your account, posts and circles live there.
             </Text>
@@ -281,7 +281,7 @@ export default function Register() {
                     {serverInfo.name}
                   </Heading>
                   {serverInfo.subtitle ? (
-                    <Text className="font-reading text-sm text-base-content/70 mt-1">
+                    <Text className="font-ui text-sm text-base-content/70 mt-1">
                       {serverInfo.subtitle}
                     </Text>
                   ) : null}
@@ -336,7 +336,7 @@ export default function Register() {
                 {rules.length > 0 ? (
                   <View className="mt-2 mb-4">
                     <Eyebrow className="mb-2">Community rules</Eyebrow>
-                    <Text className="font-reading text-sm text-base-content/70 mb-3 leading-5">
+                    <Text className="font-ui text-sm text-base-content/70 mb-3 leading-5">
                       Tick every rule to confirm you've read and agreed to it.
                     </Text>
                     <View className="border-2 border-base-300 bg-base-100 px-3 py-1">

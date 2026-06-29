@@ -148,7 +148,7 @@ export function CopyCircleMenu({ circle }) {
                     strokeWidth={1.75}
                   />
                 )}
-                <Text className="font-reading text-base text-base-content ml-3">
+                <Text className="font-ui text-base text-base-content ml-3">
                   Copy as a new circle
                 </Text>
               </Pressable>
@@ -168,7 +168,7 @@ export function CopyCircleMenu({ circle }) {
                         className="px-5 py-3 border-t border-base-300"
                       >
                         <Text
-                          className="font-reading text-base text-base-content"
+                          className="font-ui text-base text-base-content"
                           numberOfLines={1}
                         >
                           {c.name}

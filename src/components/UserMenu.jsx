@@ -95,7 +95,7 @@ export function UserMenu({ visible, onClose }) {
               <Avatar actor={me} size={44} baseUrl={account.baseUrl} />
               <View className="flex-1 ml-3">
                 <Text
-                  className="font-reading text-base text-base-content"
+                  className="font-ui text-base text-base-content"
                   numberOfLines={1}
                 >
                   {me.name}

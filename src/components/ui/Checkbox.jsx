@@ -20,7 +20,7 @@ export function Checkbox({ checked, onToggle, label, disabled = false }) {
           </Text>
         ) : null}
       </View>
-      <Text className="flex-1 font-reading text-base text-base-content leading-6">
+      <Text className="flex-1 font-ui text-base text-base-content leading-6">
         {label}
       </Text>
     </Pressable>

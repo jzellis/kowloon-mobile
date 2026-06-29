@@ -87,7 +87,7 @@ export default function PageDetail() {
           </View>
         ) : error ? (
           <View className="py-20 items-center px-6">
-            <Text className="font-reading text-base text-error text-center mb-4">
+            <Text className="font-ui text-base text-error text-center mb-4">
               {error}
             </Text>
             <Button label="Back" variant="ghost" onPress={() => router.back()} />
@@ -101,7 +101,7 @@ export default function PageDetail() {
             {/* Header */}
             <View className="px-5 pt-2">
               <Eyebrow>Page</Eyebrow>
-              <Text className="font-reading text-3xl text-base-content leading-tight mt-2 mb-3">
+              <Text className="font-ui text-3xl text-base-content leading-tight mt-2 mb-3">
                 {page.title || page.name}
               </Text>
 
@@ -114,7 +114,7 @@ export default function PageDetail() {
               ) : null}
 
               {page.summary ? (
-                <Text className="font-reading italic text-lg text-base-content/75 leading-snug mb-4">
+                <Text className="font-ui italic text-lg text-base-content/75 leading-snug mb-4">
                   {page.summary}
                 </Text>
               ) : null}
@@ -194,7 +194,7 @@ export default function PageDetail() {
                   selectable
                 />
               ) : (
-                <Text className="font-reading text-base text-base-content/50">
+                <Text className="font-ui text-base text-base-content/50">
                   No content.
                 </Text>
               )}

@@ -98,7 +98,7 @@ export function Reply({ reply, client, currentUserId, onUpdated, onDeleted }) {
               autoFocus
               placeholder="Edit your reply…"
               placeholderTextColor="rgba(26,26,32,0.35)"
-              className="border-2 border-base-300 bg-white px-3 py-2 font-reading text-sm text-base-content min-h-20"
+              className="border-2 border-base-300 bg-white px-3 py-2 font-ui text-sm text-base-content min-h-20"
             />
             <View className="flex-row justify-end mt-2">
               <Pressable

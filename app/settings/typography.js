@@ -62,7 +62,7 @@ export default function TypographySettings() {
           <Heading className="text-4xl mt-2 mb-1 leading-tight">
             Typography
           </Heading>
-          <Text className="font-reading text-base text-base-content/70 leading-6 mb-6">
+          <Text className="font-ui text-base text-base-content/70 leading-6 mb-6">
             Tune how Kowloon reads. Changes follow your account across every
             device.
           </Text>

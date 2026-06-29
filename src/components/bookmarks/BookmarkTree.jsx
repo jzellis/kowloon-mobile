@@ -64,17 +64,17 @@ export const BookmarkTree = forwardRef(function BookmarkTree(
   if (error) {
     return (
       <View className="py-12 px-6 items-center">
-        <Text className="font-reading text-sm text-error text-center">{error}</Text>
+        <Text className="font-ui text-sm text-error text-center">{error}</Text>
       </View>
     );
   }
   if (!rootNodes.length) {
     return (
       <View className="px-6 py-16 items-center">
-        <Text className="font-reading text-lg text-base-content/70 text-center mb-2">
+        <Text className="font-ui text-lg text-base-content/70 text-center mb-2">
           {emptyTitle || (isOwner ? "No bookmarks yet." : "Private.")}
         </Text>
-        <Text className="font-reading text-sm text-base-content/55 text-center leading-6">
+        <Text className="font-ui text-sm text-base-content/55 text-center leading-6">
           {emptyBody || (isOwner
             ? "Save a link from a post and it lands here."
             : "Someone's bookmarks are visible only to themselves.")}

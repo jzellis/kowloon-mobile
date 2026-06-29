@@ -160,7 +160,7 @@ export function GroupForm({
               onChangeText={setName}
               placeholder="Group name"
               placeholderTextColor="rgba(26,26,32,0.35)"
-              className="border-2 border-base-300 bg-white px-3 py-2.5 font-reading text-base text-base-content"
+              className="border-2 border-base-300 bg-white px-3 py-2.5 font-ui text-base text-base-content"
             />
           </View>
         </View>
@@ -174,7 +174,7 @@ export function GroupForm({
             multiline
             placeholder="What's this group for?"
             placeholderTextColor="rgba(26,26,32,0.35)"
-            className="border-2 border-base-300 bg-white px-3 py-2.5 font-reading text-base text-base-content min-h-20"
+            className="border-2 border-base-300 bg-white px-3 py-2.5 font-ui text-base text-base-content min-h-20"
           />
         </View>
 
@@ -194,7 +194,7 @@ export function GroupForm({
             onChange={setTo}
             title="Who can see this group"
           />
-          <Text className="font-reading text-xs text-base-content/55 mt-1.5">
+          <Text className="font-ui text-xs text-base-content/55 mt-1.5">
             {visibilityOptions.find((o) => o.value === to)?.summary || ""}
           </Text>
         </View>
@@ -209,7 +209,7 @@ export function GroupForm({
             onChange={setRsvpPolicy}
             title="How people join"
           />
-          <Text className="font-reading text-xs text-base-content/55 mt-1.5">
+          <Text className="font-ui text-xs text-base-content/55 mt-1.5">
             {RSVP_POLICIES.find((o) => o.value === rsvpPolicy)?.summary || ""}
           </Text>
         </View>

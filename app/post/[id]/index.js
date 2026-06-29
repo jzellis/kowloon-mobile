@@ -149,7 +149,7 @@ export default function PostDetail() {
           </View>
         ) : error ? (
           <View className="py-20 items-center px-6">
-            <Text className="font-reading text-base text-error text-center mb-4">
+            <Text className="font-ui text-base text-error text-center mb-4">
               {error}
             </Text>
             <Button label="Back" variant="ghost" onPress={() => router.back()} />

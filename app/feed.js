@@ -215,7 +215,7 @@ export default function Feed() {
           <Menu size={26} color="rgba(26,26,32,0.85)" strokeWidth={1.75} />
         </Pressable>
         <Text
-          className="font-reading text-3xl text-base-content flex-1 mr-3"
+          className="font-ui text-3xl text-base-content flex-1 mr-3"
           numberOfLines={1}
         >
           {account.serverName || account.server}
@@ -274,7 +274,7 @@ export default function Feed() {
             </View>
           ) : error ? (
             <View className="px-6 py-20 items-center">
-              <Text className="font-reading text-base text-error text-center mb-4">
+              <Text className="font-ui text-base text-error text-center mb-4">
                 {error}
               </Text>
               <Pressable
