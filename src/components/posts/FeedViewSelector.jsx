@@ -80,12 +80,12 @@ export function FeedViewSelector({ value, onChange }) {
         className="flex-row items-center"
       >
         <Text
-          className="font-ui text-2xl text-base-content mr-1.5"
+          className="font-ui text-sm tracking-tight text-base-content mr-1"
           numberOfLines={1}
         >
           {currentLabel}
         </Text>
-        <Text className="font-ui text-lg text-base-content/40">▾</Text>
+        <Text className="font-ui text-xs text-base-content/40">▾</Text>
       </Pressable>
 
       <Modal
