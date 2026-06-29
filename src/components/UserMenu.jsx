@@ -118,6 +118,8 @@ export function UserMenu({ visible, onClose }) {
               onPress={() => go("/notifications")}
               badge={unreadCount}
             />
+            <MenuRow label="Discover" onPress={() => go("/discover")} />
+            <MenuRow label="Search" onPress={() => go("/search")} />
             <MenuRow label="Circles" onPress={() => go("/circles")} />
             <MenuRow label="Groups" onPress={() => go("/groups")} />
             <MenuRow label="Settings" onPress={() => go("/settings")} />

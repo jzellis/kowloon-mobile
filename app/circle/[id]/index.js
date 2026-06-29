@@ -21,6 +21,7 @@ import { Avatar } from "../../../src/components/posts/Avatar.jsx";
 import { BackLink } from "../../../src/components/ui/BackLink.jsx";
 import { Button } from "../../../src/components/ui/Button.jsx";
 import { CircleAvatar } from "../../../src/components/circles/CircleAvatar.jsx";
+import { CircleHeartButton } from "../../../src/components/circles/CircleHeartButton.jsx";
 import { CopyCircleMenu } from "../../../src/components/circles/CopyCircleMenu.jsx";
 import { useActiveClient } from "../../../src/lib/useActiveClient.js";
 import { circleVisibilityLabel } from "../../../src/lib/circles.js";
@@ -206,7 +207,10 @@ export default function CircleDetail() {
                   </>
                 ) : null}
                 {account?.id ? (
-                  <CopyCircleMenu circle={circle} />
+                  <>
+                    <CopyCircleMenu circle={circle} />
+                    <CircleHeartButton circle={circle} client={client} />
+                  </>
                 ) : null}
               </View>
             </View>

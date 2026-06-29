@@ -35,8 +35,10 @@ import {
   domainFromUrl,
 } from "../src/lib/identity.js";
 import { ensureClient, forgetClient } from "../src/lib/client.js";
-import { purgeAccountStorage } from "../src/lib/storage.js";
+import { purgeAccountStorage, rootStorage } from "../src/lib/storage.js";
 import { addAccountAndPersist } from "../src/state/accountsSlice.js";
+
+const BANNER_KEY = "kowloon_discover_welcomed";
 
 export default function Register() {
   const router = useRouter();
@@ -193,7 +195,8 @@ export default function Register() {
       };
 
       await dispatch(addAccountAndPersist(account));
-      router.replace("/feed");
+      await rootStorage.setItem(BANNER_KEY, "1");
+      router.replace("/discover");
     } catch (e) {
       forgetClient(accountId);
       await purgeAccountStorage(accountId).catch(() => {});
