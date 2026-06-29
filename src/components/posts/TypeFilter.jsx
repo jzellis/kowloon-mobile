@@ -20,7 +20,7 @@ export function TypeFilter({ activeTypes = [], onToggle, onClear }) {
     <View className="flex-row items-center" style={{ gap: 14 }}>
       {POST_TYPE_NAMES.map((type) => {
         const active = activeTypes.includes(type);
-        const color = isAll ? INK_MUTED : active ? POST_TYPES[type].color : INK_DIM;
+        const color = isAll || active ? POST_TYPES[type].color : INK_DIM;
         return (
           <Pressable key={type} onPress={() => onToggle(type)} hitSlop={8}>
             <PostTypeIcon type={type} size={17} color={color} />
