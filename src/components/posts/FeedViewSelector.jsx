@@ -1,29 +1,40 @@
 // FeedViewSelector — pick what you're reading.
 //
-// Choices: Public (the public firehose), Server (server-only), or one of the
-// user's circles. The trigger is the current view's title (large, tappable);
-// tapping opens a bottom sheet picker, same shape as the composer's audience
-// picker.
+// Choices: Public, Server, one of the user's circles, or a joined group.
+// The trigger is the current view's title; tapping opens a dropdown anchored
+// directly below the trigger (not a bottom sheet).
 //
-// Returns the actual feed view key:
+// Returns the active feed view key:
 //   "public"       — getServerPosts({ to: 'public' })
 //   "server"       — getServerPosts({ to: 'server' })
 //   "circle:<id>"  — getCirclePosts({ circleId })
 
-import { useEffect, useMemo, useState } from "react";
-import { Modal, Pressable, ScrollView, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  Modal,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { useSelector } from "react-redux";
 
 import { useActiveClient } from "../../lib/useActiveClient.js";
 import { useJoinedGroups } from "../../lib/useJoinedGroups.js";
 import { selectActiveAccount } from "../../state/accountsSlice.js";
 
+const DROPDOWN_WIDTH = 240;
+const MAX_LIST_HEIGHT = 320;
+
 export function FeedViewSelector({ value, onChange }) {
   const account = useSelector(selectActiveAccount);
   const client = useActiveClient();
+  const triggerRef = useRef(null);
   const [open, setOpen] = useState(false);
+  const [dropPos, setDropPos] = useState({ top: 0, left: 0 });
   const [circles, setCircles] = useState([]);
+  const [search, setSearch] = useState("");
   const { groups } = useJoinedGroups();
 
   const serverViews = useMemo(
@@ -67,15 +78,35 @@ export function FeedViewSelector({ value, onChange }) {
     groups.find((g) => g.id === value)?.name ||
     "Public";
 
+  function openDropdown() {
+    triggerRef.current?.measureInWindow((x, y, _w, h) => {
+      setDropPos({ top: y + h, left: x });
+      setOpen(true);
+    });
+  }
+
+  function close() {
+    setOpen(false);
+    setSearch("");
+  }
+
   function select(v) {
     onChange(v);
-    setOpen(false);
+    close();
   }
+
+  const showSearch = circles.length > 5;
+  const filteredCircles = search.trim()
+    ? circles.filter((c) =>
+        c.name.toLowerCase().includes(search.toLowerCase())
+      )
+    : circles;
 
   return (
     <>
       <Pressable
-        onPress={() => setOpen(true)}
+        ref={triggerRef}
+        onPress={openDropdown}
         hitSlop={6}
         className="flex-row items-center"
       >
@@ -91,66 +122,88 @@ export function FeedViewSelector({ value, onChange }) {
       <Modal
         visible={open}
         transparent
-        animationType="fade"
-        onRequestClose={() => setOpen(false)}
+        animationType="none"
+        onRequestClose={close}
         statusBarTranslucent
       >
-        <Pressable
-          className="flex-1 bg-black/40 justify-end"
-          onPress={() => setOpen(false)}
-        >
-          <Pressable onPress={() => {}}>
-            <SafeAreaView edges={["bottom"]} className="bg-base-100">
-              <View className="border-t-2 border-base-content">
-                <Text className="font-ui uppercase tracking-[0.18em] text-[11px] text-base-content/50 px-5 pt-4 pb-2">
-                  Viewing
-                </Text>
-                <ScrollView className="max-h-96">
-                  {serverViews.map((v) => (
+        {/* Full-screen dismiss backdrop */}
+        <Pressable className="flex-1" onPress={close}>
+          {/* Stop propagation so tapping inside the dropdown doesn't close it */}
+          <Pressable
+            onPress={() => {}}
+            style={{
+              position: "absolute",
+              top: dropPos.top,
+              left: dropPos.left,
+              width: DROPDOWN_WIDTH,
+            }}
+            className="bg-base-100 border-2 border-base-content"
+          >
+            <ScrollView
+              keyboardShouldPersistTaps="handled"
+              style={{ maxHeight: MAX_LIST_HEIGHT }}
+              bounces={false}
+            >
+              {serverViews.map((v) => (
+                <Row
+                  key={v.value}
+                  label={v.label}
+                  summary={v.summary}
+                  selected={value === v.value}
+                  onPress={() => select(v.value)}
+                />
+              ))}
+
+              {circles.length > 0 ? (
+                <View className="border-t-2 border-base-300 mt-1">
+                  <Text className="font-ui uppercase tracking-[0.18em] text-[10px] text-base-content/40 px-4 pt-3 pb-1">
+                    Your circles
+                  </Text>
+                  {showSearch ? (
+                    <TextInput
+                      value={search}
+                      onChangeText={setSearch}
+                      placeholder="Search circles..."
+                      placeholderTextColor="rgba(26,26,32,0.3)"
+                      autoCorrect={false}
+                      autoCapitalize="none"
+                      className="font-ui text-xs text-base-content border-b border-base-300 mx-4 mb-1"
+                      style={{ paddingVertical: 4 }}
+                    />
+                  ) : null}
+                  {filteredCircles.map((c) => (
                     <Row
-                      key={v.value}
-                      label={v.label}
-                      summary={v.summary}
-                      selected={value === v.value}
-                      onPress={() => select(v.value)}
+                      key={c.id}
+                      label={c.name}
+                      summary={c.summary}
+                      selected={value === c.id}
+                      onPress={() => select(c.id)}
                     />
                   ))}
-
-                  {circles.length > 0 ? (
-                    <View className="border-t-2 border-base-300 mt-1 pt-1">
-                      <Text className="font-ui uppercase tracking-[0.18em] text-[10px] text-base-content/40 px-5 py-2">
-                        Your circles
-                      </Text>
-                      {circles.map((c) => (
-                        <Row
-                          key={c.id}
-                          label={c.name}
-                          summary={c.summary}
-                          selected={value === c.id}
-                          onPress={() => select(c.id)}
-                        />
-                      ))}
-                    </View>
+                  {showSearch && filteredCircles.length === 0 ? (
+                    <Text className="font-ui text-xs text-base-content/40 px-4 py-3">
+                      No circles match
+                    </Text>
                   ) : null}
+                </View>
+              ) : null}
 
-                  {groups.length > 0 ? (
-                    <View className="border-t-2 border-base-300 mt-1 pt-1">
-                      <Text className="font-ui uppercase tracking-[0.18em] text-[10px] text-base-content/40 px-5 py-2">
-                        Your groups
-                      </Text>
-                      {groups.map((g) => (
-                        <Row
-                          key={g.id}
-                          label={g.name}
-                          selected={value === g.id}
-                          onPress={() => select(g.id)}
-                        />
-                      ))}
-                    </View>
-                  ) : null}
-                </ScrollView>
-              </View>
-            </SafeAreaView>
+              {groups.length > 0 ? (
+                <View className="border-t-2 border-base-300 mt-1">
+                  <Text className="font-ui uppercase tracking-[0.18em] text-[10px] text-base-content/40 px-4 pt-3 pb-1">
+                    Your groups
+                  </Text>
+                  {groups.map((g) => (
+                    <Row
+                      key={g.id}
+                      label={g.name}
+                      selected={value === g.id}
+                      onPress={() => select(g.id)}
+                    />
+                  ))}
+                </View>
+              ) : null}
+            </ScrollView>
           </Pressable>
         </Pressable>
       </Modal>
@@ -163,7 +216,7 @@ function Row({ label, summary, selected, onPress }) {
     <Pressable
       onPress={onPress}
       android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-      className={`px-5 py-3 ${selected ? "bg-secondary" : ""}`}
+      className={`px-4 py-3 ${selected ? "bg-secondary" : ""}`}
     >
       <Text
         className={`font-ui uppercase tracking-[0.14em] text-xs ${
