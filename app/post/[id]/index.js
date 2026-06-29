@@ -274,7 +274,11 @@ export default function PostDetail() {
                       }
                     />
                   ))
-                : null}
+                : (
+                  <Text className="font-ui text-sm text-base-content/40 py-4">
+                    No replies yet. Be the first.
+                  </Text>
+                )}
 
               <ReplyComposer
                 postId={String(id)}
