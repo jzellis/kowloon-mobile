@@ -215,7 +215,7 @@ export default function Feed() {
           <Menu size={26} color="rgba(26,26,32,0.85)" strokeWidth={1.75} />
         </Pressable>
         <Text
-          className="font-ui text-3xl text-base-content flex-1 mr-3"
+          className="font-ui text-xl tracking-tight text-base-content flex-1 mr-3"
           numberOfLines={1}
         >
           {account.serverName || account.server}
