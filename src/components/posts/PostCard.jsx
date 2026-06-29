@@ -172,8 +172,8 @@ export function PostCard({ post }) {
             <LocationLine location={post?.location} />
             {plainPreview ? (
               <Text
-                className="text-[15px] text-base-content/80 leading-6 mb-3"
-                style={{ fontFamily: resolved.regularFamily }}
+                className="text-base-content/80 mb-3"
+                style={{ fontFamily: resolved.regularFamily, fontSize: resolved.fontSize, lineHeight: resolved.lineHeight }}
               >
                 {decodeEntities(plainPreview)}
               </Text>
@@ -269,8 +269,8 @@ export function PostCard({ post }) {
             ) : null}
             {plainPreview ? (
               <Text
-                className="text-[15px] text-base-content/80 leading-6"
-                style={{ fontFamily: resolved.regularFamily }}
+                className="text-base-content/80"
+                style={{ fontFamily: resolved.regularFamily, fontSize: resolved.fontSize, lineHeight: resolved.lineHeight }}
               >
                 {decodeEntities(plainPreview)}
               </Text>
@@ -298,11 +298,16 @@ export function PostCard({ post }) {
             ) : null}
 
             {previewHtml ? (
-              <HtmlContent html={previewHtml} fontSize={15} fonts={contentFonts} />
+              <HtmlContent
+                html={previewHtml}
+                fonts={contentFonts}
+                fontSize={resolved.fontSize}
+                lineHeight={resolved.lineHeight}
+              />
             ) : plainPreview ? (
               <Text
-                className="text-[15px] text-base-content/80 leading-6"
-                style={{ fontFamily: resolved.regularFamily }}
+                className="text-base-content/80"
+                style={{ fontFamily: resolved.regularFamily, fontSize: resolved.fontSize, lineHeight: resolved.lineHeight }}
                 numberOfLines={title ? 3 : 5}
               >
                 {plainPreview}
