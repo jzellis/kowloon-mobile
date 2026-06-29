@@ -36,7 +36,7 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
 
-import { PostTypeSelector } from "../src/components/posts/PostTypeSelector.jsx";
+import { PostTypeDropdown } from "../src/components/posts/PostTypeDropdown.jsx";
 import { PostTypeIcon } from "../src/components/posts/PostTypeIcon.jsx";
 import { AudienceSelector } from "../src/components/posts/AudienceSelector.jsx";
 import { LocationField } from "../src/components/posts/LocationField.jsx";
@@ -481,8 +481,13 @@ export default function Compose() {
     <SafeAreaView className="flex-1 bg-base-100" edges={["top"]}>
       {/* Content area shrinks to clear the keyboard. */}
       <View className="flex-1" style={{ paddingBottom: bottomPad }}>
-        {/* Post type picker — across the top */}
-        <PostTypeSelector value={type} onChange={setType} />
+        {/* Title bar — "Add New [type ▾]" dropdown replaces the icon strip */}
+        <View className="flex-row items-center border-b-2 border-base-content px-4 py-3">
+          <Text className="font-ui text-[11px] uppercase tracking-[0.18em] text-base-content/45 mr-2">
+            Add New
+          </Text>
+          <PostTypeDropdown value={type} onChange={setType} />
+        </View>
 
         {composable && (
           <>
