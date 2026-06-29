@@ -239,7 +239,9 @@ export default function Compose() {
   useEffect(() => {
     if (editorState.isReady && !handedOff.current) {
       handedOff.current = true;
-      editor.focus();
+      // Only pull focus into the editor for Notes; other types have their own
+      // native input (title / link URL) that autofocuses and should keep it.
+      if (type === "Note") editor.focus();
     }
     // Repost: once the editor is up, drop the source post's excerpt in as a
     // blockquote. Followed by an empty paragraph so the cursor lands below
@@ -491,13 +493,15 @@ export default function Compose() {
 
         {composable && (
           <>
-            {/* Hidden keyboard-kicker — a real focusable input that raises the
-                soft keyboard on mount; the handoff effect above then moves
-                focus into the editor once its WebView is ready. */}
-            <TextInput
-              autoFocus
-              style={{ position: "absolute", width: 1, height: 1, opacity: 0 }}
-            />
+            {/* Hidden keyboard-kicker — only for Note, where the editor is
+                the target. Other types autofocus their own visible input
+                (title / link URL), which raises the keyboard directly. */}
+            {type === "Note" ? (
+              <TextInput
+                autoFocus
+                style={{ position: "absolute", width: 1, height: 1, opacity: 0 }}
+              />
+            ) : null}
             {/* Upper composer content (everything above the controls) scrolls
                 independently — keeps the editor reachable when a long
                 attachment list pushes things off-screen. The editor itself
@@ -517,6 +521,7 @@ export default function Compose() {
                   placeholderTextColor="rgba(26,26,32,0.35)"
                   autoCapitalize="none"
                   autoCorrect={false}
+                  autoFocus
                   keyboardType="url"
                   className="border-2 border-base-300 bg-white px-3 py-3 font-ui text-base text-base-content"
                 />
@@ -589,6 +594,7 @@ export default function Compose() {
                       : "Optional title"
                   }
                   placeholderTextColor="rgba(26,26,32,0.35)"
+                  autoFocus={type !== "Link"}
                   className="border-2 border-base-300 bg-white px-3 py-3 font-ui text-lg text-base-content"
                 />
               </View>
