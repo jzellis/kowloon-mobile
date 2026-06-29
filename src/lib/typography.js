@@ -83,7 +83,7 @@ export const FONT_ASSETS = FONTS.reduce((acc, font) => {
 
 // ---- Stepped scales --------------------------------------------------------
 
-export const FONT_SIZES = { xs: 14, s: 16, m: 18, l: 21, xl: 24 };
+export const FONT_SIZES = { xs: 10, s: 14, m: 16, l: 18, xl: 21 };
 export const FONT_SIZE_ORDER = ["xs", "s", "m", "l", "xl"];
 
 export const LINE_SPACINGS = { compact: 1.3, normal: 1.55, relaxed: 1.8 };
