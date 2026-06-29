@@ -137,17 +137,9 @@ export default function Feed() {
     scheduleSync(v, activeTypes);
   }
 
-  function handleToggleType(type) {
-    const next = activeTypes.includes(type)
-      ? activeTypes.filter((t) => t !== type)
-      : [...activeTypes, type];
-    setActiveTypes(next);
-    scheduleSync(viewKey, next);
-  }
-
-  function handleClearTypes() {
-    setActiveTypes([]);
-    scheduleSync(viewKey, []);
+  function handleSetTypes(types) {
+    setActiveTypes(types);
+    scheduleSync(viewKey, types);
   }
 
   const {
@@ -254,8 +246,7 @@ export default function Feed() {
         viewKey={viewKey}
         onViewChange={handleViewChange}
         activeTypes={activeTypes}
-        onToggleType={handleToggleType}
-        onClearTypes={handleClearTypes}
+        onSetTypes={handleSetTypes}
       />
 
       <FlatList
