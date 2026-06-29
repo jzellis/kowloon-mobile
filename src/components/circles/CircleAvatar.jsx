@@ -1,35 +1,24 @@
-// CircleAvatar — square, hard-edged circle/group icon with a Users fallback.
-// Falls back to the placeholder when no icon is set or the image fails to load.
+// CircleAvatar — hexagon-shaped icon for circles and groups.
+// Hexes are the brand mark for "circle of people" objects; user avatars are circles.
 
-import { useState } from "react";
-import { Image, View } from "react-native";
 import { Users } from "lucide-react-native";
-
+import { HexAvatar } from "../ui/HexAvatar.jsx";
 import { resolveImageUrl } from "../../lib/resolveImageUrl.js";
 
 export function CircleAvatar({ circle, size = 40, baseUrl }) {
-  const [failed, setFailed] = useState(false);
   const icon = resolveImageUrl(circle?.icon, baseUrl);
-  if (icon && !failed) {
-    return (
-      <Image
-        source={{ uri: icon }}
-        style={{ width: size, height: size }}
-        className="border-2 border-base-300 bg-base-200"
-        onError={() => setFailed(true)}
-      />
-    );
-  }
   return (
-    <View
-      style={{ width: size, height: size }}
-      className="border-2 border-base-300 bg-secondary items-center justify-center"
-    >
-      <Users
-        size={Math.round(size * 0.5)}
-        color="rgba(255,244,224,0.7)"
-        strokeWidth={1.75}
-      />
-    </View>
+    <HexAvatar
+      uri={icon}
+      size={size}
+      fallbackColor="#393B7A"
+      fallback={
+        <Users
+          size={Math.round(size * 0.45)}
+          color="rgba(250,244,232,0.8)"
+          strokeWidth={1.75}
+        />
+      }
+    />
   );
 }
