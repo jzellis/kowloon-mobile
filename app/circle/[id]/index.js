@@ -3,7 +3,7 @@
 // Owner sees Edit / Delete and can remove members inline. Any logged-in user
 // can copy the circle (copy-as-new or add its members to one of their own).
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import {
   ActivityIndicator,
@@ -11,6 +11,7 @@ import {
   Pressable,
   ScrollView,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -46,6 +47,13 @@ export default function CircleDetail() {
   const [error, setError] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [removingId, setRemovingId] = useState(null);
+
+  // Quick-add state
+  const [addQuery, setAddQuery] = useState("");
+  const [addResults, setAddResults] = useState([]);
+  const [addSearching, setAddSearching] = useState(false);
+  const [addingId, setAddingId] = useState(null);
+  const addDebounceRef = useRef(null);
 
   const load = useCallback(async () => {
     if (!client || !id) return;
@@ -95,6 +103,56 @@ export default function CircleDetail() {
     } catch (e) {
       setDeleting(false);
       Alert.alert("Couldn't delete", e?.message || "Please try again.");
+    }
+  }
+
+  // Debounced user search for the quick-add bar.
+  useEffect(() => {
+    clearTimeout(addDebounceRef.current);
+    const q = addQuery.trim();
+    if (q.length < 2) {
+      setAddResults([]);
+      setAddSearching(false);
+      return;
+    }
+    // Don't fire on partial federated handles like @user@incomplete
+    const parts = q.replace(/^@/, "").split("@");
+    if (parts.length === 2 && !parts[1].includes(".")) return;
+
+    addDebounceRef.current = setTimeout(async () => {
+      setAddSearching(true);
+      try {
+        const res = await client.feeds.http.get("/users/search", { params: { q } });
+        setAddResults((res?.orderedItems || res?.items || []).map(memberView));
+      } catch {
+        setAddResults([]);
+      } finally {
+        setAddSearching(false);
+      }
+    }, 350);
+    return () => clearTimeout(addDebounceRef.current);
+  }, [addQuery, client]);
+
+  async function handleAddMember(m) {
+    if (addingId) return;
+    setAddingId(m.id);
+    try {
+      await client.activities.addToCircle({ circleId: String(id), members: [m] });
+      setCircle((c) =>
+        c
+          ? {
+              ...c,
+              members: [...(c.members || []), m],
+              memberCount: (c.memberCount || 0) + 1,
+            }
+          : c
+      );
+      setAddQuery("");
+      setAddResults([]);
+    } catch (e) {
+      Alert.alert("Couldn't add member", e?.message || "Please try again.");
+    } finally {
+      setAddingId(null);
     }
   }
 
@@ -214,6 +272,67 @@ export default function CircleDetail() {
                 ) : null}
               </View>
             </View>
+
+            {/* Quick-add bar — owner only */}
+            {isOwner ? (
+              <View className="px-5 pt-4 pb-3 border-b border-base-200">
+                <Text className="font-ui uppercase tracking-[0.18em] text-[11px] text-base-content/50 mb-2">
+                  Add Member
+                </Text>
+                <TextInput
+                  value={addQuery}
+                  onChangeText={setAddQuery}
+                  placeholder="Name, @handle, or @user@other.server"
+                  placeholderTextColor="rgba(26,26,32,0.35)"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  className="border-2 border-base-300 bg-white px-3 py-2.5 font-ui text-base text-base-content"
+                />
+                {addSearching ? (
+                  <View className="py-3 items-start">
+                    <ActivityIndicator />
+                  </View>
+                ) : addResults.length > 0 ? (
+                  <View className="border-2 border-t-0 border-base-300">
+                    {addResults.map((m) => {
+                      const already = members.some((mem) => mem.id === m.id);
+                      return (
+                        <Pressable
+                          key={m.id}
+                          onPress={() => !already && handleAddMember(m)}
+                          disabled={already || addingId === m.id}
+                          android_ripple={{ color: "rgba(0,0,0,0.05)" }}
+                          className="flex-row items-center px-3 py-2.5 border-t border-base-300"
+                        >
+                          <Avatar actor={m} size={30} baseUrl={account?.baseUrl} />
+                          <View className="flex-1 ml-3 min-w-0">
+                            <Text
+                              className="font-ui text-sm text-base-content"
+                              numberOfLines={1}
+                            >
+                              {m.name}
+                            </Text>
+                            <Text
+                              className="font-ui text-xs text-base-content/55"
+                              numberOfLines={1}
+                            >
+                              {m.id}
+                            </Text>
+                          </View>
+                          {addingId === m.id ? (
+                            <ActivityIndicator size="small" />
+                          ) : (
+                            <Text className="font-ui uppercase tracking-[0.14em] text-[11px] text-base-content/45 ml-2">
+                              {already ? "Added" : "Add"}
+                            </Text>
+                          )}
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                ) : null}
+              </View>
+            ) : null}
 
             {/* Members */}
             <View className="px-5 pt-5">
