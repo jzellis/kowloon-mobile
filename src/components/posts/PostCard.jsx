@@ -130,7 +130,8 @@ export function PostCard({ post }) {
             <Avatar actor={actor} size={38} />
             <View className="flex-1 ml-3">
               <Text
-                className="font-ui text-sm text-base-content"
+                className="text-sm text-base-content"
+                style={{ fontFamily: "inter-medium" }}
                 numberOfLines={1}
               >
                 {name}

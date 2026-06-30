@@ -74,12 +74,17 @@ export function fontName(key, variant = "regular") {
 
 // The asset map passed to useFonts() in app/_layout.js — derived from FONTS so
 // there's exactly one place that lists font files.
-export const FONT_ASSETS = FONTS.reduce((acc, font) => {
-  acc[fontName(font.key, "regular")] = font.files.regular;
-  acc[fontName(font.key, "bold")] = font.files.bold;
-  acc[fontName(font.key, "italic")] = font.files.italic;
-  return acc;
-}, {});
+// `inter-medium` is registered separately — it's Inter Regular (400), used for
+// UI display names where Light (300) reads too thin but Bold is too heavy.
+export const FONT_ASSETS = {
+  ...FONTS.reduce((acc, font) => {
+    acc[fontName(font.key, "regular")] = font.files.regular;
+    acc[fontName(font.key, "bold")] = font.files.bold;
+    acc[fontName(font.key, "italic")] = font.files.italic;
+    return acc;
+  }, {}),
+  "inter-medium": require("../../assets/fonts/Inter-Regular.ttf"),
+};
 
 // ---- Stepped scales --------------------------------------------------------
 
