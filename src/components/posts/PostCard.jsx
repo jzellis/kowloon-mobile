@@ -113,12 +113,9 @@ export function PostCard({ post }) {
     <Pressable
       onPress={open}
       android_ripple={{ color: "rgba(0,0,0,0.04)" }}
-      className="border-b-2 border-base-300 bg-base-100"
+      className="border-b border-base-200 bg-base-100"
     >
-      {/* Type accent bar */}
-      <View className={`h-[3px] ${meta.bar}`} />
-
-      <View className="px-5 py-4">
+      <View className="px-5 py-5">
         {/* Author row — left side (avatar + name/handle) navigates to the
             user's profile; the type/time on the right stays inside the parent
             Pressable so a tap there still opens the post. */}
