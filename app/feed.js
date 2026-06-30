@@ -150,7 +150,7 @@ export default function Feed() {
     error,
     refresh,
     loadMore,
-  } = useFeed({ viewKey, activeTypes });
+  } = useFeed({ viewKey, activeTypes, accountId: account?.id });
 
   // Backfill the server's display name onto the account the first time we
   // have a client for it. Accounts created before this field existed (and

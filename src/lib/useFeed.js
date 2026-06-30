@@ -7,11 +7,49 @@
 //   "group:<id>@..."   → GET /groups/:id/posts   (group posts,     page-based)
 //
 // `activeTypes` filters by post type (empty = all types).
+// `accountId`   scopes the local cache key so multi-account installs don't mix.
+//
+// Cache strategy (stale-while-revalidate):
+//   On mount, the last 20 posts for this viewKey are read from AsyncStorage
+//   and shown immediately. The normal network fetch runs in parallel and
+//   replaces them when it lands. After every successful initial/refresh fetch
+//   the cache is overwritten with the new first page.
 //
 // When `viewKey` or `activeTypes` changes the feed resets to page 1.
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useActiveClient } from "./useActiveClient.js";
+
+// ---- Cache helpers ----------------------------------------------------------
+
+const CACHE_LIMIT = 20;
+
+function cacheKey(accountId, viewKey) {
+  if (!accountId || !viewKey) return null;
+  return `kowloon:${accountId}:feedCache:${viewKey}`;
+}
+
+async function readCache(key) {
+  if (!key) return null;
+  try {
+    const raw = await AsyncStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+async function writeCache(key, posts) {
+  if (!key || !posts?.length) return;
+  try {
+    await AsyncStorage.setItem(key, JSON.stringify(posts.slice(0, CACHE_LIMIT)));
+  } catch {
+    // Non-fatal — cache miss on next open is the worst outcome.
+  }
+}
+
+// ---- Feed helpers -----------------------------------------------------------
 
 function dedupeById(list) {
   const seen = new Set();
@@ -33,7 +71,9 @@ function isGroup(viewKey) {
   return typeof viewKey === "string" && viewKey.startsWith("group:");
 }
 
-export function useFeed({ viewKey = "public", activeTypes = [] } = {}) {
+// ---- Hook ------------------------------------------------------------------
+
+export function useFeed({ viewKey = "public", activeTypes = [], accountId } = {}) {
   const client = useActiveClient();
 
   const [posts, setPosts] = useState([]);
@@ -64,7 +104,8 @@ export function useFeed({ viewKey = "public", activeTypes = [] } = {}) {
 
       try {
         let res;
-        let nextCursor = cursor.current;
+        let items = [];
+
         if (isCircle(viewKey)) {
           // Circle feed — cursor-based via `before`.
           const before = mode === "more" ? cursor.current : undefined;
@@ -73,15 +114,11 @@ export function useFeed({ viewKey = "public", activeTypes = [] } = {}) {
             types: activeTypes,
             before,
           });
-          const items = res?.orderedItems || res?.items || [];
+          items = res?.orderedItems || res?.items || [];
           const oldest = items[items.length - 1]?.publishedAt;
-          nextCursor = oldest || cursor.current;
+          cursor.current = oldest || cursor.current;
           // No total available — assume more if we got a full-ish page.
           setHasMore(items.length >= 15);
-          cursor.current = nextCursor;
-          setPosts((prev) =>
-            mode === "more" ? dedupeById([...prev, ...items]) : dedupeById(items)
-          );
         } else if (isGroup(viewKey)) {
           // Group feed — page-based. getGroupPosts takes a single `type`,
           // not an array, so when filtering pass the first active type only
@@ -95,13 +132,10 @@ export function useFeed({ viewKey = "public", activeTypes = [] } = {}) {
             type: activeTypes?.[0],
             page,
           });
-          const items = res?.orderedItems || res?.items || [];
+          items = res?.orderedItems || res?.items || [];
           const totalPages = Number(res?.totalPages) || 1;
           setHasMore(page < totalPages);
           cursor.current = page;
-          setPosts((prev) =>
-            mode === "more" ? dedupeById([...prev, ...items]) : dedupeById(items)
-          );
         } else {
           // Server feed (public or server) — page-based.
           const to = viewKey === "server" ? "server" : "public";
@@ -114,13 +148,19 @@ export function useFeed({ viewKey = "public", activeTypes = [] } = {}) {
             types: activeTypes,
             page,
           });
-          const items = res?.orderedItems || res?.items || [];
+          items = res?.orderedItems || res?.items || [];
           const totalPages = Number(res?.totalPages) || 1;
           setHasMore(page < totalPages);
           cursor.current = page;
-          setPosts((prev) =>
-            mode === "more" ? dedupeById([...prev, ...items]) : dedupeById(items)
-          );
+        }
+
+        setPosts((prev) =>
+          mode === "more" ? dedupeById([...prev, ...items]) : dedupeById(items)
+        );
+
+        // Persist first page so the next launch can seed instantly.
+        if (mode !== "more") {
+          writeCache(cacheKey(accountId, viewKey), items);
         }
       } catch (e) {
         setError(e?.message || "Couldn't load the feed.");
@@ -131,18 +171,30 @@ export function useFeed({ viewKey = "public", activeTypes = [] } = {}) {
         setLoadingMore(false);
       }
     },
-    // typesKey covers activeTypes; viewKey direct; client identity.
+    // typesKey covers activeTypes; viewKey direct; client and accountId identity.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [client, viewKey, typesKey]
+    [client, viewKey, typesKey, accountId]
   );
 
   // Reset + load whenever the view or type filter changes (or account
-  // changes, since useActiveClient swaps).
+  // changes, since useActiveClient swaps). Seed from cache immediately so
+  // there's something to show while the network request runs.
   useEffect(() => {
     cursor.current = null;
     setPosts([]);
     setHasMore(true);
-    if (client) fetchPage("initial");
+
+    if (!client) return;
+
+    let cancelled = false;
+    readCache(cacheKey(accountId, viewKey)).then((cached) => {
+      if (!cancelled && cached?.length) setPosts(cached);
+    });
+    fetchPage("initial");
+
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [client, viewKey, typesKey]);
 
