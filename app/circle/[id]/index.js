@@ -14,7 +14,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSelector } from "react-redux";
 import { Pencil, Trash2, X } from "lucide-react-native";
 
@@ -41,6 +41,7 @@ export default function CircleDetail() {
   const { id } = useLocalSearchParams();
   const client = useActiveClient();
   const account = useSelector(selectActiveAccount);
+  const insets = useSafeAreaInsets();
 
   const [circle, setCircle] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -182,7 +183,7 @@ export default function CircleDetail() {
 
   return (
     <SafeAreaView className="flex-1 bg-base-100" edges={["top", "left", "right"]}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: (insets.bottom || 0) + (isOwner ? 100 : 40) }}>
         <View className="px-5 pt-3">
           <BackLink />
         </View>
@@ -398,6 +399,24 @@ export default function CircleDetail() {
           </>
         ) : null}
       </ScrollView>
+
+      {/* FAB — only the circle owner can post to their own circle */}
+      {isOwner ? (
+        <Pressable
+          onPress={() =>
+            router.push(
+              `/compose?to=${encodeURIComponent(String(id))}&toName=${encodeURIComponent(circle?.name || "")}`
+            )
+          }
+          style={{ bottom: (insets.bottom || 0) + 32, right: 20 }}
+          className="absolute w-14 h-14 bg-primary border-2 border-base-content items-center justify-center"
+          android_ripple={{ color: "rgba(255,255,255,0.15)" }}
+        >
+          <Text className="text-primary-content text-3xl leading-none mt-[-2px]">
+            +
+          </Text>
+        </Pressable>
+      ) : null}
     </SafeAreaView>
   );
 }

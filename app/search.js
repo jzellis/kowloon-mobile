@@ -8,7 +8,7 @@
 // wildcard search is a later enhancement.
 
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSelector } from "react-redux";
 import {
   ActivityIndicator,
@@ -65,8 +65,9 @@ export default function Search() {
   const client = useActiveClient();
   const account = useSelector(selectActiveAccount);
 
-  const [query, setQuery] = useState("");
-  const [debounced, setDebounced] = useState("");
+  const { q: initialQuery } = useLocalSearchParams();
+  const [query, setQuery] = useState(initialQuery || "");
+  const [debounced, setDebounced] = useState((initialQuery || "").trim());
   const [tab, setTab] = useState("all");
 
   // "All" tab: a few of each type. Type tabs: a paginated flat list.

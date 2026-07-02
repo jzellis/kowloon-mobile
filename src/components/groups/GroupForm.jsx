@@ -8,6 +8,7 @@
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Image,
   Pressable,
   ScrollView,
   Text,
@@ -63,6 +64,9 @@ export function GroupForm({
   const [iconAsset, setIconAsset] = useState(null); // newly picked
   const [iconUrl, setIconUrl] = useState(initialValues.icon || null);
 
+  const [bannerAsset, setBannerAsset] = useState(null);
+  const [bannerUrl, setBannerUrl] = useState(initialValues.image || null);
+
   const [myCircles, setMyCircles] = useState([]);
 
   // Load the user's circles so they can scope the group to one.
@@ -116,6 +120,25 @@ export function GroupForm({
     }
   }
 
+  async function pickBanner() {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: "images",
+        quality: 0.9,
+      });
+      if (result.canceled || !result.assets?.[0]) return;
+      const asset = result.assets[0];
+      setBannerAsset({
+        uri: asset.uri,
+        name: asset.fileName || `group-banner-${Date.now()}.jpg`,
+        mimeType: asset.mimeType || "image/jpeg",
+      });
+      setBannerUrl(null);
+    } catch {
+      // ignore picker errors
+    }
+  }
+
   function submit() {
     if (!name.trim() || submitting) return;
     onSubmit?.({
@@ -126,6 +149,8 @@ export function GroupForm({
       rsvpPolicy,
       iconAsset,
       iconUrl,
+      bannerAsset,
+      bannerUrl,
     });
   }
 
@@ -137,6 +162,39 @@ export function GroupForm({
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ padding: 20, paddingBottom: 20 + keyboardInset }}
       >
+        {/* Banner image */}
+        <View className="mb-5 -mx-5 -mt-5">
+          <Pressable
+            onPress={pickBanner}
+            android_ripple={{ color: "rgba(0,0,0,0.06)" }}
+            style={{ aspectRatio: 3 }}
+            className="w-full bg-base-200 items-center justify-center overflow-hidden"
+          >
+            {bannerAsset?.uri || bannerUrl ? (
+              <Image
+                source={{ uri: bannerAsset?.uri || bannerUrl }}
+                style={{ width: "100%", height: "100%" }}
+                resizeMode="cover"
+              />
+            ) : (
+              <Text className="font-ui text-[11px] uppercase tracking-[0.16em] text-base-content/40">
+                Tap to add banner image
+              </Text>
+            )}
+          </Pressable>
+          {(bannerAsset || bannerUrl) ? (
+            <Pressable
+              onPress={() => { setBannerAsset(null); setBannerUrl(null); }}
+              hitSlop={8}
+              className="self-end px-5 pt-1.5"
+            >
+              <Text className="font-ui text-[10px] uppercase tracking-[0.14em] text-base-content/40">
+                Remove banner
+              </Text>
+            </Pressable>
+          ) : null}
+        </View>
+
         {/* Icon + name */}
         <View className="flex-row items-center mb-5">
           <Pressable onPress={pickIcon} className="relative">

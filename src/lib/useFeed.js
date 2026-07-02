@@ -210,6 +210,10 @@ export function useFeed({ viewKey = "public", activeTypes = [], accountId } = {}
     }
   }, [fetchPage, loading, loadingMore, refreshing, hasMore]);
 
+  const removePost = useCallback((postId) => {
+    setPosts((prev) => prev.filter((p) => p.id !== postId));
+  }, []);
+
   return {
     posts,
     loading,
@@ -219,5 +223,6 @@ export function useFeed({ viewKey = "public", activeTypes = [], accountId } = {}
     refresh,
     loadMore,
     hasMore,
+    removePost,
   };
 }

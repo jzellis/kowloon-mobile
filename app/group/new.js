@@ -36,6 +36,8 @@ export default function NewGroup() {
     to,
     rsvpPolicy,
     iconAsset,
+    bannerAsset,
+    bannerUrl,
   }) {
     if (submitting) return;
     setSubmitting(true);
@@ -53,11 +55,23 @@ export default function NewGroup() {
         iconUrl = up?.file?.url;
       }
 
+      let imageUrl = bannerUrl || undefined;
+      if (bannerAsset?.uri) {
+        const up = await uploadFile(client, {
+          uri: bannerAsset.uri,
+          name: bannerAsset.name,
+          mimeType: bannerAsset.mimeType,
+          to,
+        });
+        imageUrl = up?.file?.url;
+      }
+
       const res = await client.activities.createGroup({
         name,
         description: description || undefined,
         location: location || undefined,
         icon: iconUrl || undefined,
+        image: imageUrl || undefined,
         to,
         membershipPolicy: rsvpPolicy,
       });

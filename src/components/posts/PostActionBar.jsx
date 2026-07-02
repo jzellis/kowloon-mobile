@@ -20,6 +20,7 @@ import { useRouter } from "expo-router";
 
 import { ReactButton } from "./ReactButton.jsx";
 import { BookmarkComposer } from "../bookmarks/BookmarkComposer.jsx";
+import { PostMoreMenu } from "./PostMoreMenu.jsx";
 
 const ICON_COLOR = "rgba(26,26,32,0.55)";
 const ICON_STROKE = 1.75;
@@ -131,6 +132,7 @@ export function PostActionBar({
   currentUser,
   onReply,
   onReacted,
+  onDeleted,
   size = "md",
   className = "",
 }) {
@@ -200,62 +202,73 @@ export function PostActionBar({
 
   return (
     <>
-    <View
-      className={`flex-row items-center ${className}`}
-      style={{ gap: size === "sm" ? 20 : 24 }}
-    >
-      <CountIcon
-        Icon={MessageCircle}
-        count={post?.replyCount}
-        onPress={handleReply}
-        label="Reply"
-        size={size}
+    <View className={`flex-row items-center ${className}`}>
+      {/* Left group — equally spaced action icons */}
+      <View
+        className="flex-row items-center flex-1"
+        style={{ gap: size === "sm" ? 20 : 24 }}
+      >
+        <CountIcon
+          Icon={MessageCircle}
+          count={post?.replyCount}
+          onPress={handleReply}
+          label="Reply"
+          size={size}
+        />
+
+        {currentUser && post?.canReact !== "@none" && post?.canReact !== "none" ? (
+          <ReactButton
+            client={client}
+            post={post}
+            onReacted={onReacted}
+            size={size}
+          />
+        ) : (
+          <CountIcon
+            Icon={Smile}
+            count={post?.reactCount}
+            onPress={() => {}}
+            label="React"
+            size={size}
+            disabled
+          />
+        )}
+
+        {currentUser ? (
+          <CountIcon
+            Icon={Repeat2}
+            onPress={handleRepost}
+            label="Repost"
+            size={size}
+            disabled={!shareUrl}
+          />
+        ) : null}
+
+        <CountIcon
+          Icon={Share2}
+          onPress={handleShare}
+          label="Share"
+          size={size}
+          disabled={!canShare}
+        />
+
+        {currentUser ? (
+          <CountIcon
+            Icon={Bookmark}
+            onPress={handleBookmark}
+            label="Bookmark"
+            size={size}
+          />
+        ) : null}
+      </View>
+
+      {/* Ellipsis — flush right */}
+      <PostMoreMenu
+        post={post}
+        client={client}
+        currentUser={currentUser}
+        onDeleted={onDeleted}
       />
-
-      {currentUser && post?.canReact !== "@none" && post?.canReact !== "none" ? (
-        <ReactButton
-          client={client}
-          post={post}
-          onReacted={onReacted}
-          size={size}
-        />
-      ) : (
-        <CountIcon
-          Icon={Smile}
-          count={post?.reactCount}
-          onPress={() => {}}
-          label="React"
-          size={size}
-          disabled
-        />
-      )}
-
-      {currentUser ? (
-        <CountIcon
-          Icon={Repeat2}
-          onPress={handleRepost}
-          label="Repost"
-          size={size}
-          disabled={!shareUrl}
-        />
-      ) : null}
-
-      <CountIcon
-        Icon={Share2}
-        onPress={handleShare}
-        label="Share"
-        size={size}
-        disabled={!canShare}
-      />
-
-      {currentUser ? (
-        <CountIcon
-          Icon={Bookmark}
-          onPress={handleBookmark}
-          label="Bookmark"
-          size={size}
-        />
-      ) : null}
     </View>
 
     {currentUser ? (

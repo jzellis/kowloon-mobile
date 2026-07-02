@@ -55,6 +55,8 @@ export default function EditGroup() {
     rsvpPolicy,
     iconAsset,
     iconUrl,
+    bannerAsset,
+    bannerUrl,
   }) {
     if (submitting) return;
     setSubmitting(true);
@@ -72,12 +74,24 @@ export default function EditGroup() {
         finalIcon = up?.file?.url || finalIcon;
       }
 
+      let finalImage = bannerUrl || undefined;
+      if (bannerAsset?.uri) {
+        const up = await uploadFile(client, {
+          uri: bannerAsset.uri,
+          name: bannerAsset.name,
+          mimeType: bannerAsset.mimeType,
+          to,
+        });
+        finalImage = up?.file?.url || finalImage;
+      }
+
       await client.activities.updateGroup({
         groupId: String(id),
         name,
         description,
         location,
         icon: finalIcon,
+        image: finalImage,
         to,
         membershipPolicy: rsvpPolicy,
       });

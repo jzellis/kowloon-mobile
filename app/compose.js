@@ -103,7 +103,9 @@ export default function Compose() {
   );
   const repostInjectedRef = useRef(false);
   const [previewing, setPreviewing] = useState(false);
-  const [audience, setAudience] = useState("@public");
+  const [audience, setAudience] = useState(
+    typeof params.to === "string" && params.to ? params.to : "@public"
+  );
   const [posting, setPosting] = useState(false);
   const [error, setError] = useState(null);
 

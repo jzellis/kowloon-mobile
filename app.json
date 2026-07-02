@@ -14,7 +14,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "org.kwln.kowloon"
+      "bundleIdentifier": "org.kwln.kowloon",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "org.kwln.kowloon",
@@ -24,7 +27,14 @@
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
-      }
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -40,6 +50,13 @@
       "expo-video",
       "expo-audio",
       "@react-native-community/datetimepicker"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "3625fe62-70c1-45e5-9bc0-a635b1989886"
+      }
+    },
+    "owner": "jzellis"
   }
 }

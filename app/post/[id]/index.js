@@ -5,9 +5,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Pencil, Trash2 } from "lucide-react-native";
 
 import { Avatar } from "../../../src/components/posts/Avatar.jsx";
 import { BackLink } from "../../../src/components/ui/BackLink.jsx";
@@ -92,36 +91,9 @@ export default function PostDetail() {
   }, [load]);
 
   const actor = post?.actor || {};
-  const ownerId = post?.actorId || post?.actor?.id;
-  const isOwner = !!currentUser?.id && ownerId === currentUser.id;
   const type = post?.type || "Note";
   const typeBar = TYPE_BAR[type] || TYPE_BAR.Note;
   const typeAccent = TYPE_ACCENT[type] || TYPE_ACCENT.Note;
-  const [deleting, setDeleting] = useState(false);
-
-  function confirmDelete() {
-    Alert.alert(
-      "Delete post?",
-      "This can't be undone.",
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Delete", style: "destructive", onPress: handleDelete },
-      ],
-      { cancelable: true }
-    );
-  }
-
-  async function handleDelete() {
-    if (deleting) return;
-    setDeleting(true);
-    try {
-      await client.activities.deletePost({ postId: String(id) });
-      router.back();
-    } catch (e) {
-      setDeleting(false);
-      Alert.alert("Couldn't delete", e?.message || "Please try again.");
-    }
-  }
 
   const typography = {
     fonts: {
@@ -204,7 +176,7 @@ export default function PostDetail() {
               <PostBody post={post} typography={typography} />
             </View>
 
-            {/* Action bar — reply / react / repost / share / bookmark */}
+            {/* Action bar — reply / react / repost / share / bookmark / more */}
             <View className="px-5 pt-5">
               <View className="border-t-2 border-base-300 pt-4">
                 <PostActionBar
@@ -212,47 +184,12 @@ export default function PostDetail() {
                   client={client}
                   currentUser={currentUser}
                   onReply={() => {
-                    // Already on the detail page — scroll to the composer.
                     scrollRef.current?.scrollToEnd({ animated: true });
                   }}
                   onReacted={load}
+                  onDeleted={() => router.back()}
                 />
               </View>
-
-              {/* Owner actions */}
-              {isOwner ? (
-                <View className="flex-row items-center mt-4" style={{ gap: 8 }}>
-                  <Pressable
-                    onPress={() =>
-                      router.push(
-                        `/post/${encodeURIComponent(String(id))}/edit`
-                      )
-                    }
-                    android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-                    className="flex-row items-center border-2 border-base-content px-3 py-2"
-                  >
-                    <Pencil
-                      size={13}
-                      color="rgba(26,26,32,0.85)"
-                      strokeWidth={1.75}
-                    />
-                    <Text className="font-ui uppercase tracking-[0.14em] text-[11px] text-base-content ml-1.5">
-                      Edit
-                    </Text>
-                  </Pressable>
-                  <Pressable
-                    onPress={confirmDelete}
-                    disabled={deleting}
-                    android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-                    className="flex-row items-center border-2 border-error px-3 py-2"
-                  >
-                    <Trash2 size={13} color="#CC272E" strokeWidth={1.75} />
-                    <Text className="font-ui uppercase tracking-[0.14em] text-[11px] text-error ml-1.5">
-                      {deleting ? "Deleting…" : "Delete"}
-                    </Text>
-                  </Pressable>
-                </View>
-              ) : null}
             </View>
 
             {/* Replies */}

@@ -60,7 +60,7 @@ function hostOf(url) {
     .replace(/\/.*$/, "");
 }
 
-export function PostCard({ post }) {
+export function PostCard({ post, onDeleted }) {
   const router = useRouter();
   const client = useActiveClient();
   const currentUser = client?.auth?.getUser?.() || null;
@@ -332,12 +332,13 @@ export function PostCard({ post }) {
           </>
         )}
 
-        {/* Action bar — reply / react / repost / share / bookmark */}
+        {/* Action bar — reply / react / repost / share / bookmark / more */}
         <View className="mt-3 pt-3 border-t border-base-300">
           <PostActionBar
             post={post}
             client={client}
             currentUser={currentUser}
+            onDeleted={onDeleted}
             size="sm"
           />
         </View>

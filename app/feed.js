@@ -150,6 +150,7 @@ export default function Feed() {
     error,
     refresh,
     loadMore,
+    removePost,
   } = useFeed({ viewKey, activeTypes, accountId: account?.id });
 
   // Backfill the server's display name onto the account the first time we
@@ -252,7 +253,9 @@ export default function Feed() {
       <FlatList
         data={posts}
         keyExtractor={(p) => p.id}
-        renderItem={({ item }) => <PostCard post={item} />}
+        renderItem={({ item }) => (
+          <PostCard post={item} onDeleted={() => removePost(item.id)} />
+        )}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={refresh} />
         }
