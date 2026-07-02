@@ -285,11 +285,11 @@ function PagesMenuSection({ client, onNavigate }) {
   );
 }
 
-// ── PopularCircles ──────────────────────────────────────────────────────────
+// ── Discover (Circles + Groups) ─────────────────────────────────────────────
 
-function CircleAvatar({ circle, baseUrl }) {
+function ItemAvatar({ item, baseUrl }) {
   const [failed, setFailed] = useState(false);
-  const icon = resolveImageUrl(circle?.icon, baseUrl);
+  const icon = resolveImageUrl(item?.icon, baseUrl);
   if (icon && !failed) {
     return (
       <Image
@@ -310,8 +310,31 @@ function CircleAvatar({ circle, baseUrl }) {
   );
 }
 
-function PopularCirclesSection({ client, onNavigate }) {
+function SubHeading({ children }) {
+  return (
+    <Text className="font-ui text-[11px] uppercase tracking-[0.18em] text-base-content/50 mb-1">
+      {children}
+    </Text>
+  );
+}
+
+function MoreLink({ label, onPress }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      android_ripple={{ color: "rgba(0,0,0,0.06)" }}
+      className="mt-2 mb-1"
+    >
+      <Text className="font-ui text-[11px] uppercase tracking-[0.18em] text-primary">
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
+function DiscoverSection({ client, onNavigate }) {
   const [circles, setCircles] = useState([]);
+  const [groups, setGroups] = useState([]);
   const baseUrl = client?.http?.baseUrl;
 
   useEffect(() => {
@@ -323,96 +346,6 @@ function PopularCirclesSection({ client, onNavigate }) {
         if (!cancelled) setCircles(res?.orderedItems || res?.items || []);
       })
       .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [client]);
-
-  if (!circles.length) return null;
-
-  return (
-    <View className="border-b-2 border-base-300 pb-5 mb-5">
-      <SectionHeader>Popular Circles</SectionHeader>
-      {circles.map((circle) => (
-        <Pressable
-          key={circle.id}
-          onPress={() =>
-            onNavigate(`/circle/${encodeURIComponent(circle.id)}`)
-          }
-          android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-          className="flex-row items-start py-3 border-t border-base-300"
-        >
-          <CircleAvatar circle={circle} baseUrl={baseUrl} />
-          <View className="flex-1 ml-3 min-w-0">
-            <Text
-              className="font-ui text-base text-base-content leading-tight"
-              numberOfLines={1}
-            >
-              {circle.name}
-            </Text>
-            {circle.memberCount > 0 ? (
-              <Text className="font-ui text-[11px] uppercase tracking-[0.14em] text-base-content/55 mt-0.5">
-                {circle.memberCount} members
-              </Text>
-            ) : null}
-            {circle.summary ? (
-              <Text
-                className="font-ui text-xs text-base-content/70 leading-snug mt-1"
-                numberOfLines={2}
-              >
-                {stripHtml(circle.summary)}
-              </Text>
-            ) : null}
-          </View>
-        </Pressable>
-      ))}
-    </View>
-  );
-}
-
-// ── ActiveGroups ────────────────────────────────────────────────────────────
-
-function GroupAvatar({ group, baseUrl }) {
-  const [failed, setFailed] = useState(false);
-  const icon = resolveImageUrl(group?.icon, baseUrl);
-  if (icon && !failed) {
-    return (
-      <Image
-        source={{ uri: icon }}
-        style={{ width: 36, height: 36 }}
-        className="border-2 border-base-300 bg-base-200"
-        onError={() => setFailed(true)}
-      />
-    );
-  }
-  return (
-    <View
-      style={{ width: 36, height: 36 }}
-      className="border-2 border-base-300 bg-secondary items-center justify-center"
-    >
-      <Users size={18} color="rgba(255,244,224,0.7)" strokeWidth={1.75} />
-    </View>
-  );
-}
-
-function relativeTime(iso) {
-  const t = new Date(iso).getTime();
-  if (!t) return "";
-  const diff = Date.now() - t;
-  const m = Math.floor(diff / 60000);
-  if (m < 60) return `${m}m`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h`;
-  return `${Math.floor(h / 24)}d`;
-}
-
-function ActiveGroupsSection({ client, onNavigate }) {
-  const [groups, setGroups] = useState([]);
-  const baseUrl = client?.http?.baseUrl;
-
-  useEffect(() => {
-    if (!client) return;
-    let cancelled = false;
     client.feeds
       .getGroups({ limit: 5 })
       .then((res) => {
@@ -424,52 +357,81 @@ function ActiveGroupsSection({ client, onNavigate }) {
     };
   }, [client]);
 
-  if (!groups.length) return null;
+  if (!circles.length && !groups.length) return null;
 
   return (
     <View className="pb-2">
-      <SectionHeader>Active Groups</SectionHeader>
-      {groups.map((group) => (
-        <View key={group.id} className="py-3 border-t border-base-300">
-          <Pressable
-            onPress={() =>
-              onNavigate(`/group/${encodeURIComponent(group.id)}`)
-            }
-            android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-            className="flex-row items-start"
-          >
-            <GroupAvatar group={group} baseUrl={baseUrl} />
-            <View className="flex-1 ml-3 min-w-0">
-              <Text
-                className="font-ui text-base text-base-content leading-tight"
-                numberOfLines={1}
-              >
-                {group.name}
-              </Text>
-              <Text className="font-ui text-[11px] uppercase tracking-[0.14em] text-base-content/55 mt-0.5">
-                {(group.memberCount || 0).toLocaleString()} members
-              </Text>
-            </View>
-          </Pressable>
-          {group.recentPost ? (
-            <View className="mt-2 pl-12">
-              <Text
-                className="font-ui text-xs text-base-content/75 leading-snug"
-                numberOfLines={2}
-              >
-                {stripHtml(group.recentPost.summary)}
-              </Text>
-              <Text
-                className="font-ui text-[10px] uppercase tracking-[0.14em] text-base-content/55 mt-1"
-                numberOfLines={1}
-              >
-                {group.recentPost.actor?.name || group.recentPost.actor?.id} ·{" "}
-                {relativeTime(group.recentPost.published)}
-              </Text>
-            </View>
-          ) : null}
+      <SectionHeader>Discover</SectionHeader>
+
+      {circles.length > 0 ? (
+        <View className="mb-5">
+          <SubHeading>Circles</SubHeading>
+          {circles.map((circle) => (
+            <Pressable
+              key={circle.id}
+              onPress={() =>
+                onNavigate(`/circle/${encodeURIComponent(circle.id)}`)
+              }
+              android_ripple={{ color: "rgba(0,0,0,0.06)" }}
+              className="flex-row items-start py-3 border-t border-base-300"
+            >
+              <ItemAvatar item={circle} baseUrl={baseUrl} />
+              <View className="flex-1 ml-3 min-w-0">
+                <Text
+                  className="font-ui text-base text-base-content leading-tight"
+                  numberOfLines={1}
+                >
+                  {circle.name}
+                </Text>
+                {circle.memberCount > 0 ? (
+                  <Text className="font-ui text-[11px] uppercase tracking-[0.14em] text-base-content/55 mt-0.5">
+                    {circle.memberCount} members
+                  </Text>
+                ) : null}
+                {circle.summary ? (
+                  <Text
+                    className="font-ui text-xs text-base-content/70 leading-snug mt-1"
+                    numberOfLines={2}
+                  >
+                    {stripHtml(circle.summary)}
+                  </Text>
+                ) : null}
+              </View>
+            </Pressable>
+          ))}
+          <MoreLink label="More Circles…" onPress={() => onNavigate("/circles")} />
         </View>
-      ))}
+      ) : null}
+
+      {groups.length > 0 ? (
+        <View>
+          <SubHeading>Groups</SubHeading>
+          {groups.map((group) => (
+            <Pressable
+              key={group.id}
+              onPress={() =>
+                onNavigate(`/group/${encodeURIComponent(group.id)}`)
+              }
+              android_ripple={{ color: "rgba(0,0,0,0.06)" }}
+              className="flex-row items-start py-3 border-t border-base-300"
+            >
+              <ItemAvatar item={group} baseUrl={baseUrl} />
+              <View className="flex-1 ml-3 min-w-0">
+                <Text
+                  className="font-ui text-base text-base-content leading-tight"
+                  numberOfLines={1}
+                >
+                  {group.name}
+                </Text>
+                <Text className="font-ui text-[11px] uppercase tracking-[0.14em] text-base-content/55 mt-0.5">
+                  {(group.memberCount || 0).toLocaleString()} members
+                </Text>
+              </View>
+            </Pressable>
+          ))}
+          <MoreLink label="More Groups…" onPress={() => onNavigate("/groups")} />
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -520,8 +482,7 @@ export function LeftDrawer({ visible, onClose }) {
             <ServerInfoSection client={client} />
             <SearchBar onNavigate={navigate} />
             <PagesMenuSection client={client} onNavigate={navigate} />
-            <PopularCirclesSection client={client} onNavigate={navigate} />
-            <ActiveGroupsSection client={client} onNavigate={navigate} />
+            <DiscoverSection client={client} onNavigate={navigate} />
           </ScrollView>
         </SafeAreaView>
 
