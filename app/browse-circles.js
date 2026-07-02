@@ -38,6 +38,8 @@ export default function BrowseCircles() {
 
   // Track in-flight fetches so sort/refresh changes cancel stale loads
   const fetchId = useRef(0);
+  // Prevent onEndReached firing multiple times before the first load-more settles
+  const loadingMoreRef = useRef(false);
 
   const load = useCallback(
     async ({ pageNum = 1, currentSort = sort, isRefresh = false } = {}) => {
@@ -47,8 +49,10 @@ export default function BrowseCircles() {
       if (pageNum === 1) {
         if (isRefresh) setRefreshing(true);
         else setLoading(true);
+        loadingMoreRef.current = false;
       } else {
         setLoadingMore(true);
+        loadingMoreRef.current = true;
       }
       setError(null);
 
@@ -66,7 +70,11 @@ export default function BrowseCircles() {
 
         setTotalPages(pages);
         setPage(pageNum);
-        setCircles((prev) => (pageNum === 1 ? items : [...prev, ...items]));
+        setCircles((prev) => {
+          if (pageNum === 1) return items;
+          const seen = new Set(prev.map((c) => c.id));
+          return [...prev, ...items.filter((c) => !seen.has(c.id))];
+        });
       } catch (e) {
         if (id !== fetchId.current) return;
         setError(e?.message || "Couldn't load circles.");
@@ -75,6 +83,7 @@ export default function BrowseCircles() {
         setLoading(false);
         setRefreshing(false);
         setLoadingMore(false);
+        loadingMoreRef.current = false;
       }
     },
     [client, sort]
@@ -98,7 +107,7 @@ export default function BrowseCircles() {
   }
 
   function handleLoadMore() {
-    if (loadingMore || page >= totalPages) return;
+    if (loadingMoreRef.current || loadingMore || page >= totalPages) return;
     load({ pageNum: page + 1, currentSort: sort });
   }
 
