@@ -399,7 +399,7 @@ function DiscoverSection({ client, onNavigate }) {
               </View>
             </Pressable>
           ))}
-          <MoreLink label="More Circles…" onPress={() => onNavigate("/circles")} />
+          <MoreLink label="More Circles…" onPress={() => onNavigate("/browse-circles")} />
         </View>
       ) : null}
 
