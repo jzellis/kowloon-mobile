@@ -79,6 +79,16 @@ export function FeedViewSelector({ value, onChange }) {
     "Public";
 
   function openDropdown() {
+    // Refetch circles on every open so newly added circles appear immediately
+    if (client && account?.id) {
+      client.feeds
+        .getUserCircles({ userId: account.id })
+        .then((res) => {
+          const items = res?.orderedItems || res?.items || [];
+          setCircles(items.filter((c) => c?.id && c?.name && c?.type !== "System"));
+        })
+        .catch(() => {});
+    }
     triggerRef.current?.measureInWindow((x, y, _w, h) => {
       setDropPos({ top: y + h, left: x });
       setOpen(true);
