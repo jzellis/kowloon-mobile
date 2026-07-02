@@ -429,7 +429,7 @@ function DiscoverSection({ client, onNavigate }) {
               </View>
             </Pressable>
           ))}
-          <MoreLink label="More Groups…" onPress={() => onNavigate("/groups")} />
+          <MoreLink label="More Groups…" onPress={() => onNavigate("/groups?tab=browse")} />
         </View>
       ) : null}
     </View>

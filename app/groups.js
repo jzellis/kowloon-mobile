@@ -2,7 +2,7 @@
 // visible on the server (and across federation).
 
 import { useCallback, useState } from "react";
-import { useFocusEffect, useRouter } from "expo-router";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useSelector } from "react-redux";
 import {
   ActivityIndicator,
@@ -26,7 +26,8 @@ export default function Groups() {
   const client = useActiveClient();
   const account = useSelector(selectActiveAccount);
 
-  const [tab, setTab] = useState("mine"); // "mine" | "browse"
+  const { tab: initialTab } = useLocalSearchParams();
+  const [tab, setTab] = useState(initialTab === "browse" ? "browse" : "mine"); // "mine" | "browse"
 
   // My Groups — from user.circles.groups
   const joined = useJoinedGroups();
