@@ -10,14 +10,14 @@ export function TypeFilter({ activeTypes = [], onSetTypes }) {
 
   function handlePress(type) {
     if (isAll) {
-      // All on — deselect this one, keep the rest
-      onSetTypes(POST_TYPE_NAMES.filter((t) => t !== type));
+      // All on — solo this one type
+      onSetTypes([type]);
     } else if (activeTypes.includes(type)) {
-      // Deselecting an active type — if it's the last one, wrap back to all
+      // Remove this type; empty result wraps back to all
       const next = activeTypes.filter((t) => t !== type);
       onSetTypes(next);
     } else {
-      // Reselecting a gray type — if now all selected, normalize to []
+      // Add this type; if now all selected, normalize to []
       const next = [...activeTypes, type];
       onSetTypes(next.length === POST_TYPE_NAMES.length ? [] : next);
     }
