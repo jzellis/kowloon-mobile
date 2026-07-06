@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { useFocusEffect, useLocalSearchParams } from "expo-router";
+import { useSelector } from "react-redux";
 import {
   ActivityIndicator,
   Image,
   Linking,
+  Modal,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -11,7 +13,8 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ExternalLink, Globe, MapPin, Users } from "lucide-react-native";
+import { Check, ExternalLink, Globe, MapPin, PlusCircle, Users, X } from "lucide-react-native";
+import { selectActiveAccount } from "../../src/state/accountsSlice.js";
 
 import { BackLink } from "../../src/components/ui/BackLink.jsx";
 import { PostCard } from "../../src/components/posts/PostCard.jsx";
@@ -170,6 +173,7 @@ export default function ServerProfile() {
   const domain = decodeURIComponent(rawDomain || "");
   const client = useActiveClient();
   const baseUrl = client?.http?.baseUrl;
+  const account = useSelector(selectActiveAccount);
 
   const [server, setServer] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -185,6 +189,13 @@ export default function ServerProfile() {
   const [postsPage, setPostsPage] = useState(1);
   const [postsTotal, setPostsTotal] = useState(0);
   const [loadingMore, setLoadingMore] = useState(false);
+
+  // Circle picker
+  const [showPicker, setShowPicker] = useState(false);
+  const [pickerCircles, setPickerCircles] = useState([]);
+  const [pickerLoading, setPickerLoading] = useState(false);
+  const [addingTo, setAddingTo] = useState(null);
+  const [addedTo, setAddedTo] = useState(new Set());
 
   const loadServer = useCallback(
     async ({ isRefresh = false } = {}) => {
@@ -241,6 +252,34 @@ export default function ServerProfile() {
     },
     [domain]
   );
+
+  const openPicker = useCallback(async () => {
+    if (!client || !account?.id) return;
+    setShowPicker(true);
+    if (pickerCircles.length > 0) return;
+    setPickerLoading(true);
+    try {
+      const res = await client.feeds.getUserCircles({ userId: account.id });
+      setPickerCircles(res?.orderedItems ?? res?.items ?? []);
+    } catch {
+      // fail silently — show empty state in the modal
+    } finally {
+      setPickerLoading(false);
+    }
+  }, [client, account?.id, pickerCircles.length]);
+
+  const addToCircle = useCallback(async (circleId) => {
+    if (!client || addingTo) return;
+    setAddingTo(circleId);
+    try {
+      await client.activities.addToCircle({ circleId, memberId: `@${domain}` });
+      setAddedTo((prev) => new Set([...prev, circleId]));
+    } catch {
+      // leave addedTo unchanged so the user can retry
+    } finally {
+      setAddingTo(null);
+    }
+  }, [client, domain, addingTo]);
 
   // Always load server profile on focus; posts only when Posts tab is active.
   useFocusEffect(
@@ -368,6 +407,17 @@ export default function ServerProfile() {
               />
             ) : null}
           </View>
+
+          <Pressable
+            onPress={openPicker}
+            android_ripple={{ color: "rgba(0,0,0,0.06)" }}
+            className="flex-row items-center self-start border-2 border-base-content px-4 py-2.5 mt-4"
+          >
+            <PlusCircle size={14} color="rgba(26,26,32,0.8)" strokeWidth={2} />
+            <Text className="font-ui uppercase tracking-[0.16em] text-xs text-base-content ml-2">
+              Add to Circle
+            </Text>
+          </Pressable>
         </View>
 
         {/* Tab bar */}
@@ -464,6 +514,75 @@ export default function ServerProfile() {
           ) : null}
         </View>
       </ScrollView>
+      {/* Circle picker modal */}
+      <Modal
+        visible={showPicker}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowPicker(false)}
+      >
+        <Pressable
+          className="flex-1 bg-black/50"
+          onPress={() => setShowPicker(false)}
+        />
+        <View className="bg-base-100 border-t-2 border-base-content max-h-[60%]">
+          {/* Header */}
+          <View className="flex-row items-center justify-between px-5 pt-4 pb-3 border-b-2 border-base-content">
+            <Text className="font-ui text-lg text-base-content">
+              Add {domain} to Circle
+            </Text>
+            <Pressable onPress={() => setShowPicker(false)} hitSlop={8}>
+              <X size={18} color="rgba(26,26,32,0.7)" strokeWidth={2} />
+            </Pressable>
+          </View>
+
+          <ScrollView>
+            {pickerLoading ? (
+              <View className="py-10 items-center">
+                <ActivityIndicator />
+              </View>
+            ) : pickerCircles.length === 0 ? (
+              <View className="px-6 py-10 items-center">
+                <Text className="font-ui text-base text-base-content/55 text-center">
+                  No circles yet. Create one first.
+                </Text>
+              </View>
+            ) : (
+              pickerCircles.map((circle) => {
+                const isAdded = addedTo.has(circle.id);
+                const isAdding = addingTo === circle.id;
+                return (
+                  <Pressable
+                    key={circle.id}
+                    onPress={() => !isAdded && addToCircle(circle.id)}
+                    android_ripple={{ color: "rgba(0,0,0,0.05)" }}
+                    className="flex-row items-center justify-between px-5 py-4 border-b border-base-300"
+                  >
+                    <View className="flex-1 min-w-0 mr-3">
+                      <Text
+                        className={`font-ui text-base leading-tight ${isAdded ? "text-base-content/50" : "text-base-content"}`}
+                        numberOfLines={1}
+                      >
+                        {circle.name}
+                      </Text>
+                      {typeof circle.memberCount === "number" ? (
+                        <Text className="font-ui text-[11px] uppercase tracking-[0.14em] text-base-content/40 mt-0.5">
+                          {circle.memberCount.toLocaleString()} members
+                        </Text>
+                      ) : null}
+                    </View>
+                    {isAdding ? (
+                      <ActivityIndicator size="small" />
+                    ) : isAdded ? (
+                      <Check size={16} color="rgba(26,26,32,0.5)" strokeWidth={2.5} />
+                    ) : null}
+                  </Pressable>
+                );
+              })
+            )}
+          </ScrollView>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
