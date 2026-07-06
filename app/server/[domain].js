@@ -213,10 +213,12 @@ export default function ServerProfile() {
       setPostsError(null);
       try {
         const qs = `limit=${POSTS_PER_PAGE}${page > 1 ? `&page=${page}` : ""}`;
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 15000);
         const res = await fetch(`https://${domain}/posts?${qs}`, {
           headers: { Accept: "application/json" },
-          signal: AbortSignal.timeout(15000),
-        });
+          signal: controller.signal,
+        }).finally(() => clearTimeout(timer));
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         const items = data.orderedItems ?? data.items ?? [];
