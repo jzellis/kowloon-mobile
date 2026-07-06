@@ -13,6 +13,7 @@ import { useSelector } from "react-redux";
 import {
   ActivityIndicator,
   FlatList,
+  Image,
   Pressable,
   ScrollView,
   Text,
@@ -20,7 +21,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Search as SearchIcon, X } from "lucide-react-native";
+import { Globe, Search as SearchIcon, X } from "lucide-react-native";
 
 import { BackLink } from "../src/components/ui/BackLink.jsx";
 import { Avatar } from "../src/components/posts/Avatar.jsx";
@@ -29,6 +30,7 @@ import { GroupCard } from "../src/components/groups/GroupCard.jsx";
 import { BookmarkCard } from "../src/components/bookmarks/BookmarkCard.jsx";
 import { useActiveClient } from "../src/lib/useActiveClient.js";
 import { selectActiveAccount } from "../src/state/accountsSlice.js";
+import { resolveImageUrl } from "../src/lib/resolveImageUrl.js";
 
 const MIN_QUERY = 2;
 const ALL_PREVIEW = 4; // results shown per type on the "All" tab
@@ -88,6 +90,29 @@ export default function Search() {
 
   const tooShort = debounced.length > 0 && debounced.length < MIN_QUERY;
   const ready = !!client && debounced.length >= MIN_QUERY;
+
+  // Server lookup: query is @domain (starts with @, no second @)
+  const isServerQuery =
+    debounced.startsWith("@") && !debounced.slice(1).includes("@") && debounced.length > 1;
+
+  const [serverResult, setServerResult] = useState(null);
+  const [serverLoading, setServerLoading] = useState(false);
+
+  useEffect(() => {
+    if (!client || !isServerQuery) {
+      setServerResult(null);
+      return;
+    }
+    const domain = debounced.slice(1);
+    let cancelled = false;
+    setServerLoading(true);
+    client.feeds
+      .getServer({ domain })
+      .then((res) => { if (!cancelled) setServerResult(res); })
+      .catch(() => { if (!cancelled) setServerResult(null); })
+      .finally(() => { if (!cancelled) setServerLoading(false); });
+    return () => { cancelled = true; };
+  }, [client, debounced, isServerQuery]);
 
   // Primary fetch — re-runs whenever the query or active tab changes.
   useEffect(() => {
@@ -202,6 +227,7 @@ export default function Search() {
   );
 
   const allEmpty =
+    !serverResult &&
     sections.users.length === 0 &&
     sections.posts.length === 0 &&
     sections.groups.length === 0 &&
@@ -221,7 +247,7 @@ export default function Search() {
           <TextInput
             value={query}
             onChangeText={setQuery}
-            placeholder="Search people, posts, groups..."
+            placeholder="Search people, posts, groups... or @domain"
             placeholderTextColor="rgba(26,26,32,0.35)"
             autoFocus
             autoCapitalize="none"
@@ -261,7 +287,7 @@ export default function Search() {
 
       {/* Body */}
       {debounced.length === 0 ? (
-        <Hint primary="Find people, posts, groups, and your bookmarks." secondary="Type at least two letters to begin." />
+        <Hint primary="Find people, posts, groups, and your bookmarks." secondary={"Type at least two letters to begin.\nType @domain to look up another server."} />
       ) : tooShort ? (
         <Hint primary="Keep typing..." secondary="Searches start at two letters." />
       ) : loading ? (
@@ -279,6 +305,26 @@ export default function Search() {
           <NoResults query={debounced} />
         ) : (
           <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
+            {/* Server lookup result — shown when query is @domain */}
+            {(serverResult || serverLoading) ? (
+              <View>
+                <SectionHeader title="Server" showSeeAll={false} />
+                {serverLoading ? (
+                  <View className="px-5 py-4">
+                    <ActivityIndicator />
+                  </View>
+                ) : serverResult ? (
+                  <ServerResultCard
+                    server={serverResult}
+                    baseUrl={account?.baseUrl}
+                    onPress={() => {
+                      const d = serverResult?.domain;
+                      if (d) router.push(`/server/${encodeURIComponent(d)}`);
+                    }}
+                  />
+                ) : null}
+              </View>
+            ) : null}
             {TABS.filter((t) => t.key !== "all").map((t) => {
               const items = sections[t.key];
               if (!items || items.length === 0) return null;
@@ -316,6 +362,63 @@ export default function Search() {
         />
       )}
     </SafeAreaView>
+  );
+}
+
+// ── Server result card ───────────────────────────────────────────────────────
+function ServerResultCard({ server, baseUrl, onPress }) {
+  const [iconFailed, setIconFailed] = useState(false);
+  const iconSrc = resolveImageUrl(server?.icon, baseUrl);
+  const domain = server?.domain || "";
+  const name = server?.name || domain;
+
+  return (
+    <Pressable
+      onPress={onPress}
+      android_ripple={{ color: "rgba(0,0,0,0.05)" }}
+      className="flex-row items-center px-5 py-4 border-b border-base-300 bg-base-100"
+    >
+      {iconSrc && !iconFailed ? (
+        <Image
+          source={{ uri: iconSrc }}
+          style={{ width: 44, height: 44 }}
+          className="border-2 border-base-300 bg-base-200"
+          onError={() => setIconFailed(true)}
+        />
+      ) : (
+        <View
+          style={{ width: 44, height: 44 }}
+          className="border-2 border-base-300 bg-secondary items-center justify-center"
+        >
+          <Globe size={20} color="rgba(255,244,224,0.7)" strokeWidth={1.75} />
+        </View>
+      )}
+      <View className="flex-1 ml-3 min-w-0">
+        <Text
+          className="font-ui text-lg text-base-content leading-tight"
+          numberOfLines={1}
+        >
+          {name}
+        </Text>
+        <Text
+          className="font-ui text-[11px] uppercase tracking-[0.14em] text-base-content/50 mt-0.5"
+          numberOfLines={1}
+        >
+          {domain}
+          {typeof server?.userCount === "number"
+            ? `  ·  ${server.userCount.toLocaleString()} users`
+            : ""}
+        </Text>
+        {server?.description ? (
+          <Text
+            className="font-ui text-xs text-base-content/70 leading-snug mt-1"
+            numberOfLines={2}
+          >
+            {server.description}
+          </Text>
+        ) : null}
+      </View>
+    </Pressable>
   );
 }
 
