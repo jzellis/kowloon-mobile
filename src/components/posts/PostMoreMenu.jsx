@@ -19,7 +19,14 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react-native";
-import * as Clipboard from "expo-clipboard";
+// expo-clipboard requires a native module. Guard against builds where the
+// correct SDK-matched version wasn't included at native compile time.
+let Clipboard;
+try {
+  Clipboard = require("expo-clipboard");
+} catch {
+  Clipboard = { setStringAsync: async () => {} };
+}
 import { FlagSheet } from "./FlagSheet.jsx";
 
 const DROPDOWN_WIDTH = 210;

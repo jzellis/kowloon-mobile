@@ -191,7 +191,10 @@ export default function Feed() {
   // calling router.replace synchronously in the render path.
   useEffect(() => {
     if (!account) router.replace("/welcome");
-  }, [account, router]);
+  // router is a stable API object, not reactive state — including it causes
+  // this effect to re-fire every render and rapid-navigate on iOS dev client.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [account]);
 
   if (!account) return null;
 
