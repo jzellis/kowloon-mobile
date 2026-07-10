@@ -39,3 +39,6 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# design-sync (generated bundle uploaded to claude.ai/design)
+ds-bundle/
