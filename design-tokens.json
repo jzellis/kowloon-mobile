@@ -1,0 +1,152 @@
+{
+  "$meta": {
+    "name": "Kowloon Design Tokens",
+    "description": "Machine-readable design tokens for the Kowloon editorial aesthetic. Source of truth mirrors mobile/tailwind.config.js and mobile/src/lib/typography.js. See DESIGN_SYSTEM.md for usage notes.",
+    "version": "1.0.0",
+    "colorHexNote": "Hex approximations of the OKLCH source values in frontend/src/index.css."
+  },
+  "color": {
+    "base": {
+      "100": "#FAF4E8",
+      "200": "#EFE6D4",
+      "300": "#DDD0B5",
+      "content": "#1A1A20"
+    },
+    "primary": {
+      "default": "#5588B1",
+      "content": "#F4F5F7"
+    },
+    "secondary": {
+      "default": "#393B7A",
+      "content": "#FAF4E8"
+    },
+    "accent": {
+      "default": "#C0394A",
+      "content": "#F7E8E8"
+    },
+    "status": {
+      "success": { "default": "#2F9956", "content": "#F0F8F2" },
+      "warning": { "default": "#D9B038", "content": "#1A1A20" },
+      "error": { "default": "#C0394A", "content": "#F7E8E8" },
+      "info": { "default": "#3C8DB8", "content": "#F0F6FA" }
+    },
+    "post": {
+      "note": "#B76C00",
+      "article": "#006893",
+      "media": "#009084",
+      "link": "#417843",
+      "event": "#CC272E"
+    }
+  },
+  "ink": {
+    "description": "base.content applied at opacity steps for text hierarchy.",
+    "opacity": {
+      "primary": 1.0,
+      "label": 0.7,
+      "eyebrow": 0.6,
+      "muted": 0.5,
+      "meta": 0.45,
+      "tertiary": 0.4,
+      "placeholder": 0.35
+    }
+  },
+  "typography": {
+    "chromeFonts": {
+      "reading": "lora-regular",
+      "ui": "inter-regular",
+      "uiMedium": "inter-medium",
+      "mono": "monospace"
+    },
+    "readingFonts": [
+      { "key": "inter", "label": "Inter", "classification": "sans" },
+      { "key": "atkinson", "label": "Atkinson Hyperlegible", "classification": "sans" },
+      { "key": "lora", "label": "Lora", "classification": "serif" },
+      { "key": "merriweather", "label": "Merriweather", "classification": "serif" },
+      { "key": "opendyslexic", "label": "OpenDyslexic", "classification": "accessibility" }
+    ],
+    "fontSize": { "xs": 10, "s": 14, "m": 16, "l": 18, "xl": 21 },
+    "fontSizeOrder": ["xs", "s", "m", "l", "xl"],
+    "lineSpacing": { "compact": 1.3, "normal": 1.55, "relaxed": 1.8 },
+    "lineSpacingOrder": ["compact", "normal", "relaxed"],
+    "columnWidth": { "narrow": 36, "normal": 22, "wide": 12 },
+    "columnWidthOrder": ["narrow", "normal", "wide"],
+    "readingDefaults": {
+      "fontFamily": "inter",
+      "fontSize": "m",
+      "lineSpacing": "normal",
+      "columnWidth": "normal"
+    },
+    "letterSpacing": {
+      "eyebrow": "0.25em",
+      "fieldLabel": "0.22em",
+      "button": "0.18em",
+      "typeAccent": "0.16em",
+      "control": "0.12em"
+    },
+    "roles": {
+      "title": { "font": "ui", "size": 21, "weight": "regular", "case": "none", "lineHeight": "tight" },
+      "displayName": { "font": "uiMedium", "size": 14, "case": "none" },
+      "handle": { "font": "ui", "size": 12, "opacity": 0.5 },
+      "timestamp": { "font": "ui", "size": 12, "opacity": 0.5 },
+      "eyebrow": { "font": "ui", "size": 10, "case": "upper", "letterSpacing": "0.25em", "opacity": 0.6 },
+      "buttonLabel": { "font": "ui", "size": 14, "case": "upper", "letterSpacing": "0.18em" },
+      "fieldLabel": { "font": "ui", "size": 11, "case": "upper", "letterSpacing": "0.22em", "opacity": 0.7 },
+      "controlLabel": { "font": "ui", "size": 12, "case": "upper", "letterSpacing": "0.12em" },
+      "typeAccent": { "font": "ui", "size": 10, "case": "upper", "letterSpacing": "0.16em" }
+    }
+  },
+  "border": {
+    "radius": { "none": 0, "default": 0 },
+    "width": { "hairline": 1, "strong": 2 },
+    "tokens": {
+      "loud": { "width": 2, "color": "base.content" },
+      "quiet": { "width": 2, "color": "base.300" },
+      "divider": { "width": 1, "color": "base.200" },
+      "sectionRule": { "width": 2, "color": "base.300" }
+    }
+  },
+  "elevation": {
+    "note": "No shadows. Depth is conveyed by border weight and paper tone.",
+    "shadows": {}
+  },
+  "spacing": {
+    "scale": { "0": 0, "1": 4, "2": 8, "2.5": 10, "3": 12, "4": 16, "5": 20 },
+    "gutter": 20,
+    "cardPadding": { "x": 20, "y": 20 },
+    "control": {
+      "button": { "x": 20, "y": 12 },
+      "input": { "x": 12, "y": 12 },
+      "picker": { "x": 12, "y": 10 },
+      "sheetRow": { "x": 20, "y": 12 }
+    },
+    "fieldStackGap": 16,
+    "imageGridGap": 4
+  },
+  "radiusExceptions": {
+    "userAvatar": "circle (borderRadius = size / 2)",
+    "circleGroupAvatar": "flat-top hexagon (HexAvatar SVG ClipPath)"
+  },
+  "iconography": {
+    "set": "lucide-react-native",
+    "strokeWidth": 1.75,
+    "sizes": { "inline": 18, "bar": 22 },
+    "mutedColor": "rgba(26,26,32,0.55)"
+  },
+  "motion": {
+    "modalAnimation": "fade",
+    "pressFeedback": {
+      "androidRipple": {
+        "light": "rgba(0,0,0,0.04)",
+        "default": "rgba(0,0,0,0.06)",
+        "strong": "rgba(0,0,0,0.08)"
+      }
+    },
+    "note": "Minimal and functional. No decorative animation — the aesthetic is print-static."
+  },
+  "componentVariants": {
+    "button": ["primary", "secondary", "ghost"],
+    "buttonDisabledFillOpacity": 0.6,
+    "selectedRowFill": "secondary",
+    "avatarFallbackFill": "secondary"
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "$description": "Kowloon design tokens in W3C DTCG format for Penpot / Figma Tokens Studio / Style Dictionary. Generated from design-tokens.json. Import via Penpot > Tokens > Import (single-file JSON).",
+  "color": {
+    "$type": "color",
+    "base": {
+      "100": { "$value": "#FAF4E8" },
+      "200": { "$value": "#EFE6D4" },
+      "300": { "$value": "#DDD0B5" },
+      "content": { "$value": "#1A1A20" }
+    },
+    "primary": {
+      "default": { "$value": "#5588B1" },
+      "content": { "$value": "#F4F5F7" }
+    },
+    "secondary": {
+      "default": { "$value": "#393B7A" },
+      "content": { "$value": "#FAF4E8" }
+    },
+    "accent": {
+      "default": { "$value": "#C0394A" },
+      "content": { "$value": "#F7E8E8" }
+    },
+    "status": {
+      "success": { "$value": "#2F9956" },
+      "success-content": { "$value": "#F0F8F2" },
+      "warning": { "$value": "#D9B038" },
+      "warning-content": { "$value": "#1A1A20" },
+      "error": { "$value": "#C0394A" },
+      "error-content": { "$value": "#F7E8E8" },
+      "info": { "$value": "#3C8DB8" },
+      "info-content": { "$value": "#F0F6FA" }
+    },
+    "post": {
+      "note": { "$value": "#B76C00" },
+      "article": { "$value": "#006893" },
+      "media": { "$value": "#009084" },
+      "link": { "$value": "#417843" },
+      "event": { "$value": "#CC272E" }
+    }
+  },
+  "opacity": {
+    "$type": "opacity",
+    "ink-label": { "$value": 0.7 },
+    "ink-eyebrow": { "$value": 0.6 },
+    "ink-muted": { "$value": 0.5 },
+    "ink-meta": { "$value": 0.45 },
+    "ink-tertiary": { "$value": 0.4 },
+    "ink-placeholder": { "$value": 0.35 },
+    "button-disabled-fill": { "$value": 0.6 }
+  },
+  "spacing": {
+    "$type": "dimension",
+    "0": { "$value": "0px" },
+    "1": { "$value": "4px" },
+    "2": { "$value": "8px" },
+    "2-5": { "$value": "10px" },
+    "3": { "$value": "12px" },
+    "4": { "$value": "16px" },
+    "5": { "$value": "20px" },
+    "gutter": { "$value": "20px" },
+    "field-stack-gap": { "$value": "16px" },
+    "image-grid-gap": { "$value": "4px" }
+  },
+  "fontSize": {
+    "$type": "dimension",
+    "xs": { "$value": "10px" },
+    "s": { "$value": "14px" },
+    "m": { "$value": "16px" },
+    "l": { "$value": "18px" },
+    "xl": { "$value": "21px" }
+  },
+  "borderWidth": {
+    "$type": "dimension",
+    "hairline": { "$value": "1px" },
+    "strong": { "$value": "2px" }
+  },
+  "borderRadius": {
+    "$type": "dimension",
+    "none": { "$value": "0px" },
+    "default": { "$value": "0px" }
+  },
+  "fontFamily": {
+    "$type": "fontFamily",
+    "reading": { "$value": "Lora" },
+    "ui": { "$value": "Inter" },
+    "mono": { "$value": "monospace" }
+  }
+}
