@@ -3,13 +3,13 @@
     "name": "Kowloon Design Tokens",
     "description": "Machine-readable design tokens for the Kowloon editorial aesthetic. Source of truth mirrors mobile/tailwind.config.js and mobile/src/lib/typography.js. See DESIGN_SYSTEM.md for usage notes.",
     "version": "1.0.0",
-    "colorHexNote": "Hex approximations of the OKLCH source values in frontend/src/index.css."
+    "colorHexNote": "Paper (base-100/200/300) desaturated, plus a Klein blue header and near-white field surface added 2026-07 as mobile-first design decisions. These diverge from frontend/src/index.css (OKLCH), which has not yet been updated to match."
   },
   "color": {
     "base": {
-      "100": "#FAF4E8",
-      "200": "#EFE6D4",
-      "300": "#DDD0B5",
+      "100": "#F7F3EC",
+      "200": "#EAE4D8",
+      "300": "#D8CFBD",
       "content": "#1A1A20"
     },
     "primary": {
@@ -36,7 +36,9 @@
       "media": "#009084",
       "link": "#417843",
       "event": "#CC272E"
-    }
+    },
+    "header": { "default": "#002FA7", "content": "#FFFFFF" },
+    "field": "#FCFBF7"
   },
   "ink": {
     "description": "base.content applied at opacity steps for text hierarchy.",
@@ -52,10 +54,11 @@
   },
   "typography": {
     "chromeFonts": {
-      "reading": "lora-regular",
-      "ui": "inter-regular",
-      "uiMedium": "inter-medium",
-      "mono": "monospace"
+      "_note": "`family` is the runtime fontFamily identifier registered in src/lib/typography.js. Note the UI chrome family `inter-regular` resolves to Inter-Light.ttf, i.e. weight 300 — the name says 'regular' but the shipped face is Light, matching DESIGN_SYSTEM.md.",
+      "reading": { "family": "lora-regular", "typeface": "Lora", "weight": 400 },
+      "ui": { "family": "inter-regular", "typeface": "Inter", "weight": 300 },
+      "uiMedium": { "family": "inter-medium", "typeface": "Inter", "weight": 400 },
+      "mono": { "family": "monospace", "weight": 400 }
     },
     "readingFonts": [
       { "key": "inter", "label": "Inter", "classification": "sans" },

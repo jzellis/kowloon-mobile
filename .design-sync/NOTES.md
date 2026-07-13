@@ -30,6 +30,7 @@ and re-uploads in full — cheap here.
 
 ## Font weight note
 
-`design-tokens.json` `chromeFonts.ui` says `inter-regular`, but `DESIGN_SYSTEM.md`
-documents the UI chrome as Inter **Light (300)**. The web build ships Inter at
-300/400/700 and the base layer + conventions use 300 for chrome, matching the doc.
+Resolved: `design-tokens.json` `chromeFonts.ui` now carries an explicit
+`{ family: "inter-regular", weight: 300 }` — the runtime family name
+`inter-regular` resolves to `Inter-Light.ttf` (weight 300), matching
+`DESIGN_SYSTEM.md` and the web build (Inter 300/400/700, chrome uses 300).

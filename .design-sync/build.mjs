@@ -64,6 +64,11 @@ const colorLines = [
   `  --color-post-link: ${c.post.link};`,
   `  --color-post-event: ${c.post.event};`,
   "",
+  "  /* Klein blue app header (white sans) + near-white field surface */",
+  `  --color-header: ${c.header.default};`,
+  `  --color-header-content: ${c.header.content};`,
+  `  --color-field: ${c.field};`,
+  "",
   "  /* Ink at opacity steps -- text hierarchy on paper (never below /40 for readable text) */",
 ];
 for (const [k, v] of Object.entries(tokens.ink.opacity)) {

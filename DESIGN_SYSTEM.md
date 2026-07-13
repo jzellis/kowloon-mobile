@@ -31,15 +31,18 @@ Tokens live in `tailwind.config.js`; the typography engine lives in
 
 ## 2. Color
 
-Hex approximations of the OKLCH source values in `frontend/src/index.css`. Defined
-under `theme.extend.colors` in `tailwind.config.js`.
+Defined under `theme.extend.colors` in `tailwind.config.js`. Historically these
+were hex approximations of the OKLCH values in `frontend/src/index.css`; as of
+2026-07 the mobile paper is **desaturated** (less yellow) and a **Klein blue
+header** + a **near-white field surface** were added as mobile-first decisions,
+so mobile now diverges from the web theme until the frontend is updated to match.
 
 ### Surfaces & ink (`base`)
 | Token | Hex | Role |
 |---|---|---|
-| `base-100` | `#FAF4E8` | Warm cream paper — the default canvas / card fill |
-| `base-200` | `#EFE6D4` | Slightly deeper paper — dividers, image placeholders, hover |
-| `base-300` | `#DDD0B5` | Deepest paper — 2px borders on inputs/images |
+| `base-100` | `#F7F3EC` | Warm paper (desaturated) — the default canvas / card fill |
+| `base-200` | `#EAE4D8` | Slightly deeper paper — dividers, image placeholders, hover |
+| `base-300` | `#D8CFBD` | Deepest paper — 2px borders on inputs/images |
 | `base-content` | `#1A1A20` | Near-black ink — all primary text, strong borders |
 
 Ink is used at opacity steps for hierarchy: `/70` (secondary labels), `/60`
@@ -76,6 +79,12 @@ picker underline, and the feed-card accent (eyebrow label). Also duplicated in
 
 > NativeWind needs full class names at build time — you cannot interpolate
 > `text-post-${type}`. Use a static lookup map (see `TYPE_META` in `PostCard.jsx`).
+
+### App header & input surface
+| Token | Hex | Content-on | Role |
+|---|---|---|---|
+| `header` | `#002FA7` | `#FFFFFF` | Yves Klein blue — the app top header / masthead. Title set in white **sans** (Inter), not the display serif, and the blue extends up through the status-bar area. |
+| `field` | `#FCFBF7` | — | Near-white surface for all text inputs and the composer editor — lifts off the paper so an input reads as editable. Applied via `bg-field`. |
 
 ---
 
@@ -242,7 +251,7 @@ the aesthetic is print-static.
 - Interactive controls carry `accessibilityRole` / `accessibilityLabel`
   (e.g. the password reveal toggle) — continue this on new controls.
 - `hitSlop` on small tap targets (e.g. `8` on the eye toggle).
-- Ink-on-paper contrast (`#1A1A20` on `#FAF4E8`) is high; muted text stops at
+- Ink-on-paper contrast (`#1A1A20` on `#F7F3EC`) is high; muted text stops at
   `/45`–`/50` to stay legible. Avoid going below `/40` for anything readable.
 
 ### Known gap
@@ -255,8 +264,10 @@ files).
 ## 10. Quick token reference (for new components)
 
 ```
-Canvas         bg-base-100        (#FAF4E8)
+Canvas         bg-base-100        (#F7F3EC)
 Ink            text-base-content  (#1A1A20)
+App header     bg-header / text-header-content   (Klein blue #002FA7, white sans)
+Text input     bg-field           (#FCFBF7 near-white)
 Loud frame     border-2 border-base-content
 Quiet frame    border-2 border-base-300
 Row divider    border-b border-base-200

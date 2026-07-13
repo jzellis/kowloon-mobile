@@ -12,9 +12,9 @@ module.exports = {
         // Editorial palette — mirrors frontend's kowloon theme.
         // Hex approximations of the OKLCH source values in frontend/src/index.css
         base: {
-          100: "#FAF4E8", // warm cream paper
-          200: "#EFE6D4",
-          300: "#DDD0B5",
+          100: "#F7F3EC", // warm paper — desaturated 2026-07 (less yellow)
+          200: "#EAE4D8",
+          300: "#D8CFBD",
           content: "#1A1A20",
         },
         primary: {
@@ -53,6 +53,13 @@ module.exports = {
           link: "#417843",
           event: "#CC272E",
         },
+        // Klein blue app header (white sans on Yves Klein blue)
+        header: {
+          DEFAULT: "#002FA7",
+          content: "#FFFFFF",
+        },
+        // Near-white surface for text inputs / editors
+        field: "#FCFBF7",
       },
       fontFamily: {
         // Static chrome fonts — bundled via expo-font (see src/lib/typography.js).
