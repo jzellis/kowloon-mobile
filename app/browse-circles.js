@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { BackLink } from "../src/components/ui/BackLink.jsx";
+import { AppHeader } from "../src/components/nav/AppHeader.jsx";
 import { CircleCard } from "../src/components/circles/CircleCard.jsx";
 import { useActiveClient } from "../src/lib/useActiveClient.js";
 import { selectActiveAccount } from "../src/state/accountsSlice.js";
@@ -112,43 +112,38 @@ export default function BrowseCircles() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-base-100" edges={["top", "left", "right"]}>
-      {/* Masthead */}
-      <View className="px-5 pt-3 pb-4 border-b-2 border-base-content">
-        <BackLink />
-        <View className="flex-row items-end justify-between mt-2">
-          <Text className="font-ui text-3xl text-base-content leading-tight">
-            Discover Circles
-          </Text>
-          {/* Sort toggle */}
-          <View className="flex-row items-center border-2 border-base-300">
-            <Pressable
-              onPress={() => handleSortChange("reacts")}
-              android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-              className={`px-3 py-1.5 ${sort === "reacts" ? "bg-base-content" : "bg-transparent"}`}
+    <SafeAreaView className="flex-1 bg-base-100" edges={["left", "right"]}>
+      <AppHeader back title="Discover Circles" />
+
+      {/* Sort toggle sub-header */}
+      <View className="px-5 pt-3 pb-4 border-b-2 border-base-content flex-row justify-end">
+        <View className="flex-row items-center border-2 border-base-300">
+          <Pressable
+            onPress={() => handleSortChange("reacts")}
+            android_ripple={{ color: "rgba(0,0,0,0.06)" }}
+            className={`px-3 py-1.5 ${sort === "reacts" ? "bg-base-content" : "bg-transparent"}`}
+          >
+            <Text
+              className={`font-ui text-[11px] uppercase tracking-[0.16em] ${
+                sort === "reacts" ? "text-base-100" : "text-base-content/55"
+              }`}
             >
-              <Text
-                className={`font-ui text-[11px] uppercase tracking-[0.16em] ${
-                  sort === "reacts" ? "text-base-100" : "text-base-content/55"
-                }`}
-              >
-                Popular
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={() => handleSortChange("date")}
-              android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-              className={`px-3 py-1.5 border-l-2 border-base-300 ${sort === "date" ? "bg-base-content" : "bg-transparent"}`}
+              Popular
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => handleSortChange("date")}
+            android_ripple={{ color: "rgba(0,0,0,0.06)" }}
+            className={`px-3 py-1.5 border-l-2 border-base-300 ${sort === "date" ? "bg-base-content" : "bg-transparent"}`}
+          >
+            <Text
+              className={`font-ui text-[11px] uppercase tracking-[0.16em] ${
+                sort === "date" ? "text-base-100" : "text-base-content/55"
+              }`}
             >
-              <Text
-                className={`font-ui text-[11px] uppercase tracking-[0.16em] ${
-                  sort === "date" ? "text-base-100" : "text-base-content/55"
-                }`}
-              >
-                Newest
-              </Text>
-            </Pressable>
-          </View>
+              Newest
+            </Text>
+          </Pressable>
         </View>
       </View>
 

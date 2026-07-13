@@ -22,7 +22,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Link, MapPin } from "lucide-react-native";
 
 import { Avatar } from "../../../src/components/posts/Avatar.jsx";
-import { BackLink } from "../../../src/components/ui/BackLink.jsx";
+import { AppHeader, HeaderButton } from "../../../src/components/nav/AppHeader.jsx";
 import { BookmarkComposer } from "../../../src/components/bookmarks/BookmarkComposer.jsx";
 import { BookmarkTree } from "../../../src/components/bookmarks/BookmarkTree.jsx";
 import {
@@ -140,35 +140,36 @@ export default function UserProfile() {
     id: userId,
   };
 
+  const topHeader = (
+    <AppHeader
+      back
+      title="Profile"
+      right={
+        <View className="flex-row items-center" style={{ gap: 8 }}>
+          {urls.length > 0 ? (
+            <Pressable
+              onPress={() => setLinksOpen(true)}
+              hitSlop={8}
+              android_ripple={{ color: "rgba(255,255,255,0.18)", borderless: true }}
+              className="border-2 border-header-content w-9 h-9 items-center justify-center"
+            >
+              <Link size={16} color="#FFFFFF" strokeWidth={1.9} />
+            </Pressable>
+          ) : null}
+          {isSelf ? (
+            <HeaderButton
+              label="Edit"
+              onPress={() => router.push("/settings/profile")}
+            />
+          ) : null}
+        </View>
+      }
+    />
+  );
+
   function header() {
     return (
       <View>
-        <View className="px-5 pt-3 pb-2 flex-row items-center justify-between">
-          <BackLink />
-          <View className="flex-row items-center" style={{ gap: 8 }}>
-            {urls.length > 0 ? (
-              <Pressable
-                onPress={() => setLinksOpen(true)}
-                hitSlop={8}
-                android_ripple={{ color: "rgba(0,0,0,0.06)", borderless: true }}
-                className="border-2 border-base-content w-9 h-9 items-center justify-center"
-              >
-                <Link size={16} color="rgba(26,26,32,0.85)" strokeWidth={1.9} />
-              </Pressable>
-            ) : null}
-            {isSelf ? (
-              <Pressable
-                onPress={() => router.push("/settings/profile")}
-                android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-                className="border-2 border-base-content px-3 py-1.5"
-              >
-                <Text className="font-ui text-[11px] uppercase tracking-widest text-base-content">
-                  Edit Profile
-                </Text>
-              </Pressable>
-            ) : null}
-          </View>
-        </View>
         {featuredImage ? (
           <Image
             source={{ uri: featuredImage }}
@@ -275,7 +276,8 @@ export default function UserProfile() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-base-100" edges={["top", "left", "right"]}>
+      <SafeAreaView className="flex-1 bg-base-100" edges={["left", "right"]}>
+        {topHeader}
         {header()}
         <View className="py-20 items-center">
           <ActivityIndicator />
@@ -286,7 +288,8 @@ export default function UserProfile() {
 
   if (error) {
     return (
-      <SafeAreaView className="flex-1 bg-base-100" edges={["top", "left", "right"]}>
+      <SafeAreaView className="flex-1 bg-base-100" edges={["left", "right"]}>
+        {topHeader}
         {header()}
         <View className="py-20 items-center px-6">
           <Text className="font-ui text-base text-error text-center mb-4">
@@ -299,7 +302,8 @@ export default function UserProfile() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-base-100" edges={["top", "left", "right"]}>
+    <SafeAreaView className="flex-1 bg-base-100" edges={["left", "right"]}>
+      {topHeader}
       {tab === "bookmarks" ? (
         <ScrollView
           refreshControl={

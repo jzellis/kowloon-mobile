@@ -16,7 +16,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Check, ExternalLink, Globe, MapPin, PlusCircle, Users, X } from "lucide-react-native";
 import { selectActiveAccount } from "../../src/state/accountsSlice.js";
 
-import { BackLink } from "../../src/components/ui/BackLink.jsx";
+import { AppHeader } from "../../src/components/nav/AppHeader.jsx";
 import { PostCard } from "../../src/components/posts/PostCard.jsx";
 import { useActiveClient } from "../../src/lib/useActiveClient.js";
 import { resolveImageUrl } from "../../src/lib/resolveImageUrl.js";
@@ -301,19 +301,16 @@ export default function ServerProfile() {
 
   if (loading && !server) {
     return (
-      <SafeAreaView className="flex-1 bg-base-100 items-center justify-center" edges={["top"]}>
+      <View className="flex-1 bg-base-100 items-center justify-center">
         <ActivityIndicator />
-      </SafeAreaView>
+      </View>
     );
   }
 
   if (profileError && !server) {
     return (
-      <SafeAreaView className="flex-1 bg-base-100" edges={["top", "left", "right"]}>
-        <View className="px-5 pt-3 pb-4 border-b-2 border-base-content">
-          <BackLink />
-          <Text className="font-ui text-3xl text-base-content mt-2">{domain}</Text>
-        </View>
+      <SafeAreaView className="flex-1 bg-base-100" edges={["left", "right"]}>
+        <AppHeader back title={domain} />
         <View className="flex-1 items-center justify-center px-6">
           <Text className="font-ui text-base text-error text-center mb-4">{profileError}</Text>
           <Pressable
@@ -339,11 +336,8 @@ export default function ServerProfile() {
   const hasMore = posts.length < postsTotal;
 
   return (
-    <SafeAreaView className="flex-1 bg-base-100" edges={["top", "left", "right"]}>
-      {/* Fixed back bar */}
-      <View className="px-5 pt-3 pb-3 border-b-2 border-base-content">
-        <BackLink />
-      </View>
+    <SafeAreaView className="flex-1 bg-base-100" edges={["left", "right"]}>
+      <AppHeader back title={server?.name || domain} />
 
       <ScrollView
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}

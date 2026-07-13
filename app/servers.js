@@ -15,7 +15,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Globe } from "lucide-react-native";
 
-import { BackLink } from "../src/components/ui/BackLink.jsx";
+import { AppHeader } from "../src/components/nav/AppHeader.jsx";
 import { useActiveClient } from "../src/lib/useActiveClient.js";
 import { resolveImageUrl } from "../src/lib/resolveImageUrl.js";
 
@@ -108,13 +108,8 @@ export default function Servers() {
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
   return (
-    <SafeAreaView className="flex-1 bg-base-100" edges={["top", "left", "right"]}>
-      <View className="px-5 pt-3 pb-4 border-b-2 border-base-content">
-        <BackLink />
-        <Text className="font-ui text-3xl text-base-content mt-2">
-          Other Servers
-        </Text>
-      </View>
+    <SafeAreaView className="flex-1 bg-base-100" edges={["left", "right"]}>
+      <AppHeader back title="Other Servers" />
 
       <FlatList
         data={servers}

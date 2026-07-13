@@ -3,10 +3,9 @@
 
 import { useState } from "react";
 import { useRouter } from "expo-router";
-import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { BackLink } from "../../src/components/ui/BackLink.jsx";
+import { AppHeader } from "../../src/components/nav/AppHeader.jsx";
 import { GroupForm } from "../../src/components/groups/GroupForm.jsx";
 import { useActiveClient } from "../../src/lib/useActiveClient.js";
 import { uploadFile } from "../../src/lib/uploadFile.js";
@@ -89,13 +88,8 @@ export default function NewGroup() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-base-100" edges={["top", "left", "right"]}>
-      <View className="px-5 pt-3 pb-3 border-b-2 border-base-content">
-        <BackLink />
-        <Text className="font-ui text-3xl text-base-content mt-2">
-          New Group
-        </Text>
-      </View>
+    <SafeAreaView className="flex-1 bg-base-100" edges={["left", "right"]}>
+      <AppHeader back title="New Group" />
       <GroupForm
         mode="create"
         submitting={submitting}

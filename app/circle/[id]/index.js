@@ -19,7 +19,7 @@ import { useSelector } from "react-redux";
 import { Pencil, Trash2, X } from "lucide-react-native";
 
 import { Avatar } from "../../../src/components/posts/Avatar.jsx";
-import { BackLink } from "../../../src/components/ui/BackLink.jsx";
+import { AppHeader } from "../../../src/components/nav/AppHeader.jsx";
 import { Button } from "../../../src/components/ui/Button.jsx";
 import { CircleAvatar } from "../../../src/components/circles/CircleAvatar.jsx";
 import { CircleHeartButton } from "../../../src/components/circles/CircleHeartButton.jsx";
@@ -182,12 +182,9 @@ export default function CircleDetail() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-base-100" edges={["top", "left", "right"]}>
+    <SafeAreaView className="flex-1 bg-base-100" edges={["left", "right"]}>
+      <AppHeader back title={circle?.name || "Circle"} />
       <ScrollView contentContainerStyle={{ paddingBottom: (insets.bottom || 0) + (isOwner ? 100 : 40) }}>
-        <View className="px-5 pt-3">
-          <BackLink />
-        </View>
-
         {loading ? (
           <View className="py-20 items-center">
             <ActivityIndicator />

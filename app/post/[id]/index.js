@@ -9,7 +9,7 @@ import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-nati
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Avatar } from "../../../src/components/posts/Avatar.jsx";
-import { BackLink } from "../../../src/components/ui/BackLink.jsx";
+import { AppHeader } from "../../../src/components/nav/AppHeader.jsx";
 import { Button } from "../../../src/components/ui/Button.jsx";
 import { Eyebrow } from "../../../src/components/ui/Heading.jsx";
 import { PostActionBar } from "../../../src/components/posts/PostActionBar.jsx";
@@ -108,8 +108,9 @@ export default function PostDetail() {
   return (
     <SafeAreaView
       className="flex-1 bg-base-100"
-      edges={keyboardInset > 0 ? ["top", "left", "right"] : ["top", "left", "right", "bottom"]}
+      edges={keyboardInset > 0 ? ["left", "right"] : ["left", "right", "bottom"]}
     >
+      <AppHeader back title="Post" />
       <ScrollView
         ref={scrollRef}
         contentContainerStyle={{ paddingBottom: 48 + keyboardInset }}
@@ -130,10 +131,6 @@ export default function PostDetail() {
           <>
             {/* Type accent bar */}
             <View className={`h-[3px] ${typeBar}`} />
-
-            <View className="px-5 pt-3">
-              <BackLink />
-            </View>
 
             {/* Header */}
             <View className="px-5 pt-4">

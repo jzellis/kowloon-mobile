@@ -20,7 +20,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Check, X } from "lucide-react-native";
 
 import { Avatar } from "../../../src/components/posts/Avatar.jsx";
-import { BackLink } from "../../../src/components/ui/BackLink.jsx";
+import { AppHeader } from "../../../src/components/nav/AppHeader.jsx";
 import { Button } from "../../../src/components/ui/Button.jsx";
 import { useActiveClient } from "../../../src/lib/useActiveClient.js";
 import { selectActiveAccount } from "../../../src/state/accountsSlice.js";
@@ -115,13 +115,8 @@ export default function PendingRequests() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-base-100" edges={["top", "left", "right"]}>
-      <View className="px-5 pt-3 pb-3 border-b-2 border-base-content">
-        <BackLink />
-        <Text className="font-ui text-3xl text-base-content mt-2">
-          Pending Requests
-        </Text>
-      </View>
+    <SafeAreaView className="flex-1 bg-base-100" edges={["left", "right"]}>
+      <AppHeader back title="Pending Requests" />
 
       <ScrollView
         refreshControl={

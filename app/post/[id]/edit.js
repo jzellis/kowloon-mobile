@@ -17,7 +17,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSelector } from "react-redux";
 
-import { BackLink } from "../../../src/components/ui/BackLink.jsx";
+import { AppHeader } from "../../../src/components/nav/AppHeader.jsx";
 import { Button } from "../../../src/components/ui/Button.jsx";
 import { DateTimeField } from "../../../src/components/posts/DateTimeField.jsx";
 import { useActiveClient } from "../../../src/lib/useActiveClient.js";
@@ -138,13 +138,8 @@ export default function EditPost() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-base-100" edges={["top", "left", "right"]}>
-      <View className="px-5 pt-3 pb-3 border-b-2 border-base-content">
-        <BackLink />
-        <Text className="font-ui text-3xl text-base-content mt-2">
-          Edit {type}
-        </Text>
-      </View>
+    <SafeAreaView className="flex-1 bg-base-100" edges={["left", "right"]}>
+      <AppHeader back title={`Edit ${type}`} />
 
       {loading ? (
         <View className="py-20 items-center">

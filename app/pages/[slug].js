@@ -10,7 +10,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { BookOpen, Tag } from "lucide-react-native";
 
 import { Avatar } from "../../src/components/posts/Avatar.jsx";
-import { BackLink } from "../../src/components/ui/BackLink.jsx";
+import { AppHeader } from "../../src/components/nav/AppHeader.jsx";
 import { Button } from "../../src/components/ui/Button.jsx";
 import { Eyebrow } from "../../src/components/ui/Heading.jsx";
 import { HtmlContent } from "../../src/components/HtmlContent.jsx";
@@ -79,7 +79,8 @@ export default function PageDetail() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-base-100" edges={["top", "left", "right"]}>
+    <SafeAreaView className="flex-1 bg-base-100" edges={["left", "right"]}>
+      <AppHeader back title={page?.title || page?.name} />
       <ScrollView contentContainerStyle={{ paddingBottom: 48 }}>
         {loading ? (
           <View className="py-20 items-center">
@@ -94,12 +95,8 @@ export default function PageDetail() {
           </View>
         ) : page ? (
           <>
-            <View className="px-5 pt-3 pb-2">
-              <BackLink />
-            </View>
-
             {/* Header */}
-            <View className="px-5 pt-2">
+            <View className="px-5 pt-5">
               <Eyebrow>Page</Eyebrow>
               <Text className="font-ui text-3xl text-base-content leading-tight mt-2 mb-3">
                 {page.title || page.name}
