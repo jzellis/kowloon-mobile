@@ -11,6 +11,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Button } from "../../src/components/ui/Button.jsx";
 import { Eyebrow, Heading } from "../../src/components/ui/Heading.jsx";
+import { AppHeader } from "../../src/components/nav/AppHeader.jsx";
 import { SegmentedControl } from "../../src/components/ui/SegmentedControl.jsx";
 import { useTypography } from "../../src/lib/TypographyContext.js";
 import {
@@ -55,13 +56,10 @@ export default function TypographySettings() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-base-100">
+    <SafeAreaView className="flex-1 bg-base-100" edges={["left", "right", "bottom"]}>
+      <AppHeader back title="Typography" />
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
-        <View className="px-6 pt-10">
-          <Eyebrow>Settings</Eyebrow>
-          <Heading className="text-4xl mt-2 mb-1 leading-tight">
-            Typography
-          </Heading>
+        <View className="px-6 pt-6">
           <Text className="font-ui text-base text-base-content/70 leading-6 mb-6">
             Tune how Kowloon reads. Changes follow your account across every
             device.

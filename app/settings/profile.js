@@ -23,6 +23,7 @@ import * as ImagePicker from "expo-image-picker";
 
 import { Avatar } from "../../src/components/posts/Avatar.jsx";
 import { Eyebrow, Heading } from "../../src/components/ui/Heading.jsx";
+import { AppHeader } from "../../src/components/nav/AppHeader.jsx";
 import { Button } from "../../src/components/ui/Button.jsx";
 import { useActiveClient } from "../../src/lib/useActiveClient.js";
 import {
@@ -188,7 +189,8 @@ export default function ProfileSettings() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-base-100" edges={["top", "bottom"]}>
+    <SafeAreaView className="flex-1 bg-base-100" edges={["left", "right", "bottom"]}>
+      <AppHeader back title="Edit Profile" />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -197,12 +199,7 @@ export default function ProfileSettings() {
           contentContainerStyle={{ paddingBottom: 24 }}
           keyboardShouldPersistTaps="handled"
         >
-          <View className="px-6 pt-10">
-            <Eyebrow>Settings</Eyebrow>
-            <Heading className="text-4xl mt-2 mb-6 leading-tight">
-              Edit Profile
-            </Heading>
-
+          <View className="px-6 pt-6">
             {/* Avatar */}
             <Field label="Avatar">
               <View className="flex-row items-center gap-4">

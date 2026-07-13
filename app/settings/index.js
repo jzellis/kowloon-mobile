@@ -10,6 +10,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Avatar } from "../../src/components/posts/Avatar.jsx";
 import { Button } from "../../src/components/ui/Button.jsx";
 import { Eyebrow, Heading } from "../../src/components/ui/Heading.jsx";
+import { AppHeader } from "../../src/components/nav/AppHeader.jsx";
 import {
   selectAccounts,
   selectActiveId,
@@ -127,14 +128,10 @@ export default function Settings() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-base-100">
+    <SafeAreaView className="flex-1 bg-base-100" edges={["left", "right", "bottom"]}>
+      <AppHeader back title="Settings" />
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
-        <View className="px-6 pt-10">
-          <Eyebrow>App</Eyebrow>
-          <Heading className="text-4xl mt-2 mb-6 leading-tight">
-            Settings
-          </Heading>
-
+        <View className="px-6 pt-6">
           {/* ── Accounts ── */}
           <SectionLabel>Accounts</SectionLabel>
           {accounts.map((account) => (
