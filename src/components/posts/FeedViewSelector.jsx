@@ -23,6 +23,9 @@ import { useSelector } from "react-redux";
 import { useActiveClient } from "../../lib/useActiveClient.js";
 import { useJoinedGroups } from "../../lib/useJoinedGroups.js";
 import { selectActiveAccount } from "../../state/accountsSlice.js";
+import { ServerFeedIcon } from "./ServerFeedIcon.jsx";
+import { HexAvatar } from "../ui/HexAvatar.jsx";
+import { resolveImageUrl } from "../../lib/resolveImageUrl.js";
 
 const DROPDOWN_WIDTH = 240;
 const MAX_LIST_HEIGHT = 320;
@@ -36,6 +39,8 @@ export function FeedViewSelector({ value, onChange }) {
   const [circles, setCircles] = useState([]);
   const [search, setSearch] = useState("");
   const { groups } = useJoinedGroups();
+  const baseUrl = client?.http?.baseUrl;
+  const [serverIcon, setServerIcon] = useState(null);
 
   const serverViews = useMemo(
     () => [
@@ -71,6 +76,40 @@ export function FeedViewSelector({ value, onChange }) {
       cancelled = true;
     };
   }, [client, account?.id]);
+
+  // Server icon for the Public/Server overlay glyphs.
+  useEffect(() => {
+    if (!client) return;
+    let cancelled = false;
+    client.feeds
+      .getServerInfo()
+      .then((info) => {
+        if (!cancelled && info?.icon) {
+          setServerIcon(resolveImageUrl(info.icon, baseUrl));
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [client, baseUrl]);
+
+  // Icon for the collapsed trigger: server overlay for Public/Server, the
+  // circle's / group's hex avatar otherwise.
+  function iconFor(value, size = 20) {
+    if (value === "server") {
+      return <ServerFeedIcon iconUrl={serverIcon} variant="server" size={size} />;
+    }
+    const circle = circles.find((c) => c.id === value);
+    if (circle) {
+      return <HexAvatar uri={resolveImageUrl(circle.icon, baseUrl)} size={size} />;
+    }
+    const group = groups.find((g) => g.id === value);
+    if (group) {
+      return <HexAvatar uri={resolveImageUrl(group.icon, baseUrl)} size={size} />;
+    }
+    return <ServerFeedIcon iconUrl={serverIcon} variant="public" size={size} />;
+  }
 
   const currentLabel =
     serverViews.find((v) => v.value === value)?.label ||
@@ -120,6 +159,7 @@ export function FeedViewSelector({ value, onChange }) {
         hitSlop={6}
         className="flex-row items-center"
       >
+        <View className="mr-2">{iconFor(value, 20)}</View>
         <Text
           className="font-ui text-sm tracking-tight text-base-content mr-1"
           numberOfLines={1}
@@ -160,6 +200,13 @@ export function FeedViewSelector({ value, onChange }) {
                   summary={v.summary}
                   selected={value === v.value}
                   onPress={() => select(v.value)}
+                  icon={
+                    <ServerFeedIcon
+                      iconUrl={serverIcon}
+                      variant={v.value === "server" ? "server" : "public"}
+                      size={22}
+                    />
+                  }
                 />
               ))}
 
@@ -187,6 +234,12 @@ export function FeedViewSelector({ value, onChange }) {
                       summary={c.summary}
                       selected={value === c.id}
                       onPress={() => select(c.id)}
+                      icon={
+                        <HexAvatar
+                          uri={resolveImageUrl(c.icon, baseUrl)}
+                          size={22}
+                        />
+                      }
                     />
                   ))}
                   {showSearch && filteredCircles.length === 0 ? (
@@ -208,6 +261,12 @@ export function FeedViewSelector({ value, onChange }) {
                       label={g.name}
                       selected={value === g.id}
                       onPress={() => select(g.id)}
+                      icon={
+                        <HexAvatar
+                          uri={resolveImageUrl(g.icon, baseUrl)}
+                          size={22}
+                        />
+                      }
                     />
                   ))}
                 </View>
@@ -220,29 +279,32 @@ export function FeedViewSelector({ value, onChange }) {
   );
 }
 
-function Row({ label, summary, selected, onPress }) {
+function Row({ label, summary, selected, onPress, icon }) {
   return (
     <Pressable
       onPress={onPress}
       android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-      className={`px-4 py-3 ${selected ? "bg-secondary" : ""}`}
+      className={`flex-row items-center px-4 py-3 ${selected ? "bg-secondary" : ""}`}
     >
-      <Text
-        className={`font-ui uppercase tracking-[0.14em] text-xs ${
-          selected ? "text-secondary-content" : "text-base-content"
-        }`}
-      >
-        {label}
-      </Text>
-      {summary ? (
+      {icon ? <View className="mr-3">{icon}</View> : null}
+      <View className="flex-1 min-w-0">
         <Text
-          className={`font-ui text-xs mt-0.5 ${
-            selected ? "text-secondary-content/70" : "text-base-content/45"
+          className={`font-ui uppercase tracking-[0.14em] text-xs ${
+            selected ? "text-secondary-content" : "text-base-content"
           }`}
         >
-          {summary}
+          {label}
         </Text>
-      ) : null}
+        {summary ? (
+          <Text
+            className={`font-ui text-xs mt-0.5 ${
+              selected ? "text-secondary-content/70" : "text-base-content/45"
+            }`}
+          >
+            {summary}
+          </Text>
+        ) : null}
+      </View>
     </Pressable>
   );
 }

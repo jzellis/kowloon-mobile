@@ -219,62 +219,64 @@ export default function Feed() {
   if (!account) return null;
 
   return (
-    <SafeAreaView className="flex-1 bg-base-100" edges={["top"]}>
-      {/* Masthead */}
-      <View className="px-5 pt-2 pb-3 border-b-2 border-base-content flex-row items-center">
-        <Pressable
-          onPress={() => setDrawerOpen(true)}
-          hitSlop={8}
-          android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-          className="flex-row items-center flex-1 min-w-0 mr-3"
-        >
-          <View className="w-6 h-6 bg-secondary items-center justify-center overflow-hidden mr-2.5">
-            {serverIcon ? (
-              <Image
-                source={{ uri: serverIcon }}
-                style={{ width: 24, height: 24 }}
-                resizeMode="cover"
-              />
-            ) : (
-              <Globe
-                size={15}
-                color="rgba(255,244,224,0.85)"
-                strokeWidth={1.75}
-              />
-            )}
-          </View>
-          <Text
-            className="font-ui text-xl tracking-tight text-base-content flex-1"
-            numberOfLines={1}
+    <View className="flex-1 bg-base-100">
+      {/* Masthead — Klein blue. Server icon + name opens the drawer; the
+          account avatar opens the account menu. */}
+      <SafeAreaView edges={["top"]} className="bg-header">
+        <View className="px-5 pt-2 pb-3 flex-row items-center">
+          <Pressable
+            onPress={() => setDrawerOpen(true)}
+            hitSlop={8}
+            android_ripple={{ color: "rgba(255,255,255,0.15)" }}
+            className="flex-row items-center flex-1 min-w-0 mr-3"
           >
-            {account.serverName || account.server}
-          </Text>
-        </Pressable>
-        <Pressable
-          onPress={() => setMenuOpen(true)}
-          hitSlop={8}
-          android_ripple={{ color: "rgba(0,0,0,0.06)", borderless: true }}
-        >
-          <View className="relative">
-            <Avatar
-              actor={{
-                name: account.profile?.name || account.username,
-                icon: account.profile?.icon || null,
-                id: account.id,
-              }}
-              size={38}
-              baseUrl={account.baseUrl}
-            />
-            {unreadCount > 0 ? (
-              <View className="absolute -top-1 -right-1 bg-primary border-2 border-base-100 min-w-[20px] h-5 items-center justify-center px-1">
-                <Text className="font-ui text-[10px] font-bold text-primary-content">
-                  {unreadCount > 99 ? "99+" : unreadCount}
-                </Text>
-              </View>
-            ) : null}
-          </View>
-        </Pressable>
-      </View>
+            <View
+              className="w-6 h-6 items-center justify-center overflow-hidden mr-2.5"
+              style={{ backgroundColor: "rgba(255,255,255,0.16)" }}
+            >
+              {serverIcon ? (
+                <Image
+                  source={{ uri: serverIcon }}
+                  style={{ width: 24, height: 24 }}
+                  resizeMode="cover"
+                />
+              ) : (
+                <Globe size={15} color="#FFFFFF" strokeWidth={1.75} />
+              )}
+            </View>
+            <Text
+              className="font-ui text-xl tracking-tight text-header-content flex-1"
+              numberOfLines={1}
+            >
+              {account.serverName || account.server}
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => setMenuOpen(true)}
+            hitSlop={8}
+            android_ripple={{ color: "rgba(255,255,255,0.15)", borderless: true }}
+          >
+            <View className="relative">
+              <Avatar
+                actor={{
+                  name: account.profile?.name || account.username,
+                  icon: account.profile?.icon || null,
+                  id: account.id,
+                }}
+                size={38}
+                baseUrl={account.baseUrl}
+              />
+              {unreadCount > 0 ? (
+                <View className="absolute -top-1 -right-1 bg-accent border-2 border-header min-w-[20px] h-5 items-center justify-center px-1">
+                  <Text className="font-ui text-[10px] font-bold text-accent-content">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
+          </Pressable>
+        </View>
+      </SafeAreaView>
 
       <LeftDrawer visible={drawerOpen} onClose={() => setDrawerOpen(false)} />
       <UserMenu visible={menuOpen} onClose={() => setMenuOpen(false)} />
@@ -351,6 +353,6 @@ export default function Feed() {
           +
         </Text>
       </Pressable>
-    </SafeAreaView>
+    </View>
   );
 }

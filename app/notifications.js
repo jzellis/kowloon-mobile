@@ -21,6 +21,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { BackLink } from "../src/components/ui/BackLink.jsx";
 import { NotificationRow } from "../src/components/notifications/NotificationRow.jsx";
 import { BottomTabBar } from "../src/components/nav/BottomTabBar.jsx";
+import { AppHeader, HeaderButton } from "../src/components/nav/AppHeader.jsx";
 import { useActiveClient } from "../src/lib/useActiveClient.js";
 import { useUnreadCount } from "../src/lib/UnreadCountContext.js";
 import { NOTIF_TYPES, notificationRoute } from "../src/lib/notifications.js";
@@ -115,28 +116,15 @@ export default function Notifications() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-base-100" edges={["top", "left", "right"]}>
-      {/* Masthead */}
-      <View className="px-5 pt-3 pb-3 border-b-2 border-base-content">
-        <BackLink />
-        <View className="flex-row items-end justify-between mt-2">
-          <Text className="font-ui text-3xl text-base-content">
-            Notifications
-          </Text>
-          {unreadCount > 0 ? (
-            <Pressable
-              onPress={handleMarkAllRead}
-              hitSlop={6}
-              android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-              className="border-2 border-base-content px-3 py-1.5"
-            >
-              <Text className="font-ui uppercase tracking-[0.16em] text-[11px] text-base-content">
-                Mark all read
-              </Text>
-            </Pressable>
-          ) : null}
-        </View>
-      </View>
+    <SafeAreaView className="flex-1 bg-base-100" edges={["left", "right"]}>
+      <AppHeader
+        title="Notifications"
+        right={
+          unreadCount > 0 ? (
+            <HeaderButton label="Mark all read" onPress={handleMarkAllRead} />
+          ) : null
+        }
+      />
 
       {/* Filter chips */}
       <View className="border-b-2 border-base-300">

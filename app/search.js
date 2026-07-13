@@ -29,6 +29,7 @@ import { PostCard } from "../src/components/posts/PostCard.jsx";
 import { GroupCard } from "../src/components/groups/GroupCard.jsx";
 import { BookmarkCard } from "../src/components/bookmarks/BookmarkCard.jsx";
 import { BottomTabBar } from "../src/components/nav/BottomTabBar.jsx";
+import { AppHeader } from "../src/components/nav/AppHeader.jsx";
 import { useActiveClient } from "../src/lib/useActiveClient.js";
 import { selectActiveAccount } from "../src/state/accountsSlice.js";
 import { resolveImageUrl } from "../src/lib/resolveImageUrl.js";
@@ -235,15 +236,11 @@ export default function Search() {
     sections.bookmarks.length === 0;
 
   return (
-    <SafeAreaView className="flex-1 bg-base-100" edges={["top", "left", "right"]}>
-      {/* Masthead */}
+    <SafeAreaView className="flex-1 bg-base-100" edges={["left", "right"]}>
+      <AppHeader title="Search" />
+      {/* Search field */}
       <View className="px-5 pt-3 pb-3 border-b-2 border-base-content">
-        <BackLink />
-        <Text className="font-ui text-3xl text-base-content mt-2 mb-3">
-          Search
-        </Text>
-        {/* Search field */}
-        <View className="flex-row items-center border-2 border-base-300 bg-base-100 px-3">
+        <View className="flex-row items-center border-2 border-base-300 bg-field px-3">
           <SearchIcon size={16} color="rgba(26,26,32,0.45)" strokeWidth={2} />
           <TextInput
             value={query}

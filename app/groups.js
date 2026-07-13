@@ -18,6 +18,7 @@ import { Plus } from "lucide-react-native";
 import { BackLink } from "../src/components/ui/BackLink.jsx";
 import { GroupCard } from "../src/components/groups/GroupCard.jsx";
 import { BottomTabBar } from "../src/components/nav/BottomTabBar.jsx";
+import { AppHeader, HeaderButton } from "../src/components/nav/AppHeader.jsx";
 import { useActiveClient } from "../src/lib/useActiveClient.js";
 import { useJoinedGroups } from "../src/lib/useJoinedGroups.js";
 import { selectActiveAccount } from "../src/state/accountsSlice.js";
@@ -78,25 +79,17 @@ export default function Groups() {
       : () => loadBrowse({ isRefresh: true });
 
   return (
-    <SafeAreaView className="flex-1 bg-base-100" edges={["top", "left", "right"]}>
-      {/* Masthead */}
-      <View className="px-5 pt-3 pb-3 border-b-2 border-base-content">
-        <BackLink />
-        <View className="flex-row items-end justify-between mt-2">
-          <Text className="font-ui text-3xl text-base-content">Groups</Text>
-          <Pressable
+    <SafeAreaView className="flex-1 bg-base-100" edges={["left", "right"]}>
+      <AppHeader
+        title="Groups"
+        right={
+          <HeaderButton
+            label="New"
+            icon={<Plus size={14} color="#FFFFFF" strokeWidth={2} />}
             onPress={() => router.push("/group/new")}
-            hitSlop={8}
-            android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-            className="flex-row items-center border-2 border-base-content px-3 py-1.5"
-          >
-            <Plus size={14} color="rgba(26,26,32,0.85)" strokeWidth={2} />
-            <Text className="font-ui uppercase tracking-[0.16em] text-[11px] text-base-content ml-1.5">
-              New
-            </Text>
-          </Pressable>
-        </View>
-      </View>
+          />
+        }
+      />
 
       {/* Tabs */}
       <View className="flex-row border-b-2 border-base-300">
