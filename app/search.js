@@ -28,6 +28,7 @@ import { Avatar } from "../src/components/posts/Avatar.jsx";
 import { PostCard } from "../src/components/posts/PostCard.jsx";
 import { GroupCard } from "../src/components/groups/GroupCard.jsx";
 import { BookmarkCard } from "../src/components/bookmarks/BookmarkCard.jsx";
+import { BottomTabBar } from "../src/components/nav/BottomTabBar.jsx";
 import { useActiveClient } from "../src/lib/useActiveClient.js";
 import { selectActiveAccount } from "../src/state/accountsSlice.js";
 import { resolveImageUrl } from "../src/lib/resolveImageUrl.js";
@@ -286,6 +287,7 @@ export default function Search() {
       </View>
 
       {/* Body */}
+      <View className="flex-1">
       {debounced.length === 0 ? (
         <Hint primary="Find people, posts, groups, and your bookmarks." secondary={"Type at least two letters to begin.\nType @domain to look up another server."} />
       ) : tooShort ? (
@@ -347,6 +349,7 @@ export default function Search() {
         <NoResults query={debounced} />
       ) : (
         <FlatList
+          className="flex-1"
           data={list}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => renderItem(tab, item)}
@@ -361,6 +364,9 @@ export default function Search() {
           }
         />
       )}
+      </View>
+
+      <BottomTabBar active="search" />
     </SafeAreaView>
   );
 }

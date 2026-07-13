@@ -20,6 +20,7 @@ import { Plus } from "lucide-react-native";
 
 import { BackLink } from "../src/components/ui/BackLink.jsx";
 import { CircleCard } from "../src/components/circles/CircleCard.jsx";
+import { BottomTabBar } from "../src/components/nav/BottomTabBar.jsx";
 import { useActiveClient } from "../src/lib/useActiveClient.js";
 import { selectActiveAccount } from "../src/state/accountsSlice.js";
 
@@ -84,6 +85,7 @@ export default function Circles() {
       </View>
 
       <FlatList
+        className="flex-1"
         data={circles}
         keyExtractor={(c) => c.id}
         renderItem={({ item }) => (
@@ -135,6 +137,8 @@ export default function Circles() {
           )
         }
       />
+
+      <BottomTabBar active="circles" />
     </SafeAreaView>
   );
 }

@@ -17,6 +17,7 @@ import { Plus } from "lucide-react-native";
 
 import { BackLink } from "../src/components/ui/BackLink.jsx";
 import { GroupCard } from "../src/components/groups/GroupCard.jsx";
+import { BottomTabBar } from "../src/components/nav/BottomTabBar.jsx";
 import { useActiveClient } from "../src/lib/useActiveClient.js";
 import { useJoinedGroups } from "../src/lib/useJoinedGroups.js";
 import { selectActiveAccount } from "../src/state/accountsSlice.js";
@@ -115,6 +116,7 @@ export default function Groups() {
       </View>
 
       <FlatList
+        className="flex-1"
         data={data}
         keyExtractor={(g) => g.id}
         renderItem={({ item }) => (
@@ -164,6 +166,8 @@ export default function Groups() {
           )
         }
       />
+
+      <BottomTabBar active="groups" />
     </SafeAreaView>
   );
 }

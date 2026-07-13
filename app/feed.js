@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   ActivityIndicator,
   FlatList,
+  Image,
   Pressable,
   RefreshControl,
   Text,
@@ -21,11 +22,13 @@ import { Avatar } from "../src/components/posts/Avatar.jsx";
 import { FeedHeader } from "../src/components/posts/FeedHeader.jsx";
 import { UserMenu } from "../src/components/UserMenu.jsx";
 import { LeftDrawer } from "../src/components/drawer/LeftDrawer.jsx";
-import { Menu } from "lucide-react-native";
+import { BottomTabBar } from "../src/components/nav/BottomTabBar.jsx";
+import { Globe } from "lucide-react-native";
 import { useFeed } from "../src/lib/useFeed.js";
 import { useActiveClient } from "../src/lib/useActiveClient.js";
 import { useUnreadCount } from "../src/lib/UnreadCountContext.js";
 import { usePersistedFilter } from "../src/lib/usePersistedFilter.js";
+import { resolveImageUrl } from "../src/lib/resolveImageUrl.js";
 import {
   selectActiveAccount,
   updateAccountAndPersist,
@@ -41,6 +44,7 @@ export default function Feed() {
   const insets = useSafeAreaInsets();
   const [menuOpen, setMenuOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [serverIcon, setServerIcon] = useState(null);
   // Override the persisted view once when arriving via /feed?view=<key>
   // (e.g. tapping "View posts" on a circle or group detail screen).
   const viewOverrideRef = useRef(null);
@@ -64,6 +68,22 @@ export default function Feed() {
       }
       if (!cancelled) setPrefs(user?.prefs || {});
     })();
+    return () => {
+      cancelled = true;
+    };
+  }, [client]);
+
+  // Server icon for the masthead drawer toggle.
+  useEffect(() => {
+    if (!client) return;
+    let cancelled = false;
+    client.feeds
+      .getServerInfo()
+      .then((info) => {
+        if (cancelled || !info?.icon) return;
+        setServerIcon(resolveImageUrl(info.icon, client?.http?.baseUrl));
+      })
+      .catch(() => {});
     return () => {
       cancelled = true;
     };
@@ -205,17 +225,31 @@ export default function Feed() {
         <Pressable
           onPress={() => setDrawerOpen(true)}
           hitSlop={8}
-          android_ripple={{ color: "rgba(0,0,0,0.06)", borderless: true }}
-          className="mr-3"
+          android_ripple={{ color: "rgba(0,0,0,0.06)" }}
+          className="flex-row items-center flex-1 min-w-0 mr-3"
         >
-          <Menu size={26} color="rgba(26,26,32,0.85)" strokeWidth={1.75} />
+          <View className="w-6 h-6 bg-secondary items-center justify-center overflow-hidden mr-2.5">
+            {serverIcon ? (
+              <Image
+                source={{ uri: serverIcon }}
+                style={{ width: 24, height: 24 }}
+                resizeMode="cover"
+              />
+            ) : (
+              <Globe
+                size={15}
+                color="rgba(255,244,224,0.85)"
+                strokeWidth={1.75}
+              />
+            )}
+          </View>
+          <Text
+            className="font-ui text-xl tracking-tight text-base-content flex-1"
+            numberOfLines={1}
+          >
+            {account.serverName || account.server}
+          </Text>
         </Pressable>
-        <Text
-          className="font-ui text-xl tracking-tight text-base-content flex-1 mr-3"
-          numberOfLines={1}
-        >
-          {account.serverName || account.server}
-        </Text>
         <Pressable
           onPress={() => setMenuOpen(true)}
           hitSlop={8}
@@ -254,6 +288,7 @@ export default function Feed() {
       />
 
       <FlatList
+        className="flex-1"
         data={posts}
         keyExtractor={(p) => p.id}
         renderItem={({ item }) => (
@@ -301,12 +336,14 @@ export default function Feed() {
         }
       />
 
-      {/* Compose — square editorial FAB. Bottom offset accounts for the Android
-          nav bar: absolute children of SafeAreaView are positioned relative to
-          the physical screen edge, so we add insets.bottom to clear the bar. */}
+      <BottomTabBar active="feed" />
+
+      {/* Compose — square editorial FAB, floated above the bottom tab bar.
+          Absolute children of SafeAreaView are positioned relative to the
+          physical screen edge, so we clear the tab bar height + nav-bar inset. */}
       <Pressable
         onPress={() => router.push("/compose")}
-        style={{ bottom: (insets.bottom || 0) + 32, right: 20 }}
+        style={{ bottom: (insets.bottom || 0) + 78, right: 20 }}
         className="absolute w-14 h-14 bg-primary border-2 border-base-content items-center justify-center"
         android_ripple={{ color: "rgba(255,255,255,0.15)" }}
       >
