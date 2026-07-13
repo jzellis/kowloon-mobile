@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   ActivityIndicator,
   Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -29,6 +30,7 @@ import {
   updateAccountAndPersist,
 } from "../../src/state/accountsSlice.js";
 import { uploadFile } from "../../src/lib/uploadFile.js";
+import { resolveImageUrl } from "../../src/lib/resolveImageUrl.js";
 
 function Field({ label, children }) {
   return (
@@ -42,7 +44,7 @@ function Field({ label, children }) {
 }
 
 const INPUT_CLASS =
-  "border-2 border-base-300 bg-base-100 px-3 py-2.5 font-ui text-base text-base-content";
+  "border-2 border-base-300 bg-field px-3 py-2.5 font-ui text-base text-base-content";
 
 export default function ProfileSettings() {
   const router = useRouter();
@@ -58,8 +60,9 @@ export default function ProfileSettings() {
   const [urls, setUrls] = useState(profile.urls || []);
   const [urlInput, setUrlInput] = useState("");
 
-  // avatarPick — local uri to display + upload on save; null = no change
+  // avatarPick / featuredPick — local uri to display + upload on save; null = no change
   const [avatarPick, setAvatarPick] = useState(null);
+  const [featuredPick, setFeaturedPick] = useState(null);
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -77,6 +80,26 @@ export default function ProfileSettings() {
       setAvatarPick({
         uri: asset.uri,
         name: asset.fileName || `avatar-${Date.now()}.jpg`,
+        mimeType: asset.mimeType || "image/jpeg",
+      });
+    } catch (e) {
+      setError(e?.message || "Couldn't open the photo library.");
+    }
+  }
+
+  async function pickFeatured() {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: "images",
+        quality: 0.85,
+        allowsEditing: true,
+        aspect: [3, 1],
+      });
+      if (result.canceled || !result.assets?.[0]) return;
+      const asset = result.assets[0];
+      setFeaturedPick({
+        uri: asset.uri,
+        name: asset.fileName || `cover-${Date.now()}.jpg`,
         mimeType: asset.mimeType || "image/jpeg",
       });
     } catch (e) {
@@ -114,6 +137,18 @@ export default function ProfileSettings() {
         iconUrl = upload?.file?.url || iconUrl;
       }
 
+      let featuredUrl = profile.featuredImage;
+      if (featuredPick) {
+        const upload = await uploadFile(client, {
+          uri: featuredPick.uri,
+          name: featuredPick.name,
+          mimeType: featuredPick.mimeType,
+          to: "@public",
+          generateThumbnail: true,
+        });
+        featuredUrl = upload?.file?.url || featuredUrl;
+      }
+
       await client.activities.updateProfile({
         profile: {
           name: displayName.trim(),
@@ -121,6 +156,7 @@ export default function ProfileSettings() {
           pronouns: pronouns.trim(),
           urls,
           icon: iconUrl,
+          featuredImage: featuredUrl,
         },
       });
 
@@ -133,6 +169,7 @@ export default function ProfileSettings() {
             pronouns: pronouns.trim(),
             urls,
             icon: iconUrl,
+            featuredImage: featuredUrl,
           },
         })
       );
@@ -180,6 +217,45 @@ export default function ProfileSettings() {
                   </Text>
                 </Pressable>
               </View>
+            </Field>
+
+            {/* Cover image */}
+            <Field label="Cover image">
+              {(() => {
+                const src =
+                  featuredPick?.uri ||
+                  resolveImageUrl(profile.featuredImage, account?.baseUrl);
+                return src ? (
+                  <View>
+                    <Image
+                      source={{ uri: src }}
+                      style={{ width: "100%", aspectRatio: 3 }}
+                      className="border-2 border-base-300 bg-base-200"
+                      resizeMode="cover"
+                    />
+                    <Pressable
+                      onPress={pickFeatured}
+                      className="border-2 border-base-content px-4 py-2 mt-2 self-start"
+                      android_ripple={{ color: "rgba(0,0,0,0.06)" }}
+                    >
+                      <Text className="font-ui text-xs uppercase tracking-widest text-base-content">
+                        Change cover
+                      </Text>
+                    </Pressable>
+                  </View>
+                ) : (
+                  <Pressable
+                    onPress={pickFeatured}
+                    className="border-2 border-base-300 bg-field items-center justify-center"
+                    style={{ width: "100%", aspectRatio: 3 }}
+                    android_ripple={{ color: "rgba(0,0,0,0.05)" }}
+                  >
+                    <Text className="font-ui text-xs uppercase tracking-widest text-base-content/55">
+                      + Add cover image
+                    </Text>
+                  </Pressable>
+                );
+              })()}
             </Field>
 
             {/* Display name */}

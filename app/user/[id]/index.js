@@ -9,6 +9,9 @@ import { useSelector } from "react-redux";
 import {
   ActivityIndicator,
   FlatList,
+  Image,
+  Linking,
+  Modal,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -16,7 +19,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { MapPin } from "lucide-react-native";
+import { Link, MapPin } from "lucide-react-native";
 
 import { Avatar } from "../../../src/components/posts/Avatar.jsx";
 import { BackLink } from "../../../src/components/ui/BackLink.jsx";
@@ -31,6 +34,7 @@ import { CircleCard } from "../../../src/components/circles/CircleCard.jsx";
 import { HtmlContent } from "../../../src/components/HtmlContent.jsx";
 import { PostCard } from "../../../src/components/posts/PostCard.jsx";
 import { useActiveClient } from "../../../src/lib/useActiveClient.js";
+import { resolveImageUrl } from "../../../src/lib/resolveImageUrl.js";
 import { selectActiveAccount } from "../../../src/state/accountsSlice.js";
 
 const TABS = [
@@ -74,6 +78,7 @@ export default function UserProfile() {
   const [error, setError] = useState(null);
 
   const [tab, setTab] = useState("posts");
+  const [linksOpen, setLinksOpen] = useState(false);
 
   // Bookmarks load lazily on tap; the tree owns its own data.
   const treeRef = useRef(null);
@@ -124,6 +129,11 @@ export default function UserProfile() {
   const name = user?.profile?.name || user?.name || user?.username || userId;
   const description = user?.profile?.description;
   const location = user?.profile?.location;
+  const urls = user?.profile?.urls || [];
+  const featuredImage = resolveImageUrl(
+    user?.profile?.featuredImage,
+    account?.baseUrl
+  );
   const me = {
     name,
     icon: user?.profile?.icon || user?.icon,
@@ -135,18 +145,38 @@ export default function UserProfile() {
       <View>
         <View className="px-5 pt-3 pb-2 flex-row items-center justify-between">
           <BackLink />
-          {isSelf ? (
-            <Pressable
-              onPress={() => router.push("/settings/profile")}
-              android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-              className="border-2 border-base-content px-3 py-1.5"
-            >
-              <Text className="font-ui text-[11px] uppercase tracking-widest text-base-content">
-                Edit Profile
-              </Text>
-            </Pressable>
-          ) : null}
+          <View className="flex-row items-center" style={{ gap: 8 }}>
+            {urls.length > 0 ? (
+              <Pressable
+                onPress={() => setLinksOpen(true)}
+                hitSlop={8}
+                android_ripple={{ color: "rgba(0,0,0,0.06)", borderless: true }}
+                className="border-2 border-base-content w-9 h-9 items-center justify-center"
+              >
+                <Link size={16} color="rgba(26,26,32,0.85)" strokeWidth={1.9} />
+              </Pressable>
+            ) : null}
+            {isSelf ? (
+              <Pressable
+                onPress={() => router.push("/settings/profile")}
+                android_ripple={{ color: "rgba(0,0,0,0.06)" }}
+                className="border-2 border-base-content px-3 py-1.5"
+              >
+                <Text className="font-ui text-[11px] uppercase tracking-widest text-base-content">
+                  Edit Profile
+                </Text>
+              </Pressable>
+            ) : null}
+          </View>
         </View>
+        {featuredImage ? (
+          <Image
+            source={{ uri: featuredImage }}
+            style={{ width: "100%", aspectRatio: 3 }}
+            className="bg-base-200"
+            resizeMode="cover"
+          />
+        ) : null}
         <View className="px-5 pt-2 pb-5 border-b-2 border-base-300">
           <View className="flex-row items-start">
             <Avatar actor={me} size={72} baseUrl={account?.baseUrl} />
@@ -366,6 +396,49 @@ export default function UserProfile() {
           />
         </>
       ) : null}
+
+      {/* Profile links — bottom sheet of the user's URLs. */}
+      <Modal
+        visible={linksOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setLinksOpen(false)}
+        statusBarTranslucent
+      >
+        <Pressable
+          className="flex-1 bg-black/40 justify-end"
+          onPress={() => setLinksOpen(false)}
+        >
+          <Pressable onPress={() => {}}>
+            <SafeAreaView edges={["bottom"]} className="bg-base-100">
+              <View className="border-t-2 border-base-content">
+                <Text className="font-ui uppercase tracking-[0.18em] text-[11px] text-base-content/50 px-5 pt-4 pb-2">
+                  Links
+                </Text>
+                {urls.map((url) => (
+                  <Pressable
+                    key={url}
+                    onPress={() => {
+                      setLinksOpen(false);
+                      Linking.openURL(url).catch(() => {});
+                    }}
+                    android_ripple={{ color: "rgba(0,0,0,0.05)" }}
+                    className="flex-row items-center px-5 py-3 border-t border-base-300"
+                  >
+                    <Link size={16} color="#5588B1" strokeWidth={1.9} />
+                    <Text
+                      className="flex-1 font-ui text-sm text-base-content ml-3"
+                      numberOfLines={1}
+                    >
+                      {url}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            </SafeAreaView>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
