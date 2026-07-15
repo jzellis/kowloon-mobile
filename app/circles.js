@@ -1,11 +1,13 @@
-// Circles — the user's own circles (Kowloon's social-graph primitive).
+// Circles — Kowloon's social-graph primitive.
 //
-// Lists circles owned by the active account. Tap a circle to view/manage it;
-// the header "+ New" creates one. Circles are how Kowloon replaces
-// follow/unfollow — curated lists of people whose posts you read.
+// "My Circles" lists the circles owned by the active account. "Browse" shows
+// public + server-local circles anyone can discover, copy, or read. Tap a
+// circle to view/manage it; the header "+ New" creates one. Circles are how
+// Kowloon replaces follow/unfollow — curated lists of people whose posts you
+// read.
 
 import { useCallback, useState } from "react";
-import { useFocusEffect, useRouter } from "expo-router";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useSelector } from "react-redux";
 import {
   ActivityIndicator,
@@ -18,7 +20,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Plus } from "lucide-react-native";
 
-import { BackLink } from "../src/components/ui/BackLink.jsx";
 import { CircleCard } from "../src/components/circles/CircleCard.jsx";
 import { BottomTabBar } from "../src/components/nav/BottomTabBar.jsx";
 import { AppHeader, HeaderButton } from "../src/components/nav/AppHeader.jsx";
@@ -30,39 +31,87 @@ export default function Circles() {
   const client = useActiveClient();
   const account = useSelector(selectActiveAccount);
 
-  const [circles, setCircles] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState(null);
+  const { tab: initialTab } = useLocalSearchParams();
+  const [tab, setTab] = useState(initialTab === "browse" ? "browse" : "mine"); // "mine" | "browse"
 
-  const load = useCallback(
+  // My Circles — the account's own circles (owner-scoped).
+  const [mine, setMine] = useState([]);
+  const [mineLoading, setMineLoading] = useState(true);
+  const [mineError, setMineError] = useState(null);
+  const [mineRefreshing, setMineRefreshing] = useState(false);
+
+  // Browse — local discovery (public + server), minus the ones you already own.
+  const [browseList, setBrowseList] = useState([]);
+  const [browseLoading, setBrowseLoading] = useState(false);
+  const [browseError, setBrowseError] = useState(null);
+  const [browseRefreshing, setBrowseRefreshing] = useState(false);
+
+  const loadMine = useCallback(
     async ({ isRefresh = false } = {}) => {
       if (!client || !account?.id) return;
-      if (isRefresh) setRefreshing(true);
-      else setLoading(true);
-      setError(null);
+      if (isRefresh) setMineRefreshing(true);
+      else setMineLoading(true);
+      setMineError(null);
       try {
         const res = await client.feeds.getUserCircles({ userId: account.id });
         const items = res?.orderedItems || res?.items || [];
-        // Hide system circles (Following, Groups, Blocked, Muted, etc.) — those
-        // are managed implicitly, not curated by hand.
-        setCircles(items.filter((c) => c?.type !== "System"));
+        // Hide system circles (Following, Groups, Blocked, Muted) — those are
+        // managed implicitly, not curated by hand.
+        setMine(items.filter((c) => c?.type !== "System"));
       } catch (e) {
-        setError(e?.message || "Couldn't load your circles.");
+        setMineError(e?.message || "Couldn't load your circles.");
       } finally {
-        setLoading(false);
-        setRefreshing(false);
+        setMineLoading(false);
+        setMineRefreshing(false);
       }
     },
     [client, account?.id]
   );
 
-  // Refresh on focus so a newly created/edited/deleted circle shows up.
+  const loadBrowse = useCallback(
+    async ({ isRefresh = false } = {}) => {
+      if (!client) return;
+      if (isRefresh) setBrowseRefreshing(true);
+      else setBrowseLoading(true);
+      setBrowseError(null);
+      try {
+        const res = await client.feeds.getCircles({ sort: "reacts", limit: 50 });
+        const items = res?.orderedItems || res?.items || [];
+        // Skip system circles and the ones you already own — Browse is for
+        // discovering other people's circles.
+        setBrowseList(
+          items.filter(
+            (c) =>
+              c?.type !== "System" &&
+              (c?.actorId || c?.actor?.id) !== account?.id
+          )
+        );
+      } catch (e) {
+        setBrowseError(e?.message || "Couldn't load circles.");
+      } finally {
+        setBrowseLoading(false);
+        setBrowseRefreshing(false);
+      }
+    },
+    [client, account?.id]
+  );
+
   useFocusEffect(
     useCallback(() => {
-      load();
-    }, [load])
+      loadMine();
+      if (tab === "browse") loadBrowse();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [tab, loadMine, loadBrowse])
   );
+
+  const data = tab === "mine" ? mine : browseList;
+  const loading = tab === "mine" ? mineLoading : browseLoading;
+  const error = tab === "mine" ? mineError : browseError;
+  const refreshing = tab === "mine" ? mineRefreshing : browseRefreshing;
+  const onRefresh =
+    tab === "mine"
+      ? () => loadMine({ isRefresh: true })
+      : () => loadBrowse({ isRefresh: true });
 
   return (
     <SafeAreaView className="flex-1 bg-base-100" edges={["left", "right"]}>
@@ -77,9 +126,26 @@ export default function Circles() {
         }
       />
 
+      {/* Tabs */}
+      <View className="flex-row border-b-2 border-base-300">
+        <TabButton
+          label="My Circles"
+          active={tab === "mine"}
+          onPress={() => setTab("mine")}
+        />
+        <TabButton
+          label="Browse"
+          active={tab === "browse"}
+          onPress={() => {
+            setTab("browse");
+            if (browseList.length === 0) loadBrowse();
+          }}
+        />
+      </View>
+
       <FlatList
         className="flex-1"
-        data={circles}
+        data={data}
         keyExtractor={(c) => c.id}
         renderItem={({ item }) => (
           <CircleCard
@@ -92,10 +158,7 @@ export default function Circles() {
           />
         )}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={() => load({ isRefresh: true })}
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         ListEmptyComponent={
           loading ? (
@@ -108,7 +171,7 @@ export default function Circles() {
                 {error}
               </Text>
               <Pressable
-                onPress={() => load()}
+                onPress={onRefresh}
                 className="border-2 border-base-content px-5 py-2.5"
                 android_ripple={{ color: "rgba(0,0,0,0.06)" }}
               >
@@ -120,11 +183,12 @@ export default function Circles() {
           ) : (
             <View className="px-6 py-20 items-center">
               <Text className="font-ui text-lg text-base-content/70 text-center mb-2">
-                No circles yet.
+                {tab === "mine" ? "No circles yet." : "Nothing to browse."}
               </Text>
               <Text className="font-ui text-sm text-base-content/55 text-center leading-6">
-                Circles are curated lists of people whose posts you want to
-                read. Create one to get started.
+                {tab === "mine"
+                  ? "Circles are curated lists of people whose posts you want to read. Create one, or find one under Browse to copy."
+                  : "No public circles to discover yet. Create your own."}
               </Text>
             </View>
           )
@@ -133,5 +197,25 @@ export default function Circles() {
 
       <BottomTabBar active="circles" />
     </SafeAreaView>
+  );
+}
+
+function TabButton({ label, active, onPress }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      android_ripple={{ color: "rgba(0,0,0,0.05)" }}
+      className={`flex-1 py-3 items-center ${
+        active ? "border-b-2 border-primary -mb-[2px]" : ""
+      }`}
+    >
+      <Text
+        className={`font-ui uppercase tracking-[0.16em] text-[11px] ${
+          active ? "text-base-content" : "text-base-content/50"
+        }`}
+      >
+        {label}
+      </Text>
+    </Pressable>
   );
 }

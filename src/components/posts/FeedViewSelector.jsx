@@ -30,7 +30,11 @@ import { resolveImageUrl } from "../../lib/resolveImageUrl.js";
 const DROPDOWN_WIDTH = 240;
 const MAX_LIST_HEIGHT = 320;
 
-export function FeedViewSelector({ value, onChange }) {
+export function FeedViewSelector({ value, onChange, subject }) {
+  // `subject` (from useFeedSubject, via FeedHeader) is the resolved circle/group
+  // behind `value` when it isn't one of your own — used so the trigger shows
+  // its real name/icon instead of falling back to "Public".
+  const subjectForValue = subject?.id === value ? subject : null;
   const account = useSelector(selectActiveAccount);
   const client = useActiveClient();
   const triggerRef = useRef(null);
@@ -108,6 +112,12 @@ export function FeedViewSelector({ value, onChange }) {
     if (group) {
       return <HexAvatar uri={resolveImageUrl(group.icon, baseUrl)} size={size} />;
     }
+    // Not one of your own — fall back to the resolved subject's hex avatar.
+    if (subjectForValue) {
+      return (
+        <HexAvatar uri={resolveImageUrl(subjectForValue.icon, baseUrl)} size={size} />
+      );
+    }
     return <ServerFeedIcon iconUrl={serverIcon} variant="public" size={size} />;
   }
 
@@ -115,6 +125,7 @@ export function FeedViewSelector({ value, onChange }) {
     serverViews.find((v) => v.value === value)?.label ||
     circles.find((c) => c.id === value)?.name ||
     groups.find((g) => g.id === value)?.name ||
+    subjectForValue?.name ||
     "Public";
 
   function openDropdown() {

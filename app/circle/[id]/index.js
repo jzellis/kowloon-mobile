@@ -16,7 +16,7 @@ import {
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSelector } from "react-redux";
-import { Pencil, Trash2, X } from "lucide-react-native";
+import { Newspaper, Pencil, Trash2, X } from "lucide-react-native";
 
 import { Avatar } from "../../../src/components/posts/Avatar.jsx";
 import { AppHeader } from "../../../src/components/nav/AppHeader.jsx";
@@ -228,7 +228,28 @@ export default function CircleDetail() {
               ) : null}
 
               {/* Actions */}
-              <View className="flex-row items-center mt-5" style={{ gap: 10 }}>
+              <View
+                className="flex-row items-center mt-5 flex-wrap"
+                style={{ gap: 10 }}
+              >
+                <Pressable
+                  onPress={() =>
+                    router.push(
+                      `/feed?view=${encodeURIComponent(String(id))}`
+                    )
+                  }
+                  android_ripple={{ color: "rgba(0,0,0,0.06)" }}
+                  className="flex-row items-center border-2 border-base-content px-3 py-2"
+                >
+                  <Newspaper
+                    size={13}
+                    color="rgba(26,26,32,0.85)"
+                    strokeWidth={1.75}
+                  />
+                  <Text className="font-ui uppercase tracking-[0.14em] text-[11px] text-base-content ml-1.5">
+                    View Feed
+                  </Text>
+                </Pressable>
                 {isOwner ? (
                   <>
                     <Pressable

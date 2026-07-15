@@ -164,6 +164,10 @@ export function useFeed({ viewKey = "public", activeTypes = [], accountId } = {}
         }
       } catch (e) {
         setError(e?.message || "Couldn't load the feed.");
+        // Stop here: without this, a failed fetch leaves hasMore=true, so an
+        // empty FlatList keeps firing onEndReached → loadMore → refetch, which
+        // flickers the error/empty states. A fresh initial/refresh resets it.
+        setHasMore(false);
       } finally {
         inFlight.current = false;
         setLoading(false);

@@ -25,7 +25,7 @@ import { useActiveClient } from "../../lib/useActiveClient.js";
 import { extractCircleId } from "../../lib/circles.js";
 import { selectActiveAccount } from "../../state/accountsSlice.js";
 
-export function CopyCircleMenu({ circle }) {
+export function CopyCircleMenu({ circle, compact = false }) {
   const router = useRouter();
   const client = useActiveClient();
   const account = useSelector(selectActiveAccount);
@@ -105,11 +105,24 @@ export function CopyCircleMenu({ circle }) {
     <>
       <Pressable
         onPress={() => setOpen(true)}
+        hitSlop={compact ? 6 : undefined}
         android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-        className="flex-row items-center border-2 border-base-content px-3 py-2"
+        className={`flex-row items-center border-2 border-base-content ${
+          compact ? "px-2 py-1" : "px-3 py-2"
+        }`}
       >
-        <Copy size={13} color="rgba(26,26,32,0.85)" strokeWidth={1.75} />
-        <Text className="font-ui uppercase tracking-[0.14em] text-[11px] text-base-content ml-1.5">
+        <Copy
+          size={compact ? 11 : 13}
+          color="rgba(26,26,32,0.85)"
+          strokeWidth={1.75}
+        />
+        <Text
+          className={`font-ui uppercase text-base-content ${
+            compact
+              ? "tracking-[0.12em] text-[10px] ml-1"
+              : "tracking-[0.14em] text-[11px] ml-1.5"
+          }`}
+        >
           Copy
         </Text>
       </Pressable>

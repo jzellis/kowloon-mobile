@@ -48,10 +48,22 @@ export const RSVP_POLICIES = [
     label: "Approval only",
     summary: "Every join request needs admin approval.",
   },
+  {
+    value: "inviteOnly",
+    label: "Invite only",
+    summary: "No one can join without an admin's invitation.",
+  },
 ];
 
 export function rsvpPolicyLabel(value) {
   return RSVP_POLICIES.find((p) => p.value === value)?.label || "Open";
+}
+
+// Whether a non-member can request to join at all. `inviteOnly` groups accept
+// no self-service joins — members are added by an admin — so no Join button is
+// offered. Every other policy allows a join or a request-to-join.
+export function canJoinGroup(rsvpPolicy) {
+  return rsvpPolicy !== "inviteOnly";
 }
 
 // Whether a viewer's join click should send "Request" wording vs immediate

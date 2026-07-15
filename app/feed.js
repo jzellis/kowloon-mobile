@@ -101,19 +101,22 @@ export default function Feed() {
   // Persisted filter state — viewKey (public/server/circleId/groupId) +
   // activeTypes. Falls back to the user's saved server-side defaults on first
   // hydration.
-  const { viewKey, setViewKey, activeTypes, setActiveTypes } =
+  const { hydrated, viewKey, setViewKey, activeTypes, setActiveTypes } =
     usePersistedFilter(account?.id, fallbackDefaults);
 
-  // If we arrived via `?view=...`, apply it once (then leave the persisted
-  // viewKey alone so subsequent normal navigations don't re-fire this).
+  // If we arrived via `?view=...` (e.g. "View Feed" on a circle/group), apply
+  // it once. Gate on `hydrated` so the override runs AFTER the persisted-filter
+  // AsyncStorage read — otherwise that late read overwrites viewKey with the
+  // last-saved view and the requested one never sticks.
   useEffect(() => {
+    if (!hydrated) return;
     const requested = typeof params.view === "string" ? params.view : null;
     if (!requested) return;
     if (viewOverrideRef.current === requested) return;
     viewOverrideRef.current = requested;
     if (requested !== viewKey) setViewKey(requested);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.view]);
+  }, [params.view, hydrated]);
 
   // Auto-sync: every user-driven filter change writes to user.prefs (debounced).
   // The pending value is held in a ref so a quick succession of taps coalesces
