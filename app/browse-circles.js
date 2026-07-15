@@ -57,7 +57,7 @@ export default function BrowseCircles() {
       setError(null);
 
       try {
-        const res = await client.feeds.browseCircles({
+        const res = await client.feeds.getCircles({
           sort: currentSort,
           page: pageNum,
           limit: PAGE_SIZE,

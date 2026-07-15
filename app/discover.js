@@ -118,7 +118,7 @@ export default function Discover() {
       setCirclesLoading(true);
       setCirclesError(null);
       client.feeds
-        .browseCircles({ sort: "reacts", limit: 20 })
+        .getCircles({ sort: "reacts", limit: 20 })
         .then((res) => setCircles(res?.orderedItems ?? []))
         .catch((e) =>
           setCirclesError(e?.message || "Could not load circles.")

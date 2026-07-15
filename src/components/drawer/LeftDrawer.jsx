@@ -341,7 +341,7 @@ function DiscoverSection({ client, onNavigate }) {
     if (!client) return;
     let cancelled = false;
     client.feeds
-      .browseCircles({ sort: "reacts", limit: 5 })
+      .getCircles({ sort: "reacts", limit: 5 })
       .then((res) => {
         if (!cancelled) setCircles(res?.orderedItems || res?.items || []);
       })
