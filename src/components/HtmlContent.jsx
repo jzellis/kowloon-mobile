@@ -98,7 +98,7 @@ export function HtmlContent({
 }) {
   const { width } = useWindowDimensions();
 
-  const effectiveLineHeight = lineHeight || Math.round(fontSize * 1.55);
+  const effectiveLineHeight = lineHeight || Math.round(fontSize * 1.75);
 
   const baseStyle = useMemo(
     () => ({
