@@ -3,15 +3,13 @@
 
 import { useRef, useState } from "react";
 import { Modal, Pressable, Text, View } from "react-native";
-import { ChevronDown } from "lucide-react-native";
 
 import { POST_TYPE_NAMES, POST_TYPES } from "../../lib/postTypes.js";
 import { PostTypeIcon } from "./PostTypeIcon.jsx";
 
 const DROPDOWN_WIDTH = 200;
 
-export function PostTypeDropdown({ value, onChange, variant = "inline" }) {
-  const isTitle = variant === "title";
+export function PostTypeDropdown({ value, onChange }) {
   const triggerRef = useRef(null);
   const [open, setOpen] = useState(false);
   const [dropPos, setDropPos] = useState({ top: 0, left: 0 });
@@ -42,31 +40,13 @@ export function PostTypeDropdown({ value, onChange, variant = "inline" }) {
         hitSlop={8}
         className="flex-row items-center"
       >
-        {isTitle ? (
-          <View className="flex-row items-center border border-header-content/40 bg-header-content/10 px-2.5 py-1">
-            <Text
-              className="font-ui text-2xl font-bold text-header-content mr-1.5"
-              style={{ includeFontPadding: false }}
-            >
-              {value}
-            </Text>
-            <ChevronDown
-              size={22}
-              color="rgba(255,255,255,0.9)"
-              strokeWidth={2.5}
-            />
-          </View>
-        ) : (
-          <>
-            <Text
-              className="font-ui text-sm tracking-tight mr-1"
-              style={{ color: typeColor }}
-            >
-              {value}
-            </Text>
-            <Text className="font-ui text-xs text-base-content/40">▾</Text>
-          </>
-        )}
+        <Text
+          className="font-ui text-sm tracking-tight mr-1"
+          style={{ color: typeColor }}
+        >
+          {value}
+        </Text>
+        <Text className="font-ui text-xs text-base-content/40">▾</Text>
       </Pressable>
 
       <Modal

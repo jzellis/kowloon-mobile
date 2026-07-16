@@ -494,22 +494,16 @@ export default function Compose() {
   }
 
   return (
-    <View className="flex-1 bg-base-100">
-      {/* Klein masthead — the type selector is the page title. */}
-      <SafeAreaView edges={["top"]} className="bg-header">
-        <View className="px-5 pt-2 pb-3 flex-row items-center">
-          <Text
-            className="font-ui text-2xl text-header-content mr-2.5"
-            style={{ includeFontPadding: false }}
-          >
-            New
-          </Text>
-          <PostTypeDropdown value={type} onChange={setType} variant="title" />
-        </View>
-      </SafeAreaView>
-
+    <SafeAreaView className="flex-1 bg-base-100" edges={["top"]}>
       {/* Content area shrinks to clear the keyboard. */}
       <View className="flex-1" style={{ paddingBottom: bottomPad }}>
+        {/* Title bar — "Add New [type ▾]" dropdown replaces the icon strip */}
+        <View className="flex-row items-center border-b-2 border-base-content px-4 py-3">
+          <Text className="font-ui text-[11px] uppercase tracking-[0.18em] text-base-content/45 mr-2">
+            Add New
+          </Text>
+          <PostTypeDropdown value={type} onChange={setType} />
+        </View>
 
         {composable && (
           <>
@@ -808,6 +802,6 @@ export default function Compose() {
           </>
         )}
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
