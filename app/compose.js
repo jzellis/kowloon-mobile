@@ -42,6 +42,7 @@ import { AudienceSelector } from "../src/components/posts/AudienceSelector.jsx";
 import { LocationField } from "../src/components/posts/LocationField.jsx";
 import { DateTimeField } from "../src/components/posts/DateTimeField.jsx";
 import { useActiveClient } from "../src/lib/useActiveClient.js";
+import { requestFeedRefresh } from "../src/lib/feedRefreshSignal.js";
 import { useKeyboardInset } from "../src/lib/useKeyboardInset.js";
 import { kowloonPostIdFromUrl } from "../src/lib/parseKowloonUrl.js";
 import { pmToMarkdown } from "../src/lib/pmToMarkdown.js";
@@ -474,6 +475,7 @@ export default function Compose() {
         to: audience,
         dedupeKey,
       });
+      requestFeedRefresh();
       router.back();
     } catch (e) {
       setError(e?.response?.data?.error || e?.message || "Failed to post.");

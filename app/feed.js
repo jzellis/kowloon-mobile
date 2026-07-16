@@ -25,6 +25,7 @@ import { LeftDrawer } from "../src/components/drawer/LeftDrawer.jsx";
 import { BottomTabBar } from "../src/components/nav/BottomTabBar.jsx";
 import { Globe } from "lucide-react-native";
 import { useFeed } from "../src/lib/useFeed.js";
+import { consumeFeedRefresh } from "../src/lib/feedRefreshSignal.js";
 import { useActiveClient } from "../src/lib/useActiveClient.js";
 import { useUnreadCount } from "../src/lib/UnreadCountContext.js";
 import { usePersistedFilter } from "../src/lib/usePersistedFilter.js";
@@ -194,17 +195,12 @@ export default function Feed() {
     };
   }, [account?.id, account?.serverName, client, dispatch]);
 
-  // Refresh when the feed regains focus — after composing a post, returning
-  // from a detail view, etc. Skip the very first focus: useFeed already loads
-  // on mount, so refreshing there would double-fetch.
-  const firstFocus = useRef(true);
+  // Refresh on focus ONLY when something explicitly asked for it (e.g. you just
+  // composed a post). Returning from a post detail or another tab preserves the
+  // timeline and scroll position — no reload, no jump to top.
   useFocusEffect(
     useCallback(() => {
-      if (firstFocus.current) {
-        firstFocus.current = false;
-        return;
-      }
-      refresh();
+      if (consumeFeedRefresh()) refresh();
     }, [refresh])
   );
 
