@@ -47,6 +47,7 @@ import { LocationField } from "../src/components/posts/LocationField.jsx";
 import { DateTimeField } from "../src/components/posts/DateTimeField.jsx";
 import { useActiveClient } from "../src/lib/useActiveClient.js";
 import { requestFeedRefresh } from "../src/lib/feedRefreshSignal.js";
+import { consumePendingShare } from "../src/lib/pendingShare.js";
 import { useKeyboardInset } from "../src/lib/useKeyboardInset.js";
 import { kowloonPostIdFromUrl } from "../src/lib/parseKowloonUrl.js";
 import { pmToMarkdown } from "../src/lib/pmToMarkdown.js";
@@ -77,6 +78,12 @@ function joinDateTime(date, time) {
   if (!date) return undefined;
   return time ? `${date}T${time}` : date;
 }
+function kindFromMime(m) {
+  const s = (m || "").toLowerCase();
+  if (s.startsWith("video/")) return "video";
+  if (s.startsWith("audio/")) return "audio";
+  return "image";
+}
 
 export default function Compose() {
   const router = useRouter();
@@ -86,8 +93,18 @@ export default function Compose() {
   // can edit before posting.
   const params = useLocalSearchParams();
 
+  // Inbound OS share of text/files (ShareIntentHandler routed us here with
+  // ?fromShare=1). Consumed once. URL shares don't use this — they arrive as
+  // ?type=Link&href=... on the normal param path.
+  const shareRef = useRef(params.fromShare ? consumePendingShare() : null);
+  const shared = shareRef.current;
+
   const [type, setType] = useState(
-    typeof params.type === "string" && COMPOSABLE_TYPES.includes(params.type)
+    shared?.kind === "files"
+      ? "Media"
+      : shared?.kind === "text"
+      ? "Note"
+      : typeof params.type === "string" && COMPOSABLE_TYPES.includes(params.type)
       ? params.type
       : "Note"
   );
@@ -113,6 +130,9 @@ export default function Compose() {
     typeof params.quote === "string" ? params.quote : ""
   );
   const repostInjectedRef = useRef(false);
+  // Shared plain text (Note) — seeded into the editor once it's ready.
+  const sharedTextRef = useRef(shared?.kind === "text" ? shared.text || "" : "");
+  const sharedTextInjectedRef = useRef(false);
   const [previewing, setPreviewing] = useState(false);
   const [audience, setAudience] = useState(
     typeof params.to === "string" && params.to ? params.to : "@public"
@@ -126,7 +146,16 @@ export default function Compose() {
   // Media attachments — array of { uri, name, mimeType, kind }.
   // kind: 'image' | 'video' | 'audio'. Uploaded at submit; the returned
   // file IDs become the post's attachments[] array.
-  const [attachments, setAttachments] = useState([]);
+  const [attachments, setAttachments] = useState(
+    shared?.kind === "files" && Array.isArray(shared.files)
+      ? shared.files.map((f) => ({
+          uri: f.uri,
+          name: f.name,
+          mimeType: f.mimeType,
+          kind: kindFromMime(f.mimeType),
+        }))
+      : []
+  );
 
   // Universal geotag — available on every post type. null when unset;
   // otherwise { name, lat, lon }.
@@ -280,6 +309,25 @@ export default function Compose() {
         .replace(/\n+/g, "<br>");
       try {
         editor.setContent(`<blockquote><p>${escaped}</p></blockquote><p></p>`);
+      } catch {
+        // editor not ready or unreachable — skip silently
+      }
+    }
+
+    // Shared text (from the OS share sheet): seed the body as a paragraph.
+    if (
+      editorState.isReady &&
+      !sharedTextInjectedRef.current &&
+      sharedTextRef.current.trim()
+    ) {
+      sharedTextInjectedRef.current = true;
+      const escaped = sharedTextRef.current
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\n+/g, "<br>");
+      try {
+        editor.setContent(`<p>${escaped}</p>`);
       } catch {
         // editor not ready or unreachable — skip silently
       }

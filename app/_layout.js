@@ -7,9 +7,10 @@
 
 import "../global.css";
 
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import Constants from "expo-constants";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -25,6 +26,14 @@ import { UnreadCountProvider } from "../src/lib/UnreadCountContext.js";
 // Hold the native splash screen until fonts are ready — no flash of fallback
 // text. preventAutoHideAsync can reject during fast-refresh; ignore that.
 SplashScreen.preventAutoHideAsync().catch(() => {});
+
+// Share-into-Kowloon relies on a native module that doesn't exist in Expo Go.
+// Only load/mount it in a dev-client or standalone build; lazy() keeps the
+// module (and expo-share-intent) out of the Expo Go bundle entirely.
+const IS_EXPO_GO = Constants.executionEnvironment === "storeClient";
+const ShareIntentHandler = lazy(() =>
+  import("../src/components/ShareIntentHandler.jsx")
+);
 
 function HydrationBoot() {
   const dispatch = useDispatch();
@@ -57,6 +66,11 @@ export default function RootLayout() {
             <UnreadCountProvider>
               <StatusBar style="auto" />
               <HydrationBoot />
+              {IS_EXPO_GO ? null : (
+                <Suspense fallback={null}>
+                  <ShareIntentHandler />
+                </Suspense>
+              )}
               <Stack
                 screenOptions={{
                   headerShown: false,
