@@ -83,6 +83,18 @@ export default function CircleDetail() {
     : [];
   const visibility = circleVisibilityLabel(circle?.to, account?.server);
 
+  // Open a member's profile. A bare "@domain" is a server (one @); a
+  // "@user@domain" is a person (two @).
+  function openMember(id) {
+    if (typeof id !== "string") return;
+    const isServer = id.startsWith("@") && !id.slice(1).includes("@");
+    router.push(
+      isServer
+        ? `/server/${encodeURIComponent(id.slice(1))}`
+        : `/user/${encodeURIComponent(id)}`
+    );
+  }
+
   function confirmDelete() {
     Alert.alert(
       "Delete circle?",
@@ -373,21 +385,27 @@ export default function CircleDetail() {
                     key={m.id}
                     className="flex-row items-center py-3 border-b border-base-300"
                   >
-                    <Avatar actor={m} size={36} baseUrl={account?.baseUrl} />
-                    <View className="flex-1 ml-3 min-w-0">
-                      <Text
-                        className="font-ui text-sm font-bold text-base-content"
-                        numberOfLines={1}
-                      >
-                        {m.name}
-                      </Text>
-                      <Text
-                        className="font-ui text-xs text-base-content/55"
-                        numberOfLines={1}
-                      >
-                        {m.id}
-                      </Text>
-                    </View>
+                    <Pressable
+                      onPress={() => openMember(m.id)}
+                      android_ripple={{ color: "rgba(0,0,0,0.04)" }}
+                      className="flex-1 flex-row items-center min-w-0"
+                    >
+                      <Avatar actor={m} size={36} baseUrl={account?.baseUrl} />
+                      <View className="flex-1 ml-3 min-w-0">
+                        <Text
+                          className="font-ui text-sm font-bold text-base-content"
+                          numberOfLines={1}
+                        >
+                          {m.name}
+                        </Text>
+                        <Text
+                          className="font-ui text-xs text-base-content/55"
+                          numberOfLines={1}
+                        >
+                          {m.id}
+                        </Text>
+                      </View>
+                    </Pressable>
                     {isOwner ? (
                       <Pressable
                         onPress={() => removeMember(m.id)}
