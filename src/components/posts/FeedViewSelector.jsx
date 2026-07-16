@@ -18,6 +18,8 @@ import {
   View,
 } from "react-native";
 import { useSelector } from "react-redux";
+import { useRouter } from "expo-router";
+import { Compass } from "lucide-react-native";
 
 import { useActiveClient } from "../../lib/useActiveClient.js";
 import { useJoinedGroups } from "../../lib/useJoinedGroups.js";
@@ -41,6 +43,7 @@ export function FeedViewSelector({ value, onChange, subject }) {
     (value.startsWith("circle:") || value.startsWith("group:"));
   const account = useSelector(selectActiveAccount);
   const client = useActiveClient();
+  const router = useRouter();
   const triggerRef = useRef(null);
   const [open, setOpen] = useState(false);
   const [dropPos, setDropPos] = useState({ top: 0, left: 0 });
@@ -153,12 +156,23 @@ export function FeedViewSelector({ value, onChange, subject }) {
     close();
   }
 
-  const showSearch = circles.length > 5;
-  const filteredCircles = search.trim()
-    ? circles.filter((c) =>
-        c.name.toLowerCase().includes(search.toLowerCase())
-      )
+  // One search box filters BOTH circles and groups. Only worth showing once the
+  // combined list is long enough to bother scanning.
+  const q = search.trim().toLowerCase();
+  const showSearch = circles.length + groups.length > 5;
+  const filteredCircles = q
+    ? circles.filter((c) => c.name?.toLowerCase().includes(q))
     : circles;
+  const filteredGroups = q
+    ? groups.filter((g) => g.name?.toLowerCase().includes(q))
+    : groups;
+  const noMatches =
+    q && filteredCircles.length === 0 && filteredGroups.length === 0;
+
+  function goDiscover() {
+    close();
+    router.push("/discover");
+  }
 
   return (
     <>
@@ -197,6 +211,22 @@ export function FeedViewSelector({ value, onChange, subject }) {
             }}
             className="bg-base-100 border-2 border-base-content"
           >
+            {/* Unified search — filters circles + groups together */}
+            {showSearch ? (
+              <View className="border-b-2 border-base-300 px-3 py-2">
+                <TextInput
+                  value={search}
+                  onChangeText={setSearch}
+                  placeholder="Search circles & groups..."
+                  placeholderTextColor="rgba(26,26,32,0.3)"
+                  autoCorrect={false}
+                  autoCapitalize="none"
+                  className="font-ui text-xs text-base-content"
+                  style={{ paddingVertical: 2 }}
+                />
+              </View>
+            ) : null}
+
             <ScrollView
               keyboardShouldPersistTaps="handled"
               style={{ maxHeight: MAX_LIST_HEIGHT }}
@@ -215,23 +245,11 @@ export function FeedViewSelector({ value, onChange, subject }) {
                 />
               ))}
 
-              {circles.length > 0 ? (
+              {filteredCircles.length > 0 ? (
                 <View className="border-t-2 border-base-300 mt-1">
                   <Text className="font-ui uppercase tracking-[0.18em] text-[10px] text-base-content/40 px-4 pt-3 pb-1">
                     Your circles
                   </Text>
-                  {showSearch ? (
-                    <TextInput
-                      value={search}
-                      onChangeText={setSearch}
-                      placeholder="Search circles..."
-                      placeholderTextColor="rgba(26,26,32,0.3)"
-                      autoCorrect={false}
-                      autoCapitalize="none"
-                      className="font-ui text-xs text-base-content border-b border-base-300 mx-4 mb-1"
-                      style={{ paddingVertical: 4 }}
-                    />
-                  ) : null}
                   {filteredCircles.map((c) => (
                     <Row
                       key={c.id}
@@ -247,20 +265,15 @@ export function FeedViewSelector({ value, onChange, subject }) {
                       }
                     />
                   ))}
-                  {showSearch && filteredCircles.length === 0 ? (
-                    <Text className="font-ui text-xs text-base-content/40 px-4 py-3">
-                      No circles match
-                    </Text>
-                  ) : null}
                 </View>
               ) : null}
 
-              {groups.length > 0 ? (
+              {filteredGroups.length > 0 ? (
                 <View className="border-t-2 border-base-300 mt-1">
                   <Text className="font-ui uppercase tracking-[0.18em] text-[10px] text-base-content/40 px-4 pt-3 pb-1">
                     Your groups
                   </Text>
-                  {groups.map((g) => (
+                  {filteredGroups.map((g) => (
                     <Row
                       key={g.id}
                       label={g.name}
@@ -276,7 +289,27 @@ export function FeedViewSelector({ value, onChange, subject }) {
                   ))}
                 </View>
               ) : null}
+
+              {noMatches ? (
+                <Text className="font-ui text-xs text-base-content/40 px-4 py-3">
+                  No circles or groups match.
+                </Text>
+              ) : null}
             </ScrollView>
+
+            {/* Discover footer — pinned below the scroll, always reachable */}
+            <Pressable
+              onPress={goDiscover}
+              android_ripple={{ color: "rgba(0,0,0,0.05)" }}
+              className="flex-row items-center px-4 py-3 border-t-2 border-base-content"
+            >
+              <View className="mr-3">
+                <Compass size={20} color="rgba(26,26,32,0.7)" strokeWidth={1.75} />
+              </View>
+              <Text className="font-ui uppercase tracking-[0.14em] text-xs text-base-content">
+                Discover...
+              </Text>
+            </Pressable>
           </Pressable>
         </Pressable>
       </Modal>
