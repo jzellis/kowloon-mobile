@@ -333,7 +333,7 @@ export function PostCard({ post, onDeleted }) {
         )}
 
         {/* Action bar — reply / react / repost / share / bookmark / more */}
-        <View className="mt-3 pt-3  ">
+        <View className="mt-1">
           <PostActionBar
             post={post}
             client={client}
