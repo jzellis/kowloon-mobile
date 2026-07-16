@@ -41,12 +41,12 @@ export function PostTypeDropdown({ value, onChange }) {
         className="flex-row items-center"
       >
         <Text
-          className="font-ui text-sm tracking-tight mr-1"
-          style={{ color: typeColor }}
+          className="font-ui text-2xl font-bold tracking-tight mr-1.5"
+          style={{ color: typeColor, includeFontPadding: false }}
         >
           {value}
         </Text>
-        <Text className="font-ui text-xs text-base-content/40">▾</Text>
+        <Text className="font-ui text-lg text-base-content/45">▾</Text>
       </Pressable>
 
       <Modal
