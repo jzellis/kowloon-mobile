@@ -7,33 +7,26 @@
 
 import "../global.css";
 
-import { lazy, Suspense, useEffect } from "react";
+import { useEffect } from "react";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import Constants from "expo-constants";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Provider, useDispatch } from "react-redux";
+import { ShareIntentProvider } from "expo-share-intent";
 
 import { store } from "../src/state/store.js";
 import { hydrateAccounts } from "../src/state/accountsSlice.js";
 import { FONT_ASSETS } from "../src/lib/typography.js";
 import { TypographyProvider } from "../src/lib/TypographyContext.js";
 import { UnreadCountProvider } from "../src/lib/UnreadCountContext.js";
+import { ShareIntentRouter } from "../src/components/ShareIntentRouter.jsx";
 
 // Hold the native splash screen until fonts are ready — no flash of fallback
 // text. preventAutoHideAsync can reject during fast-refresh; ignore that.
 SplashScreen.preventAutoHideAsync().catch(() => {});
-
-// Share-into-Kowloon relies on a native module that doesn't exist in Expo Go.
-// Only load/mount it in a dev-client or standalone build; lazy() keeps the
-// module (and expo-share-intent) out of the Expo Go bundle entirely.
-const IS_EXPO_GO = Constants.executionEnvironment === "storeClient";
-const ShareIntentHandler = lazy(() =>
-  import("../src/components/ShareIntentHandler.jsx")
-);
 
 function HydrationBoot() {
   const dispatch = useDispatch();
@@ -59,28 +52,26 @@ export default function RootLayout() {
   }
 
   return (
-    <Provider store={store}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <SafeAreaProvider>
-          <TypographyProvider>
-            <UnreadCountProvider>
-              <StatusBar style="auto" />
-              <HydrationBoot />
-              {IS_EXPO_GO ? null : (
-                <Suspense fallback={null}>
-                  <ShareIntentHandler />
-                </Suspense>
-              )}
-              <Stack
-                screenOptions={{
-                  headerShown: false,
-                  contentStyle: { backgroundColor: "#FFFFFF" },
-                }}
-              />
-            </UnreadCountProvider>
-          </TypographyProvider>
-        </SafeAreaProvider>
-      </GestureHandlerRootView>
-    </Provider>
+    <ShareIntentProvider options={{ resetOnBackground: true }}>
+      <Provider store={store}>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <SafeAreaProvider>
+            <TypographyProvider>
+              <UnreadCountProvider>
+                <StatusBar style="auto" />
+                <HydrationBoot />
+                <ShareIntentRouter />
+                <Stack
+                  screenOptions={{
+                    headerShown: false,
+                    contentStyle: { backgroundColor: "#FFFFFF" },
+                  }}
+                />
+              </UnreadCountProvider>
+            </TypographyProvider>
+          </SafeAreaProvider>
+        </GestureHandlerRootView>
+      </Provider>
+    </ShareIntentProvider>
   );
 }
