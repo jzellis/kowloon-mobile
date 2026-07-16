@@ -55,7 +55,7 @@ export function FeedViewSelector({ value, onChange, subject }) {
       {
         value: "all",
         label: "Community Posts",
-        summary: `Everything across the network and ${
+        summary: `All public and community posts from ${
           account?.serverName || account?.server || "this server"
         }.`,
       },
