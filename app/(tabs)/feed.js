@@ -324,6 +324,7 @@ export default function Feed() {
         renderItem={({ item }) => (
           <PostCard post={item} onDeleted={() => removePost(item.id)} />
         )}
+        ItemSeparatorComponent={() => <View className="h-3" />}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={refresh} />
         }
