@@ -3,6 +3,7 @@
 
 import { useRef, useState } from "react";
 import { Modal, Pressable, Text, View } from "react-native";
+import { ChevronDown } from "lucide-react-native";
 
 import { POST_TYPE_NAMES, POST_TYPES } from "../../lib/postTypes.js";
 import { PostTypeIcon } from "./PostTypeIcon.jsx";
@@ -41,12 +42,12 @@ export function PostTypeDropdown({ value, onChange }) {
         className="flex-row items-center"
       >
         <Text
-          className="font-ui text-2xl font-bold tracking-tight mr-1.5"
+          className="font-ui text-2xl font-bold tracking-tight mr-1"
           style={{ color: typeColor, includeFontPadding: false }}
         >
           {value}
         </Text>
-        <Text className="font-ui text-lg text-base-content/45">▾</Text>
+        <ChevronDown size={22} color="rgba(26,26,32,0.5)" strokeWidth={2.5} />
       </Pressable>
 
       <Modal
