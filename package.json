@@ -7,7 +7,8 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "eas-build-pre-install": "test -d ../client || git clone --depth 1 https://github.com/jzellis/kowloon-client.git ../client"
   },
   "dependencies": {
     "@10play/tentap-editor": "^1.0.1",
