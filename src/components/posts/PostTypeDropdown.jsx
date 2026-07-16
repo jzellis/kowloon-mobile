@@ -43,10 +43,12 @@ export function PostTypeDropdown({ value, onChange, variant = "inline" }) {
       >
         {isTitle ? (
           <>
-            <Text className="font-ui text-2xl text-header-content mr-1.5">
+            <Text className="font-ui text-2xl font-bold text-header-content mr-2">
               {value}
             </Text>
-            <Text className="font-ui text-lg text-header-content/70">▾</Text>
+            <Text className="font-ui text-3xl text-header-content/80 mt-[-2px]">
+              ▾
+            </Text>
           </>
         ) : (
           <>

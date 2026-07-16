@@ -37,7 +37,6 @@ import {
 
 import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
-import { ImagePlus } from "lucide-react-native";
 
 import { PostTypeDropdown } from "../src/components/posts/PostTypeDropdown.jsx";
 import { PostTypeIcon } from "../src/components/posts/PostTypeIcon.jsx";
@@ -728,14 +727,11 @@ export default function Compose() {
                   <Pressable
                     onPress={pickFeaturedImage}
                     android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-                    hitSlop={6}
-                    className="self-start border-2 border-base-300 bg-base-100 p-3"
+                    className="border-2 border-base-300 bg-white py-5 items-center"
                   >
-                    <ImagePlus
-                      size={20}
-                      color="rgba(26,26,32,0.6)"
-                      strokeWidth={1.75}
-                    />
+                    <Text className="font-ui uppercase tracking-[0.14em] text-xs text-base-content/55">
+                      + Add featured image
+                    </Text>
                   </Pressable>
                 )}
               </View>

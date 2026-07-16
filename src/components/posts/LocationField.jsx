@@ -24,7 +24,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Location from "expo-location";
-import { MapPin } from "lucide-react-native";
 
 import { placeLabel, reverseLookup, searchPlaces } from "../../lib/geocode.js";
 import { useKeyboardInset } from "../../lib/useKeyboardInset.js";
@@ -121,33 +120,34 @@ export function LocationField({ value, onChange }) {
 
   return (
     <>
-      {value ? (
-        <Pressable
-          onPress={() => setOpen(true)}
-          android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-          className="self-start flex-row items-center border-2 border-base-300 bg-base-100 px-3 py-2"
-        >
-          <MapPin size={16} color="rgba(26,26,32,0.6)" strokeWidth={1.75} />
-          <Text
-            className="font-ui text-xs uppercase tracking-[0.12em] text-base-content ml-2"
-            numberOfLines={1}
-          >
-            {value.name}
+      <Pressable
+        onPress={() => setOpen(true)}
+        android_ripple={{ color: "rgba(0,0,0,0.05)" }}
+        className="flex-row items-center border-2 border-base-300 bg-base-100 px-3 py-2"
+      >
+        <Text className="font-ui text-sm mr-2 text-base-content/70">📍</Text>
+        {value ? (
+          <>
+            <Text
+              className="font-ui text-xs uppercase tracking-[0.12em] text-base-content flex-1"
+              numberOfLines={1}
+            >
+              {value.name}
+            </Text>
+            <Pressable
+              onPress={clearLocation}
+              hitSlop={8}
+              className="ml-2 px-1"
+            >
+              <Text className="font-ui text-base-content/45 text-sm">×</Text>
+            </Pressable>
+          </>
+        ) : (
+          <Text className="font-ui uppercase tracking-[0.14em] text-[11px] text-base-content/55 flex-1">
+            Add location
           </Text>
-          <Pressable onPress={clearLocation} hitSlop={8} className="ml-2 px-1">
-            <Text className="font-ui text-base-content/45 text-sm">×</Text>
-          </Pressable>
-        </Pressable>
-      ) : (
-        <Pressable
-          onPress={() => setOpen(true)}
-          android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-          hitSlop={6}
-          className="self-start border-2 border-base-300 bg-base-100 p-3"
-        >
-          <MapPin size={20} color="rgba(26,26,32,0.6)" strokeWidth={1.75} />
-        </Pressable>
-      )}
+        )}
+      </Pressable>
 
       <Modal
         visible={open}
