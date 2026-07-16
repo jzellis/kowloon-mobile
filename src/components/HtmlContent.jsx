@@ -32,7 +32,7 @@ function buildTagStyles(fonts, fontSize, lineHeight) {
     // lineHeight must live on the tag styles — react-native-render-html doesn't
     // reliably cascade baseStyle.lineHeight into paragraph text, so the reading
     // line-spacing preference was being ignored (lines rendered tight).
-    p: { marginTop: 0, marginBottom: fontSize * 0.7, lineHeight },
+    p: { marginTop: 0, marginBottom: fontSize * 1.2, lineHeight },
     strong: { fontFamily: fonts.bold },
     b: { fontFamily: fonts.bold },
     em: { fontFamily: fonts.italic },
@@ -65,8 +65,8 @@ function buildTagStyles(fonts, fontSize, lineHeight) {
       color: MUTED,
       fontFamily: fonts.italic,
     },
-    ul: { marginTop: 0, marginBottom: fontSize * 0.7 },
-    ol: { marginTop: 0, marginBottom: fontSize * 0.7 },
+    ul: { marginTop: 0, marginBottom: fontSize * 1.2 },
+    ol: { marginTop: 0, marginBottom: fontSize * 1.2 },
     li: { marginBottom: fontSize * 0.2, lineHeight },
     code: {
       fontFamily: "monospace",
