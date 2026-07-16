@@ -31,7 +31,7 @@ function UserRow({ user, router }) {
   };
   return (
     <Pressable
-      className="flex-row items-center py-3 border-b border-base-300 gap-3"
+      className="flex-row items-center py-3   gap-3"
       onPress={() => router.push(`/user/${encodeURIComponent(user.id)}`)}
       android_ripple={{ color: "rgba(0,0,0,0.05)" }}
     >
@@ -119,7 +119,7 @@ export default function Discover() {
         keyboardShouldPersistTaps="handled"
       >
         {banner ? (
-          <View className="bg-secondary px-5 py-5 border-b-2 border-base-content">
+          <View className="bg-secondary px-5 py-5  ">
             <Text className="font-display text-2xl text-secondary-content mb-1">
               Welcome to Kowloon.
             </Text>
@@ -145,7 +145,7 @@ export default function Discover() {
             autoCorrect={false}
             autoCapitalize="none"
             spellCheck={false}
-            className="border-2 border-base-300 bg-field px-3 h-11 font-ui text-sm text-base-content"
+            className="  bg-field px-3 h-11 font-ui text-sm text-base-content"
           />
         </View>
 

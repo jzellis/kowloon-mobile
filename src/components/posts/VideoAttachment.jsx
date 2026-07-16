@@ -13,7 +13,7 @@ export function VideoAttachment({ att, height = 288 }) {
 
   return (
     <View
-      className="mb-2 border-2 border-base-300 bg-base-200"
+      className="mb-2   bg-base-200"
       style={{ height }}
     >
       <VideoView

@@ -211,7 +211,7 @@ export default function CircleDetail() {
         ) : circle ? (
           <>
             {/* Header */}
-            <View className="px-5 pt-4 pb-5 border-b-2 border-base-300">
+            <View className="px-5 pt-4 pb-5  ">
               <View className="flex-row items-center">
                 <CircleAvatar
                   circle={circle}
@@ -251,7 +251,7 @@ export default function CircleDetail() {
                     )
                   }
                   android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-                  className="flex-row items-center border-2 border-base-content px-3 py-2"
+                  className="flex-row items-center   px-3 py-2"
                 >
                   <Newspaper
                     size={13}
@@ -271,7 +271,7 @@ export default function CircleDetail() {
                         )
                       }
                       android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-                      className="flex-row items-center border-2 border-base-content px-3 py-2"
+                      className="flex-row items-center   px-3 py-2"
                     >
                       <Pencil
                         size={13}
@@ -286,7 +286,7 @@ export default function CircleDetail() {
                       onPress={confirmDelete}
                       disabled={deleting}
                       android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-                      className="flex-row items-center border-2 border-error px-3 py-2"
+                      className="flex-row items-center   px-3 py-2"
                     >
                       <Trash2 size={13} color="#CC272E" strokeWidth={1.75} />
                       <Text className="font-ui uppercase tracking-[0.14em] text-[11px] text-error ml-1.5">
@@ -306,7 +306,7 @@ export default function CircleDetail() {
 
             {/* Quick-add bar — owner only */}
             {isOwner ? (
-              <View className="px-5 pt-4 pb-3 border-b border-base-200">
+              <View className="px-5 pt-4 pb-3  ">
                 <Text className="font-ui uppercase tracking-[0.18em] text-[11px] text-base-content/50 mb-2">
                   Add Member
                 </Text>
@@ -317,14 +317,14 @@ export default function CircleDetail() {
                   placeholderTextColor="rgba(26,26,32,0.35)"
                   autoCapitalize="none"
                   autoCorrect={false}
-                  className="border-2 border-base-300 bg-white px-3 py-2.5 font-ui text-base text-base-content"
+                  className="  bg-white px-3 py-2.5 font-ui text-base text-base-content"
                 />
                 {addSearching ? (
                   <View className="py-3 items-start">
                     <ActivityIndicator />
                   </View>
                 ) : addResults.length > 0 ? (
-                  <View className="border-2 border-t-0 border-base-300">
+                  <View className="  ">
                     {addResults.map((m) => {
                       const already = members.some((mem) => mem.id === m.id);
                       return (
@@ -333,7 +333,7 @@ export default function CircleDetail() {
                           onPress={() => !already && handleAddMember(m)}
                           disabled={already || addingId === m.id}
                           android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-                          className="flex-row items-center px-3 py-2.5 border-t border-base-300"
+                          className="flex-row items-center px-3 py-2.5  "
                         >
                           <Avatar actor={m} size={30} baseUrl={account?.baseUrl} />
                           <View className="flex-1 ml-3 min-w-0">
@@ -383,7 +383,7 @@ export default function CircleDetail() {
                 members.map((m) => (
                   <View
                     key={m.id}
-                    className="flex-row items-center py-3 border-b border-base-300"
+                    className="flex-row items-center py-3  "
                   >
                     <Pressable
                       onPress={() => openMember(m.id)}
@@ -445,7 +445,7 @@ export default function CircleDetail() {
             )
           }
           style={{ bottom: (insets.bottom || 0) + 32, right: 20 }}
-          className="absolute w-14 h-14 bg-primary border-2 border-base-content items-center justify-center"
+          className="absolute w-14 h-14 bg-primary   items-center justify-center"
           android_ripple={{ color: "rgba(255,255,255,0.15)" }}
         >
           <Text className="text-primary-content text-3xl leading-none mt-[-2px]">

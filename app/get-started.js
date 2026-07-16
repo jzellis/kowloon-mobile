@@ -47,7 +47,7 @@ export default function GetStarted() {
     <SafeAreaView className="flex-1 bg-base-100" edges={["top", "left", "right"]}>
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
         {/* Hero */}
-        <View className="px-6 pt-10 pb-6 border-b-2 border-base-300">
+        <View className="px-6 pt-10 pb-6  ">
           <Eyebrow>You're in</Eyebrow>
           <Heading className="text-4xl mt-2 leading-[1.05]">
             Welcome to {serverName}.

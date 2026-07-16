@@ -89,7 +89,7 @@ function ServerInfoSection({ client }) {
   if (!hasContent) return null;
 
   return (
-    <View className="border-b-2 border-base-300 pb-5 mb-5">
+    <View className="  pb-5 mb-5">
       {hasHero ? (
         <View className="-mt-5 -mx-5 mb-4">
           <Image
@@ -143,8 +143,8 @@ function SearchBar({ onNavigate }) {
   }
 
   return (
-    <View className="border-b-2 border-base-300 pb-5 mb-5">
-      <View className="flex-row items-center border-2 border-base-300 bg-white px-3">
+    <View className="  pb-5 mb-5">
+      <View className="flex-row items-center   bg-white px-3">
         <Search size={15} color="rgba(26,26,32,0.4)" strokeWidth={1.75} />
         <TextInput
           value={query}
@@ -208,7 +208,7 @@ function PagesMenuSection({ client, onNavigate }) {
   }
 
   return (
-    <View className="border-b-2 border-base-300 pb-5 mb-5">
+    <View className="  pb-5 mb-5">
       <SectionHeader>Pages</SectionHeader>
       {pages.map((page) => {
         const hasChildren = page.children?.length > 0;
@@ -259,7 +259,7 @@ function PagesMenuSection({ client, onNavigate }) {
             </View>
 
             {hasChildren && isOpen ? (
-              <View className="border-l-2 border-base-300 ml-2 mb-1">
+              <View className="  ml-2 mb-1">
                 {page.children.map((child) => (
                   <Pressable
                     key={child.id}
@@ -295,7 +295,7 @@ function ItemAvatar({ item, baseUrl }) {
       <Image
         source={{ uri: icon }}
         style={{ width: 36, height: 36 }}
-        className="border-2 border-base-300 bg-base-200"
+        className="  bg-base-200"
         onError={() => setFailed(true)}
       />
     );
@@ -303,7 +303,7 @@ function ItemAvatar({ item, baseUrl }) {
   return (
     <View
       style={{ width: 36, height: 36 }}
-      className="border-2 border-base-300 bg-secondary items-center justify-center"
+      className="  bg-secondary items-center justify-center"
     >
       <Users size={18} color="rgba(255,244,224,0.7)" strokeWidth={1.75} />
     </View>
@@ -373,7 +373,7 @@ function DiscoverSection({ client, onNavigate }) {
                 onNavigate(`/circle/${encodeURIComponent(circle.id)}`)
               }
               android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-              className="flex-row items-start py-3 border-t border-base-300"
+              className="flex-row items-start py-3  "
             >
               <ItemAvatar item={circle} baseUrl={baseUrl} />
               <View className="flex-1 ml-3 min-w-0">
@@ -413,7 +413,7 @@ function DiscoverSection({ client, onNavigate }) {
                 onNavigate(`/group/${encodeURIComponent(group.id)}`)
               }
               android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-              className="flex-row items-start py-3 border-t border-base-300"
+              className="flex-row items-start py-3  "
             >
               <ItemAvatar item={group} baseUrl={baseUrl} />
               <View className="flex-1 ml-3 min-w-0">
@@ -462,10 +462,10 @@ export function LeftDrawer({ visible, onClose }) {
         <SafeAreaView
           edges={["top", "left", "bottom"]}
           style={{ width: panelWidth }}
-          className="bg-base-100 border-r-2 border-base-content"
+          className="bg-base-100  "
         >
           {/* Fixed header */}
-          <View className="flex-row items-center justify-between px-5 pt-2 pb-3 border-b-2 border-base-300">
+          <View className="flex-row items-center justify-between px-5 pt-2 pb-3  ">
             <Text className="font-ui uppercase tracking-[0.18em] text-[11px] text-base-content/55">
               Menu
             </Text>

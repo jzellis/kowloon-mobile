@@ -49,7 +49,7 @@ function TabButton({ label, active, onPress }) {
       onPress={onPress}
       android_ripple={{ color: "rgba(0,0,0,0.05)" }}
       className={`flex-1 py-3 items-center ${
-        active ? "border-b-2 border-primary -mb-[2px]" : ""
+        active ? "  -mb-[2px]" : ""
       }`}
     >
       <Text
@@ -151,7 +151,7 @@ export default function UserProfile() {
               onPress={() => setLinksOpen(true)}
               hitSlop={8}
               android_ripple={{ color: "rgba(255,255,255,0.18)", borderless: true }}
-              className="border-2 border-header-content w-9 h-9 items-center justify-center"
+              className="  w-9 h-9 items-center justify-center"
             >
               <Link size={16} color="#FFFFFF" strokeWidth={1.9} />
             </Pressable>
@@ -178,7 +178,7 @@ export default function UserProfile() {
             resizeMode="cover"
           />
         ) : null}
-        <View className="px-5 pt-2 pb-5 border-b-2 border-base-300">
+        <View className="px-5 pt-2 pb-5  ">
           <View className="flex-row items-start">
             <Avatar actor={me} size={72} baseUrl={account?.baseUrl} />
             <View className="flex-1 ml-4 min-w-0">
@@ -220,7 +220,7 @@ export default function UserProfile() {
         </View>
 
         {/* Tabs */}
-        <View className="flex-row border-b-2 border-base-300">
+        <View className="flex-row  ">
           {TABS.map((t) => (
             <TabButton
               key={t.key}
@@ -312,11 +312,11 @@ export default function UserProfile() {
         >
           {header()}
           {isSelf ? (
-            <View className="flex-row items-center px-5 py-2 border-b border-base-300 bg-base-200">
+            <View className="flex-row items-center px-5 py-2   bg-base-200">
               <Pressable
                 onPress={() => setComposingBookmark(true)}
                 android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-                className="px-3 py-1.5 border-2 border-base-300 mr-2 bg-base-100"
+                className="px-3 py-1.5   mr-2 bg-base-100"
               >
                 <Text className="font-ui uppercase tracking-[0.14em] text-[11px] text-base-content/70">
                   + Bookmark
@@ -325,7 +325,7 @@ export default function UserProfile() {
               <Pressable
                 onPress={() => setComposingFolder(true)}
                 android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-                className="px-3 py-1.5 border-2 border-base-300 bg-base-100"
+                className="px-3 py-1.5   bg-base-100"
               >
                 <Text className="font-ui uppercase tracking-[0.14em] text-[11px] text-base-content/70">
                   + Folder
@@ -415,7 +415,7 @@ export default function UserProfile() {
         >
           <Pressable onPress={() => {}}>
             <SafeAreaView edges={["bottom"]} className="bg-base-100">
-              <View className="border-t-2 border-base-content">
+              <View className=" ">
                 <Text className="font-ui uppercase tracking-[0.18em] text-[11px] text-base-content/50 px-5 pt-4 pb-2">
                   Links
                 </Text>
@@ -427,7 +427,7 @@ export default function UserProfile() {
                       Linking.openURL(url).catch(() => {});
                     }}
                     android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-                    className="flex-row items-center px-5 py-3 border-t border-base-300"
+                    className="flex-row items-center px-5 py-3  "
                   >
                     <Link size={16} color="#5588B1" strokeWidth={1.9} />
                     <Text

@@ -92,7 +92,7 @@ function ImageGrid({ images }) {
     return (
       <Image
         source={{ uri: images[0].url }}
-        className="w-full h-80 mb-3 border-2 border-base-300 bg-base-200"
+        className="w-full h-80 mb-3   bg-base-200"
         resizeMode="cover"
       />
     );
@@ -108,7 +108,7 @@ function ImageGrid({ images }) {
           >
             <Image
               source={{ uri: img.url }}
-              className="w-full h-48 border-2 border-base-300 bg-base-200"
+              className="w-full h-48   bg-base-200"
               resizeMode="cover"
             />
           </View>
@@ -200,7 +200,7 @@ export function PostBody({ post, typography }) {
 
       {/* Event details — date/time block. */}
       {type === "Event" && eventRange ? (
-        <View className="border-l-4 border-post-event pl-4 mb-5">
+        <View className="  pl-4 mb-5">
           <Text className="font-ui uppercase tracking-[0.16em] text-[10px] text-base-content/55 mb-1">
             When
           </Text>
@@ -223,14 +223,14 @@ export function PostBody({ post, typography }) {
           <Pressable onPress={openHref}>
             <Image
               source={{ uri: hero }}
-              className="w-full h-72 mb-5 border-2 border-base-300 bg-base-200"
+              className="w-full h-72 mb-5   bg-base-200"
               resizeMode="cover"
             />
           </Pressable>
         ) : (
           <Image
             source={{ uri: hero }}
-            className="w-full h-72 mb-5 border-2 border-base-300 bg-base-200"
+            className="w-full h-72 mb-5   bg-base-200"
             resizeMode="cover"
           />
         )

@@ -43,7 +43,7 @@ export function AudioAttachment({ att }) {
   }
 
   return (
-    <View className="border-2 border-base-300 bg-base-200 mb-2">
+    <View className="  bg-base-200 mb-2">
       <Pressable
         onPress={toggle}
         android_ripple={{ color: "rgba(0,0,0,0.06)" }}

@@ -113,7 +113,7 @@ export function PostCard({ post, onDeleted }) {
     <Pressable
       onPress={open}
       android_ripple={{ color: "rgba(0,0,0,0.04)" }}
-      className="border-b border-base-200 bg-base-100"
+      className="  bg-base-100"
     >
       <View className="px-5 py-5">
         {/* Author row — left side (avatar + name/handle) navigates to the
@@ -190,7 +190,7 @@ export function PostCard({ post, onDeleted }) {
                     return (
                       <Image
                         source={{ uri: imgs[0].url }}
-                        className="w-full h-72 mb-2 border-2 border-base-300 bg-base-200"
+                        className="w-full h-72 mb-2   bg-base-200"
                         resizeMode="cover"
                       />
                     );
@@ -207,7 +207,7 @@ export function PostCard({ post, onDeleted }) {
                           >
                             <Image
                               source={{ uri: img.url }}
-                              className="w-full h-40 border-2 border-base-300 bg-base-200"
+                              className="w-full h-40   bg-base-200"
                               resizeMode="cover"
                             />
                           </View>
@@ -233,7 +233,7 @@ export function PostCard({ post, onDeleted }) {
             ) : image ? (
               <Image
                 source={{ uri: image }}
-                className="w-full h-72 mb-3 border-2 border-base-300 bg-base-200"
+                className="w-full h-72 mb-3   bg-base-200"
                 resizeMode="cover"
               />
             ) : null}
@@ -247,7 +247,7 @@ export function PostCard({ post, onDeleted }) {
               <Pressable onPress={openExternal} className="mb-3">
                 <Image
                   source={{ uri: image }}
-                  className="w-full h-48 border-2 border-base-300 bg-base-200"
+                  className="w-full h-48   bg-base-200"
                   resizeMode="cover"
                 />
               </Pressable>
@@ -325,7 +325,7 @@ export function PostCard({ post, onDeleted }) {
             {image ? (
               <Image
                 source={{ uri: image }}
-                className="w-full h-48 mt-3 border-2 border-base-300 bg-base-200"
+                className="w-full h-48 mt-3   bg-base-200"
                 resizeMode="cover"
               />
             ) : null}
@@ -333,7 +333,7 @@ export function PostCard({ post, onDeleted }) {
         )}
 
         {/* Action bar — reply / react / repost / share / bookmark / more */}
-        <View className="mt-3 pt-3 border-t border-base-300">
+        <View className="mt-3 pt-3  ">
           <PostActionBar
             post={post}
             client={client}

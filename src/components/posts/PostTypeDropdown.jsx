@@ -68,7 +68,7 @@ export function PostTypeDropdown({ value, onChange, prefix }) {
               left: dropPos.left,
               width: DROPDOWN_WIDTH,
             }}
-            className="bg-base-100 border-2 border-base-content"
+            className="bg-base-100  "
           >
             {POST_TYPE_NAMES.map((t) => {
               const info = POST_TYPES[t];

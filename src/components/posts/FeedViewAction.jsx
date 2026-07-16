@@ -76,8 +76,8 @@ function JoinGroupButton({ group }) {
       disabled={busy || done}
       hitSlop={6}
       android_ripple={{ color: "rgba(0,0,0,0.08)" }}
-      className={`flex-row items-center border-2 px-2 py-1 ${
-        done ? "border-base-300" : "bg-primary border-primary"
+      className={`flex-row items-center  px-2 py-1 ${
+        done ? "" : "bg-primary "
       }`}
     >
       {done ? null : (

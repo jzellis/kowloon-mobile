@@ -152,7 +152,7 @@ export function ReactButton({ client, post, onReacted, size = "md" }) {
               elevation: 6,
               zIndex: 10,
             }}
-            className="border-2 border-primary bg-base-100"
+            className="  bg-base-100"
           >
             {emojis.map(({ emoji, name }) => (
               <Pressable
@@ -187,7 +187,7 @@ export function ReactButton({ client, post, onReacted, size = "md" }) {
             className="bg-black/40"
           />
           <SafeAreaView edges={["bottom"]} className="bg-base-100">
-            <View className="border-t-2 border-base-content">
+            <View className=" ">
               <Text className="font-ui uppercase tracking-[0.18em] text-[11px] text-base-content/50 px-5 pt-4 pb-3">
                 React
               </Text>

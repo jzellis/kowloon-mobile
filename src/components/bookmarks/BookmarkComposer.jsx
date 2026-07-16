@@ -225,11 +225,11 @@ export function BookmarkComposer({
       <View className="flex-1 bg-black/40 justify-end">
         <SafeAreaView
           edges={keyboardInset > 0 ? [] : ["bottom"]}
-          className="bg-base-100 border-t-2 border-base-content"
+          className="bg-base-100  "
           style={{ maxHeight: "92%" }}
         >
           {/* Header */}
-          <View className="flex-row items-center justify-between px-5 py-3 border-b-2 border-base-300 bg-secondary">
+          <View className="flex-row items-center justify-between px-5 py-3   bg-secondary">
             <Text className="font-ui text-2xl text-secondary-content">
               Add Bookmark
             </Text>
@@ -262,7 +262,7 @@ export function BookmarkComposer({
                 autoCapitalize="none"
                 autoCorrect={false}
                 keyboardType="url"
-                className={`border-2 border-base-300 bg-white px-3 py-2.5 font-ui text-base text-base-content ${
+                className={`  bg-white px-3 py-2.5 font-ui text-base text-base-content ${
                   hrefLocked ? "opacity-60" : ""
                 }`}
               />
@@ -273,7 +273,7 @@ export function BookmarkComposer({
               <View className="mb-4">
                 <Image
                   source={{ uri: imageSrc }}
-                  className="w-full h-40 border-2 border-base-300 bg-base-200"
+                  className="w-full h-40   bg-base-200"
                   resizeMode="cover"
                 />
                 <Pressable
@@ -298,7 +298,7 @@ export function BookmarkComposer({
                   fetchingPreview ? "Fetching…" : "Bookmark title"
                 }
                 placeholderTextColor="rgba(26,26,32,0.35)"
-                className="border-2 border-base-300 bg-white px-3 py-2.5 font-ui text-base text-base-content"
+                className="  bg-white px-3 py-2.5 font-ui text-base text-base-content"
               />
             </View>
 
@@ -311,7 +311,7 @@ export function BookmarkComposer({
                 multiline
                 placeholder="Why are you saving this?"
                 placeholderTextColor="rgba(26,26,32,0.35)"
-                className="border-2 border-base-300 bg-white px-3 py-2.5 font-ui text-base text-base-content min-h-20"
+                className="  bg-white px-3 py-2.5 font-ui text-base text-base-content min-h-20"
               />
             </View>
 
@@ -324,7 +324,7 @@ export function BookmarkComposer({
                 placeholder="reading, design, reference"
                 placeholderTextColor="rgba(26,26,32,0.35)"
                 autoCapitalize="none"
-                className="border-2 border-base-300 bg-white px-3 py-2.5 font-ui text-base text-base-content"
+                className="  bg-white px-3 py-2.5 font-ui text-base text-base-content"
               />
             </View>
 
@@ -352,7 +352,7 @@ export function BookmarkComposer({
                 ))}
                 <Pressable
                   onPress={() => setShowNewFolder((s) => !s)}
-                  className="flex-row items-center border-2 border-base-300 px-3 py-2"
+                  className="flex-row items-center   px-3 py-2"
                   android_ripple={{ color: "rgba(0,0,0,0.06)" }}
                 >
                   <FolderPlus
@@ -374,7 +374,7 @@ export function BookmarkComposer({
                     placeholder="New folder name"
                     placeholderTextColor="rgba(26,26,32,0.35)"
                     autoFocus
-                    className="flex-1 border-2 border-base-300 bg-white px-3 py-2 font-ui text-sm text-base-content mr-2"
+                    className="flex-1   bg-white px-3 py-2 font-ui text-sm text-base-content mr-2"
                   />
                   <Pressable
                     onPress={handleCreateFolder}
@@ -404,7 +404,7 @@ export function BookmarkComposer({
           </ScrollView>
 
           {/* Footer */}
-          <View className="flex-row items-center justify-end px-5 py-3 border-t-2 border-base-300">
+          <View className="flex-row items-center justify-end px-5 py-3  ">
             <Pressable
               onPress={onClose}
               hitSlop={6}
@@ -442,8 +442,8 @@ function FolderChip({ label, selected, onPress }) {
     <Pressable
       onPress={onPress}
       android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-      className={`border-2 px-3 py-2 ${
-        selected ? "border-primary bg-primary" : "border-base-300"
+      className={` px-3 py-2 ${
+        selected ? " bg-primary" : ""
       }`}
     >
       <Text

@@ -176,7 +176,7 @@ export default function EditPost() {
                   onChangeText={setTitle}
                   placeholder={`${type} title`}
                   placeholderTextColor="rgba(26,26,32,0.35)"
-                  className="border-2 border-base-300 bg-white px-3 py-2.5 font-ui text-base text-base-content"
+                  className="  bg-white px-3 py-2.5 font-ui text-base text-base-content"
                 />
               </View>
             ) : null}
@@ -189,7 +189,7 @@ export default function EditPost() {
                 multiline
                 placeholder="Write your post…"
                 placeholderTextColor="rgba(26,26,32,0.35)"
-                className="border-2 border-base-300 bg-white px-3 py-2.5 font-ui text-base text-base-content"
+                className="  bg-white px-3 py-2.5 font-ui text-base text-base-content"
                 style={{ minHeight: 200, textAlignVertical: "top" }}
               />
             </View>
@@ -223,7 +223,7 @@ export default function EditPost() {
           </ScrollView>
 
           <View
-            className="flex-row items-center justify-end px-5 pt-3 border-t-2 border-base-300"
+            className="flex-row items-center justify-end px-5 pt-3  "
             style={{
               paddingBottom: (keyboardInset > 0 ? 0 : insets.bottom) + 12,
             }}

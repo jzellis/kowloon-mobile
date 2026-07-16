@@ -33,7 +33,7 @@ export function NotificationRow({
     <Pressable
       onPress={onPress}
       android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-      className={`flex-row items-center px-5 py-4 border-b border-base-300 bg-base-100 ${
+      className={`flex-row items-center px-5 py-4   bg-base-100 ${
         unread ? "" : "opacity-60"
       }`}
     >

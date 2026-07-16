@@ -21,7 +21,7 @@ export function Avatar({ actor, size = 38, baseUrl }) {
         source={{ uri: icon }}
         onError={() => setFailed(true)}
         style={{ width: size, height: size, borderRadius: radius }}
-        className="border-2 border-base-300 bg-base-200"
+        className="  bg-base-200"
       />
     );
   }
@@ -29,7 +29,7 @@ export function Avatar({ actor, size = 38, baseUrl }) {
   return (
     <View
       style={{ width: size, height: size, borderRadius: radius }}
-      className="border-2 border-base-300 bg-secondary items-center justify-center"
+      className="  bg-secondary items-center justify-center"
     >
       <Text
         className="font-ui text-secondary-content"

@@ -201,7 +201,7 @@ export default function GroupDetail() {
             ) : null}
 
             {/* Group header */}
-            <View className="px-5 pt-4 pb-5 border-b-2 border-base-300">
+            <View className="px-5 pt-4 pb-5  ">
               <View className="flex-row items-center">
                 <GroupAvatar group={group} size={60} baseUrl={account?.baseUrl} />
                 <View className="flex-1 ml-4 min-w-0">
@@ -241,7 +241,7 @@ export default function GroupDetail() {
                     router.push(`/feed?view=${encodeURIComponent(String(id))}`)
                   }
                   android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-                  className="flex-row items-center border-2 border-base-content px-3 py-2"
+                  className="flex-row items-center   px-3 py-2"
                 >
                   <Newspaper size={13} color="rgba(26,26,32,0.85)" strokeWidth={1.75} />
                   <Text className="font-ui uppercase tracking-[0.14em] text-[11px] text-base-content ml-1.5">
@@ -255,7 +255,7 @@ export default function GroupDetail() {
                       onPress={handleLeave}
                       disabled={busy}
                       android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-                      className="flex-row items-center border-2 border-base-content px-3 py-2"
+                      className="flex-row items-center   px-3 py-2"
                     >
                       <LogOut size={13} color="rgba(26,26,32,0.85)" strokeWidth={1.75} />
                       <Text className="font-ui uppercase tracking-[0.14em] text-[11px] text-base-content ml-1.5">
@@ -267,7 +267,7 @@ export default function GroupDetail() {
                       onPress={handleJoin}
                       disabled={busy}
                       android_ripple={{ color: "rgba(0,0,0,0.08)" }}
-                      className="flex-row items-center bg-primary border-2 border-primary px-3 py-2"
+                      className="flex-row items-center bg-primary   px-3 py-2"
                     >
                       <LogIn size={13} color="#FAF4E8" strokeWidth={1.75} />
                       <Text className="font-ui uppercase tracking-[0.14em] text-[11px] text-primary-content ml-1.5">
@@ -284,7 +284,7 @@ export default function GroupDetail() {
                         router.push(`/group/${encodeURIComponent(String(id))}/pending`)
                       }
                       android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-                      className="flex-row items-center border-2 border-base-content px-3 py-2"
+                      className="flex-row items-center   px-3 py-2"
                     >
                       <Inbox size={13} color="rgba(26,26,32,0.85)" strokeWidth={1.75} />
                       <Text className="font-ui uppercase tracking-[0.14em] text-[11px] text-base-content ml-1.5">
@@ -296,7 +296,7 @@ export default function GroupDetail() {
                         router.push(`/group/${encodeURIComponent(String(id))}/edit`)
                       }
                       android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-                      className="flex-row items-center border-2 border-base-content px-3 py-2"
+                      className="flex-row items-center   px-3 py-2"
                     >
                       <Pencil size={13} color="rgba(26,26,32,0.85)" strokeWidth={1.75} />
                       <Text className="font-ui uppercase tracking-[0.14em] text-[11px] text-base-content ml-1.5">
@@ -307,7 +307,7 @@ export default function GroupDetail() {
                       onPress={confirmDelete}
                       disabled={busy}
                       android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-                      className="flex-row items-center border-2 border-error px-3 py-2"
+                      className="flex-row items-center   px-3 py-2"
                     >
                       <Trash2 size={13} color="#CC272E" strokeWidth={1.75} />
                       <Text className="font-ui uppercase tracking-[0.14em] text-[11px] text-error ml-1.5">
@@ -339,7 +339,7 @@ export default function GroupDetail() {
                       router.push(`/user/${encodeURIComponent(m.id)}`)
                     }
                     android_ripple={{ color: "rgba(0,0,0,0.04)" }}
-                    className="flex-row items-center py-3 border-b border-base-300"
+                    className="flex-row items-center py-3  "
                   >
                     <Avatar actor={m} size={36} baseUrl={account?.baseUrl} />
                     <View className="flex-1 ml-3 min-w-0">
@@ -373,7 +373,7 @@ export default function GroupDetail() {
             )
           }
           style={{ bottom: (insets.bottom || 0) + 32, right: 20 }}
-          className="absolute w-14 h-14 bg-primary border-2 border-base-content items-center justify-center"
+          className="absolute w-14 h-14 bg-primary   items-center justify-center"
           android_ripple={{ color: "rgba(255,255,255,0.15)" }}
         >
           <Text className="text-primary-content text-3xl leading-none mt-[-2px]">

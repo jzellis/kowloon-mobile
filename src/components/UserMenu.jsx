@@ -22,7 +22,7 @@ function MenuRow({ label, onPress, destructive = false, badge }) {
     <Pressable
       onPress={onPress}
       android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-      className="px-4 py-3.5 border-t-2 border-base-300 flex-row items-center"
+      className="px-4 py-3.5   flex-row items-center"
     >
       <Text
         className={`font-ui text-sm uppercase tracking-[0.14em] flex-1 ${
@@ -84,7 +84,7 @@ export function UserMenu({ visible, onClose }) {
               Pressable swallows taps so they don't reach the backdrop. */}
           <Pressable
             onPress={() => {}}
-            className="self-end mr-3 mt-2 w-64 border-2 border-base-content bg-base-100"
+            className="self-end mr-3 mt-2 w-64   bg-base-100"
           >
             {/* Header → own profile */}
             <Pressable

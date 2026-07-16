@@ -290,7 +290,7 @@ export default function Feed() {
                 baseUrl={account.baseUrl}
               />
               {unreadCount > 0 ? (
-                <View className="absolute -top-1 -right-1 bg-accent border-2 border-header min-w-[20px] h-5 items-center justify-center px-1">
+                <View className="absolute -top-1 -right-1 bg-accent   min-w-[20px] h-5 items-center justify-center px-1">
                   <Text className="font-ui text-[10px] font-bold text-accent-content">
                     {unreadCount > 99 ? "99+" : unreadCount}
                   </Text>
@@ -341,7 +341,7 @@ export default function Feed() {
               </Text>
               <Pressable
                 onPress={refresh}
-                className="border-2 border-base-content px-5 py-2.5"
+                className="  px-5 py-2.5"
                 android_ripple={{ color: "rgba(0,0,0,0.06)" }}
               >
                 <Text className="font-ui uppercase tracking-[0.16em] text-xs text-base-content">
@@ -373,7 +373,7 @@ export default function Feed() {
       <Pressable
         onPress={() => router.push("/compose")}
         style={{ bottom: 24, right: 20 }}
-        className="absolute w-14 h-14 bg-primary border-2 border-base-content items-center justify-center"
+        className="absolute w-14 h-14 bg-primary   items-center justify-center"
         android_ripple={{ color: "rgba(255,255,255,0.15)" }}
       >
         <Text className="text-primary-content text-3xl leading-none mt-[-2px]">

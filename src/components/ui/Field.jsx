@@ -3,8 +3,8 @@ import { Pressable, Text, TextInput, View } from "react-native";
 import { Eye, EyeOff } from "lucide-react-native";
 
 // Single text input with a thin uppercase label above. Editorial styling:
-// no rounding, 2px bottom border that shifts to primary on focus is
-// future work — for now we render a 2px box border on all sides for clarity.
+// no rounding, 2px bottom  that shifts to primary on focus is
+// future work — for now we render a 2px box  on all sides for clarity.
 //
 // When `secureTextEntry` is set, a reveal toggle (eye icon) shows up inside
 // the input on the right so users can confirm what they're typing — useful
@@ -41,7 +41,7 @@ export function Field({
           autoCorrect={autoCorrect}
           secureTextEntry={isSecure}
           keyboardType={keyboardType}
-          className={`border-2 border-base-300 bg-field px-3 py-3 font-ui text-base text-base-content ${
+          className={`  bg-field px-3 py-3 font-ui text-base text-base-content ${
             secureTextEntry ? "pr-11" : ""
           }`}
         />

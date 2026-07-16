@@ -175,7 +175,7 @@ export default function PostDetail() {
 
             {/* Action bar — reply / react / repost / share / bookmark / more */}
             <View className="px-5 pt-5">
-              <View className="border-t-2 border-base-300 pt-4">
+              <View className="  pt-4">
                 <PostActionBar
                   post={post}
                   client={client}

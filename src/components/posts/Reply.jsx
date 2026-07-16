@@ -72,7 +72,7 @@ export function Reply({ reply, client, currentUserId, onUpdated, onDeleted }) {
   }
 
   return (
-    <View className="flex-row py-4 border-b border-base-300">
+    <View className="flex-row py-4  ">
       <View className="shrink-0 mr-3">
         <Avatar actor={actor} size={32} baseUrl={client?.http?.baseUrl} />
       </View>
@@ -98,7 +98,7 @@ export function Reply({ reply, client, currentUserId, onUpdated, onDeleted }) {
               autoFocus
               placeholder="Edit your reply…"
               placeholderTextColor="rgba(26,26,32,0.35)"
-              className="border-2 border-base-300 bg-white px-3 py-2 font-ui text-sm text-base-content min-h-20"
+              className="  bg-white px-3 py-2 font-ui text-sm text-base-content min-h-20"
             />
             <View className="flex-row justify-end mt-2">
               <Pressable

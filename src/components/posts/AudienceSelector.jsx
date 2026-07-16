@@ -71,7 +71,7 @@ export function AudienceSelector({ value, onChange }) {
     <>
       <Pressable
         onPress={() => setOpen(true)}
-        className="flex-row items-center border-2 border-base-content px-3 py-2.5"
+        className="flex-row items-center   px-3 py-2.5"
         android_ripple={{ color: "rgba(0,0,0,0.06)" }}
       >
         <Text className="font-ui uppercase tracking-[0.12em] text-[11px] text-base-content/50 mr-2">
@@ -100,7 +100,7 @@ export function AudienceSelector({ value, onChange }) {
           {/* Inner Pressable swallows taps so they don't dismiss. */}
           <Pressable onPress={() => {}}>
             <SafeAreaView edges={["bottom"]} className="bg-base-100">
-              <View className="border-t-2 border-base-content">
+              <View className=" ">
                 <Text className="font-ui uppercase tracking-[0.18em] text-[11px] text-base-content/50 px-5 pt-4 pb-2">
                   Post audience
                 </Text>
@@ -116,7 +116,7 @@ export function AudienceSelector({ value, onChange }) {
                   ))}
 
                   {circles.length > 0 ? (
-                    <View className="border-t-2 border-base-300 mt-1 pt-1">
+                    <View className="  mt-1 pt-1">
                       <Text className="font-ui uppercase tracking-[0.18em] text-[10px] text-base-content/40 px-5 py-2">
                         Your circles
                       </Text>

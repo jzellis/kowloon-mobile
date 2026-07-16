@@ -12,9 +12,9 @@ module.exports = {
         // Editorial palette — mirrors frontend's kowloon theme.
         // Hex approximations of the OKLCH source values in frontend/src/index.css
         base: {
-          100: "#F7F3EC", // warm paper — desaturated 2026-07 (less yellow)
-          200: "#EAE4D8",
-          300: "#D8CFBD",
+          100: "#FFFFFF", // white app background (was warm paper; experiment 2026-07)
+          200: "#F4F4F4", // neutral light surface (cards / sheets)
+          300: "#E7E7E7", // neutral hairline / placeholder fill
           content: "#1A1A20",
         },
         primary: {

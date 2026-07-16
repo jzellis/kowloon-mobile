@@ -126,7 +126,7 @@ export default function Notifications() {
       />
 
       {/* Filter chips */}
-      <View className="border-b-2 border-base-300">
+      <View className=" ">
         <FlatList
           horizontal
           data={FILTERS}
@@ -139,8 +139,8 @@ export default function Notifications() {
               <Pressable
                 onPress={() => setFilter(item.key)}
                 android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-                className={`border-2 px-3 py-1.5 ${
-                  active ? "border-primary bg-primary" : "border-base-300"
+                className={` px-3 py-1.5 ${
+                  active ? " bg-primary" : ""
                 }`}
               >
                 <Text
@@ -186,7 +186,7 @@ export default function Notifications() {
               </Text>
               <Pressable
                 onPress={() => load()}
-                className="border-2 border-base-content px-5 py-2.5"
+                className="  px-5 py-2.5"
                 android_ripple={{ color: "rgba(0,0,0,0.06)" }}
               >
                 <Text className="font-ui uppercase tracking-[0.16em] text-xs text-base-content">

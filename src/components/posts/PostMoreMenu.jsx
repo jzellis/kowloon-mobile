@@ -263,7 +263,7 @@ export function PostMoreMenu({ post, client, currentUser, onDeleted }) {
               left: dropPos.left,
               width: DROPDOWN_WIDTH,
             }}
-            className="bg-base-100 border-2 border-base-content"
+            className="bg-base-100  "
           >
             {items.map((item) =>
               item.sep ? (

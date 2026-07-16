@@ -30,7 +30,7 @@ function NavRow({ label, hint, onPress }) {
   return (
     <Pressable
       onPress={onPress}
-      className="border-2 border-base-300 bg-base-100 px-4 py-4 mb-3 flex-row items-center justify-between"
+      className="  bg-base-100 px-4 py-4 mb-3 flex-row items-center justify-between"
       android_ripple={{ color: "rgba(0,0,0,0.05)" }}
     >
       <View className="flex-1">
@@ -55,10 +55,10 @@ function AccountRow({ account, isActive, onSwitch, onSignOut }) {
   return (
     <Pressable
       onPress={isActive ? undefined : onSwitch}
-      className={`flex-row items-center px-4 py-3 mb-2 border-2 ${
+      className={`flex-row items-center px-4 py-3 mb-2  ${
         isActive
-          ? "border-base-content bg-base-content"
-          : "border-base-300 bg-base-100"
+          ? " bg-base-content"
+          : " bg-base-100"
       }`}
       android_ripple={isActive ? undefined : { color: "rgba(0,0,0,0.05)" }}
     >
@@ -91,8 +91,8 @@ function AccountRow({ account, isActive, onSwitch, onSignOut }) {
       <Pressable
         onPress={onSignOut}
         hitSlop={10}
-        className={`w-7 h-7 items-center justify-center border ${
-          isActive ? "border-base-100/30" : "border-base-300"
+        className={`w-7 h-7 items-center justify-center  ${
+          isActive ? "" : ""
         }`}
       >
         <Text
@@ -145,10 +145,10 @@ export default function Settings() {
           ))}
           <Pressable
             onPress={() => router.push("/login")}
-            className="border-2 border-base-300 bg-base-100 px-4 py-3 mb-8 flex-row items-center gap-3"
+            className="  bg-base-100 px-4 py-3 mb-8 flex-row items-center gap-3"
             android_ripple={{ color: "rgba(0,0,0,0.05)" }}
           >
-            <View className="w-9 h-9 border-2 border-base-300 items-center justify-center">
+            <View className="w-9 h-9   items-center justify-center">
               <Text className="font-ui text-xl text-base-content/40 leading-none">
                 +
               </Text>

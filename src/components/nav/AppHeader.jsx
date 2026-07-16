@@ -60,7 +60,7 @@ export function HeaderButton({ label, icon, onPress }) {
       onPress={onPress}
       hitSlop={6}
       android_ripple={{ color: "rgba(255,255,255,0.18)" }}
-      className="flex-row items-center border-2 border-header-content px-3 py-1.5"
+      className="flex-row items-center   px-3 py-1.5"
     >
       {icon || null}
       <Text

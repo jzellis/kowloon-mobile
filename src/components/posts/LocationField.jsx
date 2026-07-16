@@ -123,7 +123,7 @@ export function LocationField({ value, onChange }) {
       <Pressable
         onPress={() => setOpen(true)}
         android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-        className="flex-row items-center border-2 border-base-300 bg-base-100 px-3 py-2"
+        className="flex-row items-center   bg-base-100 px-3 py-2"
       >
         <Text className="font-ui text-sm mr-2 text-base-content/70">📍</Text>
         {value ? (
@@ -169,7 +169,7 @@ export function LocationField({ value, onChange }) {
             edges={keyboardInset > 0 ? [] : ["bottom"]}
             className="bg-base-100"
           >
-            <View className="border-t-2 border-base-content">
+            <View className=" ">
               <Text className="font-ui uppercase tracking-[0.18em] text-[11px] text-base-content/50 px-5 pt-4 pb-2">
                 Location
               </Text>
@@ -178,7 +178,7 @@ export function LocationField({ value, onChange }) {
                 onPress={useCurrentLocation}
                 disabled={locating}
                 android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-                className="flex-row items-center px-5 py-3 border-b-2 border-base-300"
+                className="flex-row items-center px-5 py-3  "
               >
                 {locating ? (
                   <ActivityIndicator />
@@ -199,7 +199,7 @@ export function LocationField({ value, onChange }) {
                   autoCapitalize="none"
                   autoCorrect={false}
                   returnKeyType="search"
-                  className="border-2 border-base-300 bg-white px-3 py-2.5 font-ui text-base text-base-content"
+                  className="  bg-white px-3 py-2.5 font-ui text-base text-base-content"
                 />
               </View>
 
@@ -229,7 +229,7 @@ export function LocationField({ value, onChange }) {
                         key={`${r.place_id || r.osm_id || i}`}
                         onPress={() => selectResult(r)}
                         android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-                        className="px-5 py-3 border-t border-base-300"
+                        className="px-5 py-3  "
                       >
                         <Text
                           className="font-ui text-base text-base-content"

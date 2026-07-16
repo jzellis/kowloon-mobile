@@ -151,7 +151,7 @@ export default function PendingRequests() {
           items.map((u) => (
             <View
               key={u.id}
-              className="flex-row items-center px-5 py-3 border-b border-base-300"
+              className="flex-row items-center px-5 py-3  "
             >
               <Avatar actor={u} size={40} baseUrl={account?.baseUrl} />
               <View className="flex-1 ml-3 min-w-0">
@@ -173,7 +173,7 @@ export default function PendingRequests() {
                   onPress={() => approve(u.id)}
                   disabled={busyId === u.id}
                   android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-                  className="flex-row items-center bg-primary border-2 border-primary px-3 py-2"
+                  className="flex-row items-center bg-primary   px-3 py-2"
                 >
                   {busyId === u.id ? (
                     <ActivityIndicator size="small" color="#FAF4E8" />
@@ -190,7 +190,7 @@ export default function PendingRequests() {
                   onPress={() => confirmReject(u)}
                   disabled={busyId === u.id}
                   android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-                  className="flex-row items-center border-2 border-error px-3 py-2"
+                  className="flex-row items-center   px-3 py-2"
                 >
                   <X size={13} color="#CC272E" strokeWidth={1.75} />
                   <Text className="font-ui uppercase tracking-[0.14em] text-[11px] text-error ml-1.5">

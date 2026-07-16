@@ -91,7 +91,7 @@ export default function Groups() {
       />
 
       {/* Tabs */}
-      <View className="flex-row border-b-2 border-base-300">
+      <View className="flex-row  ">
         <TabButton
           label="My Groups"
           active={tab === "mine"}
@@ -136,7 +136,7 @@ export default function Groups() {
               </Text>
               <Pressable
                 onPress={onRefresh}
-                className="border-2 border-base-content px-5 py-2.5"
+                className="  px-5 py-2.5"
                 android_ripple={{ color: "rgba(0,0,0,0.06)" }}
               >
                 <Text className="font-ui uppercase tracking-[0.16em] text-xs text-base-content">
@@ -169,7 +169,7 @@ function TabButton({ label, active, onPress }) {
       onPress={onPress}
       android_ripple={{ color: "rgba(0,0,0,0.05)" }}
       className={`flex-1 py-3 items-center ${
-        active ? "border-b-2 border-primary -mb-[2px]" : ""
+        active ? "  -mb-[2px]" : ""
       }`}
     >
       <Text

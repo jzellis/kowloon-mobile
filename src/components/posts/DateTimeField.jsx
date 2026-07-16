@@ -64,11 +64,11 @@ export function DateTimeField({
           {label}
         </Text>
       ) : null}
-      <View className="flex-row border-2 border-base-300 bg-white">
+      <View className="flex-row   bg-white">
         <Pressable
           onPress={() => setMode("date")}
           android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-          className="flex-1 px-3 py-3 border-r-2 border-base-300"
+          className="flex-1 px-3 py-3  "
         >
           <Text className="font-ui uppercase tracking-[0.12em] text-[10px] text-base-content/45 mb-0.5">
             Date

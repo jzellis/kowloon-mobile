@@ -44,7 +44,7 @@ export function FeedDefaultsMenu({
           <Pressable
             onPress={() => {}}
             style={{ position: "absolute", top: pos.top, right: pos.right, width: DROPDOWN_WIDTH }}
-            className="bg-base-100 border-2 border-base-content"
+            className="bg-base-100  "
           >
             <Text className="font-ui uppercase tracking-[0.16em] text-[10px] text-base-content/40 px-4 pt-3 pb-1">
               Set as default
@@ -74,7 +74,7 @@ function Row({ label, isDefault, onPress, last }) {
       disabled={isDefault}
       android_ripple={{ color: "rgba(0,0,0,0.05)" }}
       className={`flex-row items-center justify-between px-4 py-3 ${
-        last ? "" : "border-b border-base-300"
+        last ? "" : " "
       }`}
     >
       <Text

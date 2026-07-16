@@ -105,7 +105,7 @@ export default function PageDetail() {
               {imageSrc ? (
                 <Image
                   source={{ uri: imageSrc }}
-                  className="w-full h-64 mb-4 border-2 border-base-300 bg-base-200"
+                  className="w-full h-64 mb-4   bg-base-200"
                   resizeMode="cover"
                 />
               ) : null}
@@ -117,7 +117,7 @@ export default function PageDetail() {
               ) : null}
 
               {/* Author + updated/created + word count */}
-              <View className="flex-row items-center mb-3 border-b-2 border-base-300 pb-4">
+              <View className="flex-row items-center mb-3   pb-4">
                 {author ? (
                   <>
                     <Avatar

@@ -28,7 +28,7 @@ function ActionRow({ label, onPress, destructive, muted }) {
     <Pressable
       onPress={onPress}
       android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-      className="px-5 py-3.5 border-b border-base-300"
+      className="px-5 py-3.5  "
     >
       <Text
         className={`font-ui text-base ${
@@ -128,9 +128,9 @@ export function BookmarkActionSheet({
         <Pressable onPress={() => {}}>
           <SafeAreaView
             edges={["bottom"]}
-            className="bg-base-100 border-t-2 border-base-content"
+            className="bg-base-100  "
           >
-            <View className="flex-row items-center px-5 py-3 border-b-2 border-base-300 bg-secondary">
+            <View className="flex-row items-center px-5 py-3   bg-secondary">
               {isFolder ? (
                 <Folder size={16} color="rgba(255,244,224,0.85)" strokeWidth={1.75} />
               ) : (
@@ -203,10 +203,10 @@ function EditModal({ node, client, onClose, onSaved }) {
       <View className="flex-1 bg-black/40 justify-end">
         <SafeAreaView
           edges={keyboardInset > 0 ? [] : ["bottom"]}
-          className="bg-base-100 border-t-2 border-base-content"
+          className="bg-base-100  "
           style={{ maxHeight: "92%" }}
         >
-          <View className="flex-row items-center justify-between px-5 py-3 border-b-2 border-base-300 bg-secondary">
+          <View className="flex-row items-center justify-between px-5 py-3   bg-secondary">
             <Text className="font-ui text-2xl text-secondary-content">
               {isFolder ? "Edit Folder" : "Edit Bookmark"}
             </Text>
@@ -228,7 +228,7 @@ function EditModal({ node, client, onClose, onSaved }) {
                 onChangeText={setTitle}
                 placeholder={isFolder ? "e.g. Recipes" : "Bookmark title"}
                 placeholderTextColor="rgba(26,26,32,0.35)"
-                className="border-2 border-base-300 bg-white px-3 py-2.5 font-ui text-base text-base-content"
+                className="  bg-white px-3 py-2.5 font-ui text-base text-base-content"
               />
             </View>
 
@@ -244,7 +244,7 @@ function EditModal({ node, client, onClose, onSaved }) {
                     keyboardType="url"
                     placeholder="https://…"
                     placeholderTextColor="rgba(26,26,32,0.35)"
-                    className="border-2 border-base-300 bg-white px-3 py-2.5 font-ui text-base text-base-content"
+                    className="  bg-white px-3 py-2.5 font-ui text-base text-base-content"
                   />
                 </View>
                 <View className="mb-4">
@@ -255,7 +255,7 @@ function EditModal({ node, client, onClose, onSaved }) {
                     multiline
                     placeholder="A short note about what this is."
                     placeholderTextColor="rgba(26,26,32,0.35)"
-                    className="border-2 border-base-300 bg-white px-3 py-2.5 font-ui text-base text-base-content min-h-20"
+                    className="  bg-white px-3 py-2.5 font-ui text-base text-base-content min-h-20"
                   />
                 </View>
               </>
@@ -270,7 +270,7 @@ function EditModal({ node, client, onClose, onSaved }) {
               <Text className="font-ui text-xs text-error mb-3">{error}</Text>
             ) : null}
           </ScrollView>
-          <View className="flex-row items-center justify-end px-5 py-3 border-t-2 border-base-300">
+          <View className="flex-row items-center justify-end px-5 py-3  ">
             <Pressable onPress={onClose} hitSlop={6} className="px-4 py-2.5 mr-2">
               <Text className="font-ui uppercase tracking-[0.16em] text-[11px] text-base-content/55">
                 Cancel
@@ -349,9 +349,9 @@ export function FolderCreateModal({ visible, client, onClose, onCreated }) {
       <View className="flex-1 bg-black/40 justify-end">
         <SafeAreaView
           edges={keyboardInset > 0 ? [] : ["bottom"]}
-          className="bg-base-100 border-t-2 border-base-content"
+          className="bg-base-100  "
         >
-          <View className="flex-row items-center justify-between px-5 py-3 border-b-2 border-base-300 bg-secondary">
+          <View className="flex-row items-center justify-between px-5 py-3   bg-secondary">
             <Text className="font-ui text-2xl text-secondary-content">
               New Folder
             </Text>
@@ -374,7 +374,7 @@ export function FolderCreateModal({ visible, client, onClose, onCreated }) {
                 placeholder="e.g. Recipes"
                 placeholderTextColor="rgba(26,26,32,0.35)"
                 autoFocus
-                className="border-2 border-base-300 bg-white px-3 py-2.5 font-ui text-base text-base-content"
+                className="  bg-white px-3 py-2.5 font-ui text-base text-base-content"
               />
             </View>
             <View className="mb-4">
@@ -385,7 +385,7 @@ export function FolderCreateModal({ visible, client, onClose, onCreated }) {
               <Text className="font-ui text-xs text-error mb-3">{error}</Text>
             ) : null}
           </ScrollView>
-          <View className="flex-row items-center justify-end px-5 py-3 border-t-2 border-base-300">
+          <View className="flex-row items-center justify-end px-5 py-3  ">
             <Pressable onPress={onClose} hitSlop={6} className="px-4 py-2.5 mr-2">
               <Text className="font-ui uppercase tracking-[0.16em] text-[11px] text-base-content/55">
                 Cancel
@@ -480,10 +480,10 @@ function MoveModal({ node, client, account, onClose, onMoved }) {
       <View className="flex-1 bg-black/40 justify-end">
         <SafeAreaView
           edges={["bottom"]}
-          className="bg-base-100 border-t-2 border-base-content"
+          className="bg-base-100  "
           style={{ maxHeight: "80%" }}
         >
-          <View className="flex-row items-center justify-between px-5 py-3 border-b-2 border-base-300 bg-secondary">
+          <View className="flex-row items-center justify-between px-5 py-3   bg-secondary">
             <Text className="font-ui text-2xl text-secondary-content">
               Move to…
             </Text>
@@ -495,7 +495,7 @@ function MoveModal({ node, client, account, onClose, onMoved }) {
             <Pressable
               onPress={() => setSelected(null)}
               android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-              className={`flex-row items-center px-5 py-3.5 border-b border-base-300 ${
+              className={`flex-row items-center px-5 py-3.5   ${
                 selected === null ? "bg-primary/10" : ""
               }`}
             >
@@ -522,7 +522,7 @@ function MoveModal({ node, client, account, onClose, onMoved }) {
                   key={f.id}
                   onPress={() => setSelected(f.id)}
                   android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-                  className={`flex-row items-center px-5 py-3.5 border-b border-base-300 ${
+                  className={`flex-row items-center px-5 py-3.5   ${
                     selected === f.id ? "bg-primary/10" : ""
                   }`}
                 >
@@ -544,7 +544,7 @@ function MoveModal({ node, client, account, onClose, onMoved }) {
           {error ? (
             <Text className="font-ui text-xs text-error px-5 py-2">{error}</Text>
           ) : null}
-          <View className="flex-row items-center justify-end px-5 py-3 border-t-2 border-base-300">
+          <View className="flex-row items-center justify-end px-5 py-3  ">
             <Pressable onPress={onClose} hitSlop={6} className="px-4 py-2.5 mr-2">
               <Text className="font-ui uppercase tracking-[0.16em] text-[11px] text-base-content/55">
                 Cancel

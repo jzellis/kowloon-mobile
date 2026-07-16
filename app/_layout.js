@@ -60,7 +60,7 @@ export default function RootLayout() {
               <Stack
                 screenOptions={{
                   headerShown: false,
-                  contentStyle: { backgroundColor: "#FAF4E8" },
+                  contentStyle: { backgroundColor: "#FFFFFF" },
                 }}
               />
             </UnreadCountProvider>

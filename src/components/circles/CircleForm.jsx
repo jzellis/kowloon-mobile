@@ -172,7 +172,7 @@ export function CircleForm({
               size={64}
               baseUrl={account?.baseUrl}
             />
-            <View className="absolute -bottom-1 -right-1 bg-base-100 border-2 border-base-content p-1">
+            <View className="absolute -bottom-1 -right-1 bg-base-100   p-1">
               <ImagePlus
                 size={13}
                 color="rgba(26,26,32,0.85)"
@@ -187,7 +187,7 @@ export function CircleForm({
               onChangeText={setName}
               placeholder="Circle name"
               placeholderTextColor="rgba(26,26,32,0.35)"
-              className="border-2 border-base-300 bg-white px-3 py-2.5 font-ui text-base text-base-content"
+              className="  bg-white px-3 py-2.5 font-ui text-base text-base-content"
             />
           </View>
         </View>
@@ -201,7 +201,7 @@ export function CircleForm({
             multiline
             placeholder="What's this circle for?"
             placeholderTextColor="rgba(26,26,32,0.35)"
-            className="border-2 border-base-300 bg-white px-3 py-2.5 font-ui text-base text-base-content min-h-16"
+            className="  bg-white px-3 py-2.5 font-ui text-base text-base-content min-h-16"
           />
         </View>
 
@@ -216,8 +216,8 @@ export function CircleForm({
                   key={opt.label}
                   onPress={() => setTo(opt.value)}
                   android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-                  className={`flex-1 border-2 px-2 py-2.5 ${
-                    selected ? "border-primary bg-primary" : "border-base-300"
+                  className={`flex-1  px-2 py-2.5 ${
+                    selected ? " bg-primary" : ""
                   }`}
                 >
                   <Text
@@ -245,7 +245,7 @@ export function CircleForm({
               {members.map((m) => (
                 <View
                   key={m.id}
-                  className="flex-row items-center py-2 border-b border-base-300"
+                  className="flex-row items-center py-2  "
                 >
                   <Avatar actor={m} size={32} baseUrl={account?.baseUrl} />
                   <View className="flex-1 ml-3 min-w-0">
@@ -285,7 +285,7 @@ export function CircleForm({
             placeholderTextColor="rgba(26,26,32,0.35)"
             autoCapitalize="none"
             autoCorrect={false}
-            className="border-2 border-base-300 bg-white px-3 py-2.5 font-ui text-base text-base-content"
+            className="  bg-white px-3 py-2.5 font-ui text-base text-base-content"
           />
 
           {searching ? (
@@ -293,7 +293,7 @@ export function CircleForm({
               <ActivityIndicator />
             </View>
           ) : results.length > 0 ? (
-            <View className="border-2 border-t-0 border-base-300">
+            <View className="  ">
               {results.map((m) => {
                 const already = memberIds.has(m.id);
                 return (
@@ -302,7 +302,7 @@ export function CircleForm({
                     onPress={() => !already && addMember(m)}
                     disabled={already}
                     android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-                    className="flex-row items-center px-3 py-2.5 border-t border-base-300"
+                    className="flex-row items-center px-3 py-2.5  "
                   >
                     <Avatar actor={m} size={30} baseUrl={account?.baseUrl} />
                     <View className="flex-1 ml-3 min-w-0">
@@ -337,7 +337,7 @@ export function CircleForm({
       {/* Footer — pad past Android's nav bar (and don't double-pad when the
           keyboard is up, where the window resizes and the nav bar is gone). */}
       <View
-        className="flex-row items-center justify-end px-5 pt-3 border-t-2 border-base-300"
+        className="flex-row items-center justify-end px-5 pt-3  "
         style={{ paddingBottom: (keyboardInset > 0 ? 0 : insets.bottom) + 12 }}
       >
         <Pressable onPress={onCancel} hitSlop={6} className="px-4 py-2.5 mr-2">

@@ -281,7 +281,7 @@ export default function Register() {
               </View>
             ) : (
               <>
-                <View className="border-2 border-base-300 bg-base-100 p-4 mt-4 mb-6">
+                <View className="  bg-base-100 p-4 mt-4 mb-6">
                   <Eyebrow className="mb-1">Server</Eyebrow>
                   <Heading className="text-2xl leading-tight">
                     {serverInfo.name}
@@ -345,7 +345,7 @@ export default function Register() {
                     <Text className="font-ui text-sm text-base-content/70 mb-3 leading-5">
                       Tick every rule to confirm you've read and agreed to it.
                     </Text>
-                    <View className="border-2 border-base-300 bg-base-100 px-3 py-1">
+                    <View className="  bg-base-100 px-3 py-1">
                       {rules.map((r) => (
                         <Checkbox
                           key={r.id}

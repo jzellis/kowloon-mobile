@@ -1,6 +1,6 @@
 import { Pressable, Text, View, ActivityIndicator } from "react-native";
 
-// Editorial button — hard edges (no rounding), 2px border, uppercase label.
+// Editorial button — hard edges (no rounding), uppercase label.
 // `variant` controls fill: primary | secondary | ghost.
 // `loading` disables the button and replaces the label with a spinner.
 export function Button({
@@ -22,16 +22,10 @@ export function Button({
     secondary: "text-secondary-content",
     ghost: "text-base-content",
   }[variant];
-  const border = {
-    primary: "border-primary",
-    secondary: "border-secondary",
-    ghost: "border-base-content",
-  }[variant];
-
   return (
     <Pressable
       onPress={isDisabled ? undefined : onPress}
-      className={`border-2 ${border} ${bg} py-3 px-5 ${className}`}
+      className={`${bg} py-3 px-5 ${className}`}
       android_ripple={{ color: "rgba(0,0,0,0.08)" }}
     >
       <View className="flex-row items-center justify-center">

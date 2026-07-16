@@ -80,10 +80,10 @@ export function FlagSheet({ visible, onClose, onSubmit, client }) {
         <Pressable
           onPress={() => {}}
           style={{ maxHeight: "75%" }}
-          className="bg-base-100 border-t-2 border-base-content"
+          className="bg-base-100  "
         >
           {/* Header */}
-          <View className="px-5 pt-4 pb-3 border-b border-base-200">
+          <View className="px-5 pt-4 pb-3  ">
             <Text className="font-ui uppercase tracking-[0.18em] text-[11px] text-base-content/45 mb-1.5">
               Report Post
             </Text>
@@ -104,7 +104,7 @@ export function FlagSheet({ visible, onClose, onSubmit, client }) {
                   onPress={() => onSubmit(r.key)}
                   android_ripple={{ color: "rgba(0,0,0,0.05)" }}
                   className={`px-5 py-3.5 ${
-                    i < reasons.length - 1 ? "border-b border-base-200" : ""
+                    i < reasons.length - 1 ? " " : ""
                   }`}
                 >
                   <Text className="font-ui text-sm text-base-content">
@@ -123,11 +123,11 @@ export function FlagSheet({ visible, onClose, onSubmit, client }) {
             </ScrollView>
           )}
 
-          {/* Cancel — full-width, heavy border on top to visually separate */}
+          {/* Cancel — full-width, heavy  on top to visually separate */}
           <Pressable
             onPress={onClose}
             android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-            className="border-t-2 border-base-content px-5 py-4 items-center"
+            className="  px-5 py-4 items-center"
           >
             <Text className="font-ui uppercase tracking-[0.18em] text-[11px] text-base-content">
               Cancel

@@ -53,14 +53,14 @@ function TabBar({ tab, onSelect }) {
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={{ paddingHorizontal: 12 }}
-      className="border-b-2 border-base-content"
+      className=" "
     >
       {TABS.map((t) => (
         <Pressable
           key={t.key}
           onPress={() => onSelect(t.key)}
           android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-          className={`px-4 py-3 ${tab === t.key ? "border-b-2 border-primary -mb-[2px]" : ""}`}
+          className={`px-4 py-3 ${tab === t.key ? "  -mb-[2px]" : ""}`}
         >
           <Text
             className={`font-ui uppercase tracking-[0.16em] text-[11px] ${
@@ -105,7 +105,7 @@ function ItemAvatar({ item, baseUrl, size = 36 }) {
       <Image
         source={{ uri: src }}
         style={{ width: size, height: size }}
-        className="border-2 border-base-300 bg-base-200"
+        className="  bg-base-200"
         onError={() => setFailed(true)}
       />
     );
@@ -113,7 +113,7 @@ function ItemAvatar({ item, baseUrl, size = 36 }) {
   return (
     <View
       style={{ width: size, height: size }}
-      className="border-2 border-base-300 bg-secondary items-center justify-center"
+      className="  bg-secondary items-center justify-center"
     >
       <Users size={size * 0.45} color="rgba(255,244,224,0.7)" strokeWidth={1.75} />
     </View>
@@ -122,7 +122,7 @@ function ItemAvatar({ item, baseUrl, size = 36 }) {
 
 function CachedRow({ item, baseUrl }) {
   return (
-    <View className="flex-row items-center py-3 px-5 border-t border-base-300">
+    <View className="flex-row items-center py-3 px-5  ">
       <ItemAvatar item={item} baseUrl={baseUrl} />
       <View className="flex-1 ml-3 min-w-0">
         <Text className="font-ui text-base text-base-content leading-tight" numberOfLines={1}>
@@ -148,7 +148,7 @@ function PageRow({ page }) {
     <Pressable
       onPress={() => Linking.openURL(page.url)}
       android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-      className="flex-row items-center justify-between py-3 px-5 border-t border-base-300"
+      className="flex-row items-center justify-between py-3 px-5  "
     >
       <Text className="font-ui text-base text-base-content flex-1 mr-3" numberOfLines={1}>
         {page.title}
@@ -315,7 +315,7 @@ export default function ServerProfile() {
           <Text className="font-ui text-base text-error text-center mb-4">{profileError}</Text>
           <Pressable
             onPress={() => loadServer()}
-            className="border-2 border-base-content px-5 py-2.5"
+            className="  px-5 py-2.5"
             android_ripple={{ color: "rgba(0,0,0,0.06)" }}
           >
             <Text className="font-ui uppercase tracking-[0.16em] text-xs text-base-content">
@@ -405,7 +405,7 @@ export default function ServerProfile() {
           <Pressable
             onPress={openPicker}
             android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-            className="flex-row items-center self-start border-2 border-base-content px-4 py-2.5 mt-4"
+            className="flex-row items-center self-start   px-4 py-2.5 mt-4"
           >
             <PlusCircle size={14} color="rgba(26,26,32,0.8)" strokeWidth={2} />
             <Text className="font-ui uppercase tracking-[0.16em] text-xs text-base-content ml-2">
@@ -430,7 +430,7 @@ export default function ServerProfile() {
                 <Text className="font-ui text-base text-error text-center mb-4">{postsError}</Text>
                 <Pressable
                   onPress={() => loadPosts({ page: 1 })}
-                  className="border-2 border-base-content px-5 py-2.5"
+                  className="  px-5 py-2.5"
                 >
                   <Text className="font-ui uppercase tracking-[0.16em] text-xs text-base-content">
                     Retry
@@ -451,7 +451,7 @@ export default function ServerProfile() {
                     ) : (
                       <Pressable
                         onPress={() => loadPosts({ page: postsPage + 1, append: true })}
-                        className="border-2 border-base-content px-6 py-3"
+                        className="  px-6 py-3"
                         android_ripple={{ color: "rgba(0,0,0,0.06)" }}
                       >
                         <Text className="font-ui uppercase tracking-[0.16em] text-xs text-base-content">
@@ -519,9 +519,9 @@ export default function ServerProfile() {
           className="flex-1 bg-black/50"
           onPress={() => setShowPicker(false)}
         />
-        <View className="bg-base-100 border-t-2 border-base-content max-h-[60%]">
+        <View className="bg-base-100   max-h-[60%]">
           {/* Header */}
-          <View className="flex-row items-center justify-between px-5 pt-4 pb-3 border-b-2 border-base-content">
+          <View className="flex-row items-center justify-between px-5 pt-4 pb-3  ">
             <Text className="font-ui text-lg text-base-content">
               Add {domain} to Circle
             </Text>
@@ -550,7 +550,7 @@ export default function ServerProfile() {
                     key={circle.id}
                     onPress={() => !isAdded && addToCircle(circle.id)}
                     android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-                    className="flex-row items-center justify-between px-5 py-4 border-b border-base-300"
+                    className="flex-row items-center justify-between px-5 py-4  "
                   >
                     <View className="flex-1 min-w-0 mr-3">
                       <Text

@@ -116,8 +116,8 @@ export default function BrowseCircles() {
       <AppHeader back title="Discover Circles" />
 
       {/* Sort toggle sub-header */}
-      <View className="px-5 pt-3 pb-4 border-b-2 border-base-content flex-row justify-end">
-        <View className="flex-row items-center border-2 border-base-300">
+      <View className="px-5 pt-3 pb-4   flex-row justify-end">
+        <View className="flex-row items-center  ">
           <Pressable
             onPress={() => handleSortChange("reacts")}
             android_ripple={{ color: "rgba(0,0,0,0.06)" }}
@@ -134,7 +134,7 @@ export default function BrowseCircles() {
           <Pressable
             onPress={() => handleSortChange("date")}
             android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-            className={`px-3 py-1.5 border-l-2 border-base-300 ${sort === "date" ? "bg-base-content" : "bg-transparent"}`}
+            className={`px-3 py-1.5   ${sort === "date" ? "bg-base-content" : "bg-transparent"}`}
           >
             <Text
               className={`font-ui text-[11px] uppercase tracking-[0.16em] ${
@@ -177,7 +177,7 @@ export default function BrowseCircles() {
               </Text>
               <Pressable
                 onPress={() => load({ pageNum: 1, currentSort: sort })}
-                className="border-2 border-base-content px-5 py-2.5"
+                className="  px-5 py-2.5"
                 android_ripple={{ color: "rgba(0,0,0,0.06)" }}
               >
                 <Text className="font-ui uppercase tracking-[0.16em] text-xs text-base-content">

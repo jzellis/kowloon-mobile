@@ -69,7 +69,7 @@ export default function TypographySettings() {
         {/* Live preview */}
         <View className="px-6 mb-8">
           <Eyebrow className="mb-2">Preview</Eyebrow>
-          <View className="border-2 border-base-300 bg-base-100 py-5">
+          <View className="  bg-base-100 py-5">
             <Text
               style={{
                 fontFamily: resolved.regularFamily,
@@ -105,10 +105,10 @@ export default function TypographySettings() {
                 <Pressable
                   key={font.key}
                   onPress={() => setTypography({ fontFamily: font.key })}
-                  className={`mr-3 border-2 px-4 py-4 w-40 ${
+                  className={`mr-3  px-4 py-4 w-40 ${
                     active
-                      ? "border-primary bg-primary/10"
-                      : "border-base-300 bg-base-100"
+                      ? " bg-primary/10"
+                      : " bg-base-100"
                   }`}
                   android_ripple={{ color: "rgba(0,0,0,0.06)" }}
                 >

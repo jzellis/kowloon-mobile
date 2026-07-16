@@ -116,7 +116,7 @@ export default function Scan() {
         pointerEvents="none"
         className="absolute inset-0 items-center justify-center"
       >
-        <View className="w-64 h-64 border-2 border-base-100/80" />
+        <View className="w-64 h-64  " />
       </View>
       {/* Bottom: cancel + error toast. */}
       <SafeAreaView
@@ -125,13 +125,13 @@ export default function Scan() {
       >
         <View className="px-6 pb-6">
           {error ? (
-            <View className="border-2 border-error bg-error/90 px-3 py-2 mb-3">
+            <View className="  bg-error/90 px-3 py-2 mb-3">
               <Text className="font-ui text-sm text-error-content">{error}</Text>
             </View>
           ) : null}
           <Pressable
             onPress={() => router.back()}
-            className="border-2 border-base-100 py-3 px-5 items-center"
+            className="  py-3 px-5 items-center"
             android_ripple={{ color: "rgba(255,255,255,0.12)" }}
           >
             <Text className="font-ui uppercase tracking-[0.18em] text-sm text-base-100">

@@ -241,7 +241,7 @@ export default function Compose() {
     autofocus: true,
     avoidIosKeyboard: true,
     initialContent: "",
-    // Give the editor content breathing room from the border — the WebView has
+    // Give the editor content breathing room from the  — the WebView has
     // no horizontal padding by default, so text sat flush against the edge.
     bridgeExtensions: [
       ...TenTapStartKit,
@@ -542,32 +542,32 @@ export default function Compose() {
                   autoCorrect={false}
                   autoFocus
                   keyboardType="url"
-                  className="border-2 border-base-300 bg-white px-3 py-3 font-ui text-base text-base-content"
+                  className="  bg-white px-3 py-3 font-ui text-base text-base-content"
                 />
                 {/* Link preview — auto-fetched from /preview when href
                     changes. On a Repost, forcedFeaturedImage carries the
                     source post's hero so the preview block shows the right
                     image immediately, even before the OG fetch returns. */}
                 {previewing || linkPreview || forcedFeaturedImage ? (
-                  <View className="flex-row mt-2 border-2 border-base-300 bg-white p-2">
+                  <View className="flex-row mt-2   bg-white p-2">
                     {forcedFeaturedImage ? (
                       <Image
                         source={{ uri: forcedFeaturedImage }}
-                        className="w-16 h-16 mr-3 border-2 border-base-300 bg-base-200"
+                        className="w-16 h-16 mr-3   bg-base-200"
                         resizeMode="cover"
                       />
                     ) : previewing ? (
-                      <View className="w-16 h-16 mr-3 border-2 border-base-300 bg-base-200 items-center justify-center">
+                      <View className="w-16 h-16 mr-3   bg-base-200 items-center justify-center">
                         <ActivityIndicator />
                       </View>
                     ) : linkPreview?.image ? (
                       <Image
                         source={{ uri: linkPreview.image }}
-                        className="w-16 h-16 mr-3 border-2 border-base-300 bg-base-200"
+                        className="w-16 h-16 mr-3   bg-base-200"
                         resizeMode="cover"
                       />
                     ) : (
-                      <View className="w-16 h-16 mr-3 border-2 border-base-300 bg-base-200" />
+                      <View className="w-16 h-16 mr-3   bg-base-200" />
                     )}
                     <View className="flex-1">
                       <Text className="font-ui text-[10px] uppercase tracking-[0.14em] text-base-content/45 mb-0.5">
@@ -614,7 +614,7 @@ export default function Compose() {
                   }
                   placeholderTextColor="rgba(26,26,32,0.35)"
                   autoFocus={type !== "Link"}
-                  className="border-2 border-base-300 bg-white px-3 py-3 font-ui text-lg text-base-content"
+                  className="  bg-white px-3 py-3 font-ui text-lg text-base-content"
                 />
               </View>
             ) : null}
@@ -645,16 +645,16 @@ export default function Compose() {
                 {attachments.map((att, i) => (
                   <View
                     key={`${att.uri}-${i}`}
-                    className="flex-row items-center border-2 border-base-300 bg-white p-2 mb-2"
+                    className="flex-row items-center   bg-white p-2 mb-2"
                   >
                     {att.kind === "image" ? (
                       <Image
                         source={{ uri: att.uri }}
-                        className="w-14 h-14 mr-3 border-2 border-base-300 bg-base-200"
+                        className="w-14 h-14 mr-3   bg-base-200"
                         resizeMode="cover"
                       />
                     ) : (
-                      <View className="w-14 h-14 mr-3 border-2 border-base-300 bg-base-200 items-center justify-center">
+                      <View className="w-14 h-14 mr-3   bg-base-200 items-center justify-center">
                         <Text className="font-ui uppercase tracking-[0.14em] text-[10px] text-base-content/60">
                           {att.kind === "audio" ? "Audio" : "Video"}
                         </Text>
@@ -689,7 +689,7 @@ export default function Compose() {
                   <Pressable
                     onPress={pickPhotosOrVideos}
                     android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-                    className="flex-1 mr-2 border-2 border-base-300 bg-white py-3 items-center"
+                    className="flex-1 mr-2   bg-white py-3 items-center"
                   >
                     <Text className="font-ui uppercase tracking-[0.14em] text-xs text-base-content/55">
                       + Photo / Video
@@ -698,7 +698,7 @@ export default function Compose() {
                   <Pressable
                     onPress={pickAudio}
                     android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-                    className="flex-1 border-2 border-base-300 bg-white py-3 items-center"
+                    className="flex-1   bg-white py-3 items-center"
                   >
                     <Text className="font-ui uppercase tracking-[0.14em] text-xs text-base-content/55">
                       + Audio
@@ -711,7 +711,7 @@ export default function Compose() {
             {type === "Article" || type === "Event" ? (
               <View className="px-4 pt-3">
                 {featuredImage ? (
-                  <View className="border-2 border-base-300 bg-white">
+                  <View className="  bg-white">
                     <Image
                       source={{ uri: featuredImage.uri }}
                       className="w-full h-40"
@@ -731,7 +731,7 @@ export default function Compose() {
                   <Pressable
                     onPress={pickFeaturedImage}
                     android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-                    className="border-2 border-base-300 bg-white py-5 items-center"
+                    className="  bg-white py-5 items-center"
                   >
                     <Text className="font-ui uppercase tracking-[0.14em] text-xs text-base-content/55">
                       + Add featured image
@@ -752,11 +752,11 @@ export default function Compose() {
                 ScrollView. `hidden={false}` overrides 10tap's auto-hide. */}
             <View
               style={{ height: 320 }}
-              className="mx-4 mt-3 border-2 border-base-300"
+              className="mx-4 mt-3  "
             >
               <View
                 style={{ height: TOOLBAR_HEIGHT }}
-                className="border-b-2 border-base-300"
+                className=" "
               >
                 <Toolbar editor={editor} hidden={false} items={TOOLBAR_ITEMS} />
               </View>
@@ -780,7 +780,7 @@ export default function Compose() {
               <Pressable
                 onPress={() => router.back()}
                 disabled={posting}
-                className="border-2 border-base-content px-4 justify-center mr-2"
+                className="  px-4 justify-center mr-2"
                 android_ripple={{ color: "rgba(0,0,0,0.06)" }}
               >
                 <Text className="font-ui uppercase tracking-[0.14em] text-[11px] text-base-content">
@@ -790,7 +790,7 @@ export default function Compose() {
               <Pressable
                 onPress={handlePost}
                 disabled={posting}
-                className={`border-2 border-primary px-5 justify-center ${
+                className={`  px-5 justify-center ${
                   posting ? "bg-primary/60" : "bg-primary"
                 }`}
                 android_ripple={{ color: "rgba(255,255,255,0.15)" }}

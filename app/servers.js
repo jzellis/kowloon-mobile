@@ -27,7 +27,7 @@ function ServerAvatar({ server, baseUrl }) {
       <Image
         source={{ uri: src }}
         style={{ width: 44, height: 44 }}
-        className="border-2 border-base-300 bg-base-200"
+        className="  bg-base-200"
         onError={() => setFailed(true)}
       />
     );
@@ -35,7 +35,7 @@ function ServerAvatar({ server, baseUrl }) {
   return (
     <View
       style={{ width: 44, height: 44 }}
-      className="border-2 border-base-300 bg-secondary items-center justify-center"
+      className="  bg-secondary items-center justify-center"
     >
       <Globe size={20} color="rgba(255,244,224,0.7)" strokeWidth={1.75} />
     </View>
@@ -47,7 +47,7 @@ function ServerRow({ server, baseUrl, onPress }) {
     <Pressable
       onPress={onPress}
       android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-      className="flex-row items-center px-5 py-4 border-b border-base-300 bg-base-100"
+      className="flex-row items-center px-5 py-4   bg-base-100"
     >
       <ServerAvatar server={server} baseUrl={baseUrl} />
       <View className="flex-1 ml-3 min-w-0">
@@ -141,7 +141,7 @@ export default function Servers() {
               </Text>
               <Pressable
                 onPress={() => load()}
-                className="border-2 border-base-content px-5 py-2.5"
+                className="  px-5 py-2.5"
                 android_ripple={{ color: "rgba(0,0,0,0.06)" }}
               >
                 <Text className="font-ui uppercase tracking-[0.16em] text-xs text-base-content">

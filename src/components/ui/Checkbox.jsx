@@ -10,8 +10,8 @@ export function Checkbox({ checked, onToggle, label, disabled = false }) {
       android_ripple={{ color: "rgba(0,0,0,0.05)" }}
     >
       <View
-        className={`w-6 h-6 mr-3 mt-[2px] border-2 border-base-content items-center justify-center ${
-          checked ? "bg-primary border-primary" : "bg-base-100"
+        className={`w-6 h-6 mr-3 mt-[2px]   items-center justify-center ${
+          checked ? "bg-primary " : "bg-base-100"
         }`}
       >
         {checked ? (

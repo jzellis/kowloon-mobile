@@ -203,7 +203,7 @@ export function GroupForm({
               size={64}
               baseUrl={account?.baseUrl}
             />
-            <View className="absolute -bottom-1 -right-1 bg-base-100 border-2 border-base-content p-1">
+            <View className="absolute -bottom-1 -right-1 bg-base-100   p-1">
               <ImagePlus
                 size={13}
                 color="rgba(26,26,32,0.85)"
@@ -218,7 +218,7 @@ export function GroupForm({
               onChangeText={setName}
               placeholder="Group name"
               placeholderTextColor="rgba(26,26,32,0.35)"
-              className="border-2 border-base-300 bg-white px-3 py-2.5 font-ui text-base text-base-content"
+              className="  bg-white px-3 py-2.5 font-ui text-base text-base-content"
             />
           </View>
         </View>
@@ -232,7 +232,7 @@ export function GroupForm({
             multiline
             placeholder="What's this group for?"
             placeholderTextColor="rgba(26,26,32,0.35)"
-            className="border-2 border-base-300 bg-white px-3 py-2.5 font-ui text-base text-base-content min-h-20"
+            className="  bg-white px-3 py-2.5 font-ui text-base text-base-content min-h-20"
           />
         </View>
 
@@ -280,7 +280,7 @@ export function GroupForm({
       {/* Footer — pad past Android's nav bar; zero the extra padding when the
           keyboard is up (window resizes, nav bar hidden). */}
       <View
-        className="flex-row items-center justify-end px-5 pt-3 border-t-2 border-base-300"
+        className="flex-row items-center justify-end px-5 pt-3  "
         style={{ paddingBottom: (keyboardInset > 0 ? 0 : insets.bottom) + 12 }}
       >
         <Pressable onPress={onCancel} hitSlop={6} className="px-4 py-2.5 mr-2">

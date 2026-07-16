@@ -11,7 +11,7 @@ const MUTED = "rgba(26,26,32,0.38)";
 
 export function PostTypeSelector({ value, onChange }) {
   return (
-    <View className="flex-row border-b-2 border-base-300">
+    <View className="flex-row  ">
       {POST_TYPE_NAMES.map((type) => {
         const active = value === type;
         const color = POST_TYPES[type].color;

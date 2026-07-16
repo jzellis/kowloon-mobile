@@ -34,13 +34,13 @@ export function BookmarkCard({ bookmark, baseUrl }) {
     <Pressable
       onPress={open}
       android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-      className="flex-row px-5 py-4 border-b border-base-300 bg-base-100"
+      className="flex-row px-5 py-4   bg-base-100"
     >
       {image ? (
         <Image
           source={{ uri: image }}
           style={{ width: 56, height: 56 }}
-          className="border border-base-300 bg-base-200 mr-3"
+          className="  bg-base-200 mr-3"
           resizeMode="cover"
         />
       ) : null}

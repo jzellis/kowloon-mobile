@@ -45,7 +45,7 @@ function Field({ label, children }) {
 }
 
 const INPUT_CLASS =
-  "border-2 border-base-300 bg-field px-3 py-2.5 font-ui text-base text-base-content";
+  "  bg-field px-3 py-2.5 font-ui text-base text-base-content";
 
 export default function ProfileSettings() {
   const router = useRouter();
@@ -206,7 +206,7 @@ export default function ProfileSettings() {
                 <Avatar actor={avatarActor} size={72} baseUrl={account?.baseUrl} />
                 <Pressable
                   onPress={pickAvatar}
-                  className="border-2 border-base-content px-4 py-2"
+                  className="  px-4 py-2"
                   android_ripple={{ color: "rgba(0,0,0,0.06)" }}
                 >
                   <Text className="font-ui text-xs uppercase tracking-widest text-base-content">
@@ -227,12 +227,12 @@ export default function ProfileSettings() {
                     <Image
                       source={{ uri: src }}
                       style={{ width: "100%", aspectRatio: 3 }}
-                      className="border-2 border-base-300 bg-base-200"
+                      className="  bg-base-200"
                       resizeMode="cover"
                     />
                     <Pressable
                       onPress={pickFeatured}
-                      className="border-2 border-base-content px-4 py-2 mt-2 self-start"
+                      className="  px-4 py-2 mt-2 self-start"
                       android_ripple={{ color: "rgba(0,0,0,0.06)" }}
                     >
                       <Text className="font-ui text-xs uppercase tracking-widest text-base-content">
@@ -243,7 +243,7 @@ export default function ProfileSettings() {
                 ) : (
                   <Pressable
                     onPress={pickFeatured}
-                    className="border-2 border-base-300 bg-field items-center justify-center"
+                    className="  bg-field items-center justify-center"
                     style={{ width: "100%", aspectRatio: 3 }}
                     android_ripple={{ color: "rgba(0,0,0,0.05)" }}
                   >
@@ -298,7 +298,7 @@ export default function ProfileSettings() {
               {urls.map((url) => (
                 <View
                   key={url}
-                  className="flex-row items-center border-2 border-base-300 bg-base-100 px-3 mb-2"
+                  className="flex-row items-center   bg-base-100 px-3 mb-2"
                 >
                   <Text
                     className="flex-1 font-ui text-sm text-base-content py-2.5"
@@ -329,7 +329,7 @@ export default function ProfileSettings() {
                   />
                   <Pressable
                     onPress={addUrl}
-                    className="border-2 border-base-content px-3 items-center justify-center"
+                    className="  px-3 items-center justify-center"
                     android_ripple={{ color: "rgba(0,0,0,0.06)" }}
                   >
                     <Text className="font-ui text-xl text-base-content leading-none">
@@ -343,7 +343,7 @@ export default function ProfileSettings() {
         </ScrollView>
 
         {/* Sticky footer — always visible above keyboard */}
-        <View className="px-6 pt-3 pb-2 bg-base-100 border-t-2 border-base-300">
+        <View className="px-6 pt-3 pb-2 bg-base-100  ">
           {error ? (
             <Text className="font-ui text-sm text-error mb-3">{error}</Text>
           ) : null}

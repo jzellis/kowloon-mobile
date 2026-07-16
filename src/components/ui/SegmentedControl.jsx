@@ -5,7 +5,7 @@ import { Pressable, Text, View } from "react-native";
 // `options`: [{ value, label }]
 export function SegmentedControl({ options, value, onChange }) {
   return (
-    <View className="flex-row border-2 border-base-content">
+    <View className="flex-row  ">
       {options.map((opt, i) => {
         const active = opt.value === value;
         return (
@@ -14,7 +14,7 @@ export function SegmentedControl({ options, value, onChange }) {
             onPress={() => onChange(opt.value)}
             className={`flex-1 py-3 items-center ${
               active ? "bg-primary" : "bg-base-100"
-            } ${i > 0 ? "border-l-2 border-base-content" : ""}`}
+            } ${i > 0 ? " " : ""}`}
             android_ripple={{ color: "rgba(0,0,0,0.08)" }}
           >
             <Text

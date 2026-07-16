@@ -107,7 +107,7 @@ export function CopyCircleMenu({ circle, compact = false }) {
         onPress={() => setOpen(true)}
         hitSlop={compact ? 6 : undefined}
         android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-        className={`flex-row items-center border-2 border-base-content ${
+        className={`flex-row items-center   ${
           compact ? "px-2 py-1" : "px-3 py-2"
         }`}
       >
@@ -141,7 +141,7 @@ export function CopyCircleMenu({ circle, compact = false }) {
             className="bg-black/40"
           />
           <SafeAreaView edges={["bottom"]} className="bg-base-100">
-            <View className="border-t-2 border-base-content">
+            <View className=" ">
               <Text className="font-ui uppercase tracking-[0.18em] text-[11px] text-base-content/50 px-5 pt-4 pb-2">
                 Save circle
               </Text>
@@ -150,7 +150,7 @@ export function CopyCircleMenu({ circle, compact = false }) {
                 onPress={copyAsNew}
                 disabled={busy}
                 android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-                className="px-5 py-3.5 border-b-2 border-base-300 flex-row items-center"
+                className="px-5 py-3.5   flex-row items-center"
               >
                 {busy ? (
                   <ActivityIndicator size="small" />
@@ -178,7 +178,7 @@ export function CopyCircleMenu({ circle, compact = false }) {
                         onPress={() => addMembersTo(c)}
                         disabled={busy}
                         android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-                        className="px-5 py-3 border-t border-base-300"
+                        className="px-5 py-3  "
                       >
                         <Text
                           className="font-ui text-base text-base-content"

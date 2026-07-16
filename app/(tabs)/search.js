@@ -238,8 +238,8 @@ export default function Search() {
     <SafeAreaView className="flex-1 bg-base-100" edges={["left", "right"]}>
       <AppHeader title="Search" />
       {/* Search field */}
-      <View className="px-5 pt-3 pb-3 border-b-2 border-base-content">
-        <View className="flex-row items-center border-2 border-base-300 bg-field px-3">
+      <View className="px-5 pt-3 pb-3  ">
+        <View className="flex-row items-center   bg-field px-3">
           <SearchIcon size={16} color="rgba(26,26,32,0.45)" strokeWidth={2} />
           <TextInput
             value={query}
@@ -265,7 +265,7 @@ export default function Search() {
       </View>
 
       {/* Tabs — horizontally scrollable */}
-      <View className="border-b-2 border-base-300">
+      <View className=" ">
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -377,19 +377,19 @@ function ServerResultCard({ server, baseUrl, onPress }) {
     <Pressable
       onPress={onPress}
       android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-      className="flex-row items-center px-5 py-4 border-b border-base-300 bg-base-100"
+      className="flex-row items-center px-5 py-4   bg-base-100"
     >
       {iconSrc && !iconFailed ? (
         <Image
           source={{ uri: iconSrc }}
           style={{ width: 44, height: 44 }}
-          className="border-2 border-base-300 bg-base-200"
+          className="  bg-base-200"
           onError={() => setIconFailed(true)}
         />
       ) : (
         <View
           style={{ width: 44, height: 44 }}
-          className="border-2 border-base-300 bg-secondary items-center justify-center"
+          className="  bg-secondary items-center justify-center"
         >
           <Globe size={20} color="rgba(255,244,224,0.7)" strokeWidth={1.75} />
         </View>
@@ -432,7 +432,7 @@ function UserResultRow({ user, baseUrl, onPress }) {
     <Pressable
       onPress={onPress}
       android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-      className="flex-row items-center px-5 py-4 border-b border-base-300 bg-base-100"
+      className="flex-row items-center px-5 py-4   bg-base-100"
     >
       <Avatar actor={actor} size={44} baseUrl={baseUrl} />
       <View className="flex-1 ml-3 min-w-0">
@@ -480,7 +480,7 @@ function TabButton({ label, active, onPress }) {
       onPress={onPress}
       android_ripple={{ color: "rgba(0,0,0,0.05)" }}
       className={`px-4 py-3 items-center ${
-        active ? "border-b-2 border-primary -mb-[2px]" : ""
+        active ? "  -mb-[2px]" : ""
       }`}
     >
       <Text

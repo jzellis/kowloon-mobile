@@ -209,11 +209,11 @@ export function FeedViewSelector({ value, onChange, subject }) {
               left: dropPos.left,
               width: DROPDOWN_WIDTH,
             }}
-            className="bg-base-100 border-2 border-base-content"
+            className="bg-base-100  "
           >
             {/* Unified search — filters circles + groups together */}
             {showSearch ? (
-              <View className="border-b-2 border-base-300 px-3 py-2">
+              <View className="  px-3 py-2">
                 <TextInput
                   value={search}
                   onChangeText={setSearch}
@@ -246,7 +246,7 @@ export function FeedViewSelector({ value, onChange, subject }) {
               ))}
 
               {filteredCircles.length > 0 ? (
-                <View className="border-t-2 border-base-300 mt-1">
+                <View className="  mt-1">
                   <Text className="font-ui uppercase tracking-[0.18em] text-[10px] text-base-content/40 px-4 pt-3 pb-1">
                     Your circles
                   </Text>
@@ -269,7 +269,7 @@ export function FeedViewSelector({ value, onChange, subject }) {
               ) : null}
 
               {filteredGroups.length > 0 ? (
-                <View className="border-t-2 border-base-300 mt-1">
+                <View className="  mt-1">
                   <Text className="font-ui uppercase tracking-[0.18em] text-[10px] text-base-content/40 px-4 pt-3 pb-1">
                     Your groups
                   </Text>
@@ -301,7 +301,7 @@ export function FeedViewSelector({ value, onChange, subject }) {
             <Pressable
               onPress={goDiscover}
               android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-              className="flex-row items-center px-4 py-3 border-t-2 border-base-content"
+              className="flex-row items-center px-4 py-3  "
             >
               <View className="mr-3">
                 <Compass size={20} color="rgba(26,26,32,0.7)" strokeWidth={1.75} />

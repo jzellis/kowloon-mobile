@@ -31,7 +31,7 @@ export function BottomTabBar({ state, navigation }) {
   return (
     <SafeAreaView
       edges={["bottom"]}
-      className="bg-base-100 border-t-2 border-base-content"
+      className="bg-base-100  "
     >
       <View className="flex-row">
         {state.routes.map((route, index) => {
@@ -66,7 +66,7 @@ export function BottomTabBar({ state, navigation }) {
                   strokeWidth={1.75}
                 />
                 {showBadge ? (
-                  <View className="absolute -top-1.5 -right-2 bg-accent border border-base-100 min-w-[16px] h-4 items-center justify-center px-1">
+                  <View className="absolute -top-1.5 -right-2 bg-accent   min-w-[16px] h-4 items-center justify-center px-1">
                     <Text className="font-ui text-[9px] font-bold text-accent-content">
                       {count > 99 ? "99+" : count}
                     </Text>

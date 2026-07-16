@@ -38,7 +38,7 @@ export function BottomSheetPicker({
     <>
       <Pressable
         onPress={() => setOpen(true)}
-        className="flex-row items-center border-2 border-base-content px-3 py-2.5"
+        className="flex-row items-center   px-3 py-2.5"
         android_ripple={{ color: "rgba(0,0,0,0.06)" }}
       >
         {label ? (
@@ -69,7 +69,7 @@ export function BottomSheetPicker({
           {/* Inner Pressable swallows taps so they don't dismiss the sheet. */}
           <Pressable onPress={() => {}}>
             <SafeAreaView edges={["bottom"]} className="bg-base-100">
-              <View className="border-t-2 border-base-content">
+              <View className=" ">
                 {title ? (
                   <Text className="font-ui uppercase tracking-[0.18em] text-[11px] text-base-content/50 px-5 pt-4 pb-2">
                     {title}
@@ -79,7 +79,7 @@ export function BottomSheetPicker({
                   {sections.map(({ heading, rows }, sIdx) => (
                     <View
                       key={heading || `sec-${sIdx}`}
-                      className={sIdx > 0 ? "border-t-2 border-base-300 mt-1 pt-1" : ""}
+                      className={sIdx > 0 ? "  mt-1 pt-1" : ""}
                     >
                       {heading ? (
                         <Text className="font-ui uppercase tracking-[0.18em] text-[10px] text-base-content/40 px-5 py-2">

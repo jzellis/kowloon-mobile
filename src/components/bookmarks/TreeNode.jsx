@@ -88,7 +88,7 @@ export function TreeNode({
         <Pressable
           onPress={toggle}
           android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-          className="flex-row items-center py-3 border-b border-base-300 bg-base-100"
+          className="flex-row items-center py-3   bg-base-100"
           style={{ paddingLeft: indent + 20, paddingRight: 16 }}
         >
           <ChevronRight
@@ -192,14 +192,14 @@ export function TreeNode({
     <Pressable
       onPress={openExternal}
       android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-      className="flex-row items-start py-3 border-b border-base-300 bg-base-100"
+      className="flex-row items-start py-3   bg-base-100"
       style={{ paddingLeft: indent + 20, paddingRight: 16 }}
     >
       {image ? (
         <Image
           source={{ uri: image }}
           style={{ width: 44, height: 44 }}
-          className="border border-base-300 bg-base-200 mr-3"
+          className="  bg-base-200 mr-3"
           resizeMode="cover"
         />
       ) : null}
