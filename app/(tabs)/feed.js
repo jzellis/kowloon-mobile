@@ -8,6 +8,7 @@ import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useDispatch, useSelector } from "react-redux";
 import {
   ActivityIndicator,
+  AppState,
   FlatList,
   Image,
   Pressable,
@@ -15,25 +16,24 @@ import {
   Text,
   View,
 } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { PostCard } from "../src/components/posts/PostCard.jsx";
-import { Avatar } from "../src/components/posts/Avatar.jsx";
-import { FeedHeader } from "../src/components/posts/FeedHeader.jsx";
-import { UserMenu } from "../src/components/UserMenu.jsx";
-import { LeftDrawer } from "../src/components/drawer/LeftDrawer.jsx";
-import { BottomTabBar } from "../src/components/nav/BottomTabBar.jsx";
+import { PostCard } from "../../src/components/posts/PostCard.jsx";
+import { Avatar } from "../../src/components/posts/Avatar.jsx";
+import { FeedHeader } from "../../src/components/posts/FeedHeader.jsx";
+import { UserMenu } from "../../src/components/UserMenu.jsx";
+import { LeftDrawer } from "../../src/components/drawer/LeftDrawer.jsx";
 import { Globe } from "lucide-react-native";
-import { useFeed } from "../src/lib/useFeed.js";
-import { consumeFeedRefresh } from "../src/lib/feedRefreshSignal.js";
-import { useActiveClient } from "../src/lib/useActiveClient.js";
-import { useUnreadCount } from "../src/lib/UnreadCountContext.js";
-import { usePersistedFilter } from "../src/lib/usePersistedFilter.js";
-import { resolveImageUrl } from "../src/lib/resolveImageUrl.js";
+import { useFeed } from "../../src/lib/useFeed.js";
+import { consumeFeedRefresh } from "../../src/lib/feedRefreshSignal.js";
+import { useActiveClient } from "../../src/lib/useActiveClient.js";
+import { useUnreadCount } from "../../src/lib/UnreadCountContext.js";
+import { usePersistedFilter } from "../../src/lib/usePersistedFilter.js";
+import { resolveImageUrl } from "../../src/lib/resolveImageUrl.js";
 import {
   selectActiveAccount,
   updateAccountAndPersist,
-} from "../src/state/accountsSlice.js";
+} from "../../src/state/accountsSlice.js";
 
 // Order-independent equality for the active-types array ([] === "all").
 function sameTypes(a, b) {
@@ -49,13 +49,14 @@ export default function Feed() {
   const client = useActiveClient();
   const { count: unreadCount } = useUnreadCount();
   const params = useLocalSearchParams();
-  const insets = useSafeAreaInsets();
   const [menuOpen, setMenuOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [serverIcon, setServerIcon] = useState(null);
   // Override the persisted view once when arriving via /feed?view=<key>
   // (e.g. tapping "View posts" on a circle or group detail screen).
   const viewOverrideRef = useRef(null);
+  const listRef = useRef(null);
+  const backgroundedAtRef = useRef(null);
 
   // User's server-side filter defaults — used as the fallback for
   // usePersistedFilter on a fresh device (where AsyncStorage is empty for
@@ -204,6 +205,30 @@ export default function Feed() {
     }, [refresh])
   );
 
+  // Resume behavior: a quick app-switch preserves the feed, but coming back
+  // after a long time away returns you home (default view + filters, scrolled to
+  // top). Cold starts already mount to the default, so this only handles warm
+  // resumes past the threshold. Tab switches never background the app, so they
+  // never trigger this.
+  const RESET_AFTER_MS = 30 * 60 * 1000; // 30 minutes
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", (next) => {
+      if (next === "background" || next === "inactive") {
+        backgroundedAtRef.current = Date.now();
+      } else if (next === "active") {
+        const since = backgroundedAtRef.current;
+        backgroundedAtRef.current = null;
+        if (since && Date.now() - since > RESET_AFTER_MS) {
+          setViewKey(defaultView);
+          setActiveTypes(defaultTypes);
+          listRef.current?.scrollToOffset?.({ offset: 0, animated: false });
+          refresh();
+        }
+      }
+    });
+    return () => sub.remove();
+  }, [defaultView, defaultTypes, setViewKey, setActiveTypes, refresh]);
+
   // Belt-and-suspenders — the / redirect handles the no-account case. Run as
   // an effect so we don't trip React's "setState during render" warning by
   // calling router.replace synchronously in the render path.
@@ -292,6 +317,7 @@ export default function Feed() {
       />
 
       <FlatList
+        ref={listRef}
         className="flex-1"
         data={posts}
         keyExtractor={(p) => p.id}
@@ -340,14 +366,13 @@ export default function Feed() {
         }
       />
 
-      <BottomTabBar active="feed" />
 
-      {/* Compose — square editorial FAB, floated above the bottom tab bar.
-          Absolute children of SafeAreaView are positioned relative to the
-          physical screen edge, so we clear the tab bar height + nav-bar inset. */}
+      {/* Compose — square editorial FAB. The Tabs navigator now lays the tab
+          bar out below the scene, so the FAB only needs to clear the scene's
+          own bottom edge (which already sits above the bar). */}
       <Pressable
         onPress={() => router.push("/compose")}
-        style={{ bottom: (insets.bottom || 0) + 78, right: 20 }}
+        style={{ bottom: 24, right: 20 }}
         className="absolute w-14 h-14 bg-primary border-2 border-base-content items-center justify-center"
         android_ripple={{ color: "rgba(255,255,255,0.15)" }}
       >

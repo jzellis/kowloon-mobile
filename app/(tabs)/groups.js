@@ -15,13 +15,12 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Plus } from "lucide-react-native";
 
-import { BackLink } from "../src/components/ui/BackLink.jsx";
-import { GroupCard } from "../src/components/groups/GroupCard.jsx";
-import { BottomTabBar } from "../src/components/nav/BottomTabBar.jsx";
-import { AppHeader, HeaderButton } from "../src/components/nav/AppHeader.jsx";
-import { useActiveClient } from "../src/lib/useActiveClient.js";
-import { useJoinedGroups } from "../src/lib/useJoinedGroups.js";
-import { selectActiveAccount } from "../src/state/accountsSlice.js";
+import { BackLink } from "../../src/components/ui/BackLink.jsx";
+import { GroupCard } from "../../src/components/groups/GroupCard.jsx";
+import { AppHeader, HeaderButton } from "../../src/components/nav/AppHeader.jsx";
+import { useActiveClient } from "../../src/lib/useActiveClient.js";
+import { useJoinedGroups } from "../../src/lib/useJoinedGroups.js";
+import { selectActiveAccount } from "../../src/state/accountsSlice.js";
 
 export default function Groups() {
   const router = useRouter();
@@ -160,7 +159,6 @@ export default function Groups() {
         }
       />
 
-      <BottomTabBar active="groups" />
     </SafeAreaView>
   );
 }

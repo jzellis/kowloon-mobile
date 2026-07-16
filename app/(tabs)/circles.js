@@ -20,11 +20,10 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Plus } from "lucide-react-native";
 
-import { CircleCard } from "../src/components/circles/CircleCard.jsx";
-import { BottomTabBar } from "../src/components/nav/BottomTabBar.jsx";
-import { AppHeader, HeaderButton } from "../src/components/nav/AppHeader.jsx";
-import { useActiveClient } from "../src/lib/useActiveClient.js";
-import { selectActiveAccount } from "../src/state/accountsSlice.js";
+import { CircleCard } from "../../src/components/circles/CircleCard.jsx";
+import { AppHeader, HeaderButton } from "../../src/components/nav/AppHeader.jsx";
+import { useActiveClient } from "../../src/lib/useActiveClient.js";
+import { selectActiveAccount } from "../../src/state/accountsSlice.js";
 
 export default function Circles() {
   const router = useRouter();
@@ -195,7 +194,6 @@ export default function Circles() {
         }
       />
 
-      <BottomTabBar active="circles" />
     </SafeAreaView>
   );
 }

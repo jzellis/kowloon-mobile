@@ -23,16 +23,15 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Globe, Search as SearchIcon, X } from "lucide-react-native";
 
-import { BackLink } from "../src/components/ui/BackLink.jsx";
-import { Avatar } from "../src/components/posts/Avatar.jsx";
-import { PostCard } from "../src/components/posts/PostCard.jsx";
-import { GroupCard } from "../src/components/groups/GroupCard.jsx";
-import { BookmarkCard } from "../src/components/bookmarks/BookmarkCard.jsx";
-import { BottomTabBar } from "../src/components/nav/BottomTabBar.jsx";
-import { AppHeader } from "../src/components/nav/AppHeader.jsx";
-import { useActiveClient } from "../src/lib/useActiveClient.js";
-import { selectActiveAccount } from "../src/state/accountsSlice.js";
-import { resolveImageUrl } from "../src/lib/resolveImageUrl.js";
+import { BackLink } from "../../src/components/ui/BackLink.jsx";
+import { Avatar } from "../../src/components/posts/Avatar.jsx";
+import { PostCard } from "../../src/components/posts/PostCard.jsx";
+import { GroupCard } from "../../src/components/groups/GroupCard.jsx";
+import { BookmarkCard } from "../../src/components/bookmarks/BookmarkCard.jsx";
+import { AppHeader } from "../../src/components/nav/AppHeader.jsx";
+import { useActiveClient } from "../../src/lib/useActiveClient.js";
+import { selectActiveAccount } from "../../src/state/accountsSlice.js";
+import { resolveImageUrl } from "../../src/lib/resolveImageUrl.js";
 
 const MIN_QUERY = 2;
 const ALL_PREVIEW = 4; // results shown per type on the "All" tab
@@ -363,7 +362,6 @@ export default function Search() {
       )}
       </View>
 
-      <BottomTabBar active="search" />
     </SafeAreaView>
   );
 }

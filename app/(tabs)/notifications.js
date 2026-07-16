@@ -18,14 +18,13 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { BackLink } from "../src/components/ui/BackLink.jsx";
-import { NotificationRow } from "../src/components/notifications/NotificationRow.jsx";
-import { BottomTabBar } from "../src/components/nav/BottomTabBar.jsx";
-import { AppHeader, HeaderButton } from "../src/components/nav/AppHeader.jsx";
-import { useActiveClient } from "../src/lib/useActiveClient.js";
-import { useUnreadCount } from "../src/lib/UnreadCountContext.js";
-import { NOTIF_TYPES, notificationRoute } from "../src/lib/notifications.js";
-import { selectActiveAccount } from "../src/state/accountsSlice.js";
+import { BackLink } from "../../src/components/ui/BackLink.jsx";
+import { NotificationRow } from "../../src/components/notifications/NotificationRow.jsx";
+import { AppHeader, HeaderButton } from "../../src/components/nav/AppHeader.jsx";
+import { useActiveClient } from "../../src/lib/useActiveClient.js";
+import { useUnreadCount } from "../../src/lib/UnreadCountContext.js";
+import { NOTIF_TYPES, notificationRoute } from "../../src/lib/notifications.js";
+import { selectActiveAccount } from "../../src/state/accountsSlice.js";
 
 const FILTERS = [
   { key: "all", label: "All" },
@@ -211,7 +210,6 @@ export default function Notifications() {
         }
       />
 
-      <BottomTabBar active="notify" />
     </SafeAreaView>
   );
 }
