@@ -24,14 +24,14 @@ export function TypeFilter({ activeTypes = [], onSetTypes }) {
   }
 
   return (
-    <View className="flex-row items-center" style={{ gap: 14 }}>
+    <View className="flex-row items-center" style={{ gap: 16 }}>
       {POST_TYPE_NAMES.map((type) => {
         const active = isAll || activeTypes.includes(type);
         return (
           <Pressable key={type} onPress={() => handlePress(type)} hitSlop={8}>
             <PostTypeIcon
               type={type}
-              size={17}
+              size={20}
               color={active ? POST_TYPES[type].color : INK_DIM}
             />
           </Pressable>

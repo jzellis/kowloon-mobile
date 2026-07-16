@@ -182,14 +182,14 @@ export function FeedViewSelector({ value, onChange, subject }) {
         hitSlop={6}
         className="flex-row items-center"
       >
-        <View className="mr-2">{iconFor(value, 20)}</View>
+        <View className="mr-2.5">{iconFor(value, 26)}</View>
         <Text
-          className="font-ui text-sm tracking-tight text-base-content mr-1"
+          className="font-ui text-base font-bold tracking-tight text-base-content mr-1.5"
           numberOfLines={1}
         >
           {currentLabel}
         </Text>
-        <Text className="font-ui text-xs text-base-content/40">▾</Text>
+        <Text className="font-ui text-sm text-base-content/50">▾</Text>
       </Pressable>
 
       <Modal

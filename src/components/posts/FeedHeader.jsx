@@ -20,7 +20,7 @@ export function FeedHeader({
   const { kind, subject, isOwner, isMember } = useFeedSubject(viewKey);
 
   return (
-    <View className="border-b-2 border-base-300 flex-row items-center px-5 py-2">
+    <View className="border-b-2 border-base-300 flex-row items-center px-5 py-2.5">
       <View className="flex-1 min-w-0 flex-row items-center">
         <View className="flex-shrink min-w-0">
           <FeedViewSelector
