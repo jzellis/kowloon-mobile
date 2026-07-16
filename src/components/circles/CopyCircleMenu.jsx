@@ -58,7 +58,7 @@ export function CopyCircleMenu({ circle, compact = false }) {
     setBusy(true);
     try {
       const res = await client.activities.createCircle({
-        name: `Copy of ${circle.name}`,
+        name: circle.name,
         description: circle.summary || circle.description || undefined,
         icon: circle.icon || undefined,
         to: circle.to ?? "@public",
@@ -72,7 +72,7 @@ export function CopyCircleMenu({ circle, compact = false }) {
         router.push(`/circle/${encodeURIComponent(newId)}`);
       }
     } catch (e) {
-      Alert.alert("Copy failed", e?.message || "Please try again.");
+      Alert.alert("Couldn't save", e?.message || "Please try again.");
     } finally {
       setBusy(false);
     }
@@ -123,7 +123,7 @@ export function CopyCircleMenu({ circle, compact = false }) {
               : "tracking-[0.14em] text-[11px] ml-1.5"
           }`}
         >
-          Copy
+          Save
         </Text>
       </Pressable>
 
@@ -143,7 +143,7 @@ export function CopyCircleMenu({ circle, compact = false }) {
           <SafeAreaView edges={["bottom"]} className="bg-base-100">
             <View className="border-t-2 border-base-content">
               <Text className="font-ui uppercase tracking-[0.18em] text-[11px] text-base-content/50 px-5 pt-4 pb-2">
-                Copy circle
+                Save circle
               </Text>
 
               <Pressable
@@ -162,7 +162,7 @@ export function CopyCircleMenu({ circle, compact = false }) {
                   />
                 )}
                 <Text className="font-ui text-base text-base-content ml-3">
-                  Copy as a new circle
+                  Save as a new circle
                 </Text>
               </Pressable>
 

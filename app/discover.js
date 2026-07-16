@@ -1,6 +1,8 @@
-// Discover — find people and explore popular public Circles.
-// First stop after onboarding; also reachable from the menu.
-// Shows a one-time welcome banner for users who just registered.
+// Discover — the server's curated shelves plus people search.
+//
+// Shelves come from GET /recommendations (server-curated sections of Posts,
+// Circles, Groups, Bookmarks). The search box finds people to add to circles.
+// Reached from the feed view-selector's "Discover..." footer and the menu.
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -15,47 +17,12 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Avatar } from "../src/components/posts/Avatar.jsx";
-import { CircleAvatar } from "../src/components/circles/CircleAvatar.jsx";
-import { CircleHeartButton } from "../src/components/circles/CircleHeartButton.jsx";
-import { Eyebrow, Heading } from "../src/components/ui/Heading.jsx";
+import { AppHeader } from "../src/components/nav/AppHeader.jsx";
+import { RecShelf } from "../src/components/discover/RecShelf.jsx";
 import { useActiveClient } from "../src/lib/useActiveClient.js";
 import { rootStorage } from "../src/lib/storage.js";
 
 const BANNER_KEY = "kowloon_discover_welcomed";
-
-function CircleCard({ circle, client, router }) {
-  return (
-    <Pressable
-      className="flex-row items-start border-b border-base-300 py-4 gap-3"
-      onPress={() => router.push(`/circle/${encodeURIComponent(circle.id)}`)}
-      android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-    >
-      <CircleAvatar circle={circle} size={44} baseUrl={circle.baseUrl} />
-      <View className="flex-1 min-w-0">
-        <Text
-          className="font-ui text-base font-bold text-base-content"
-          numberOfLines={1}
-        >
-          {circle.name}
-        </Text>
-        {circle.memberCount > 0 ? (
-          <Text className="font-ui text-xs text-base-content/50 mb-1">
-            {circle.memberCount} {circle.memberCount === 1 ? "member" : "members"}
-          </Text>
-        ) : null}
-        {circle.summary ? (
-          <Text
-            className="font-ui text-sm text-base-content/70 leading-relaxed"
-            numberOfLines={2}
-          >
-            {circle.summary}
-          </Text>
-        ) : null}
-      </View>
-      <CircleHeartButton circle={circle} client={client} />
-    </Pressable>
-  );
-}
 
 function UserRow({ user, router }) {
   const actor = {
@@ -70,16 +37,10 @@ function UserRow({ user, router }) {
     >
       <Avatar actor={actor} size={36} baseUrl={user.baseUrl} />
       <View className="flex-1 min-w-0">
-        <Text
-          className="font-ui text-sm font-semibold text-base-content"
-          numberOfLines={1}
-        >
+        <Text className="font-ui text-sm font-semibold text-base-content" numberOfLines={1}>
           {actor.name}
         </Text>
-        <Text
-          className="font-ui text-xs text-base-content/50"
-          numberOfLines={1}
-        >
+        <Text className="font-ui text-xs text-base-content/50" numberOfLines={1}>
           {user.id}
         </Text>
       </View>
@@ -90,12 +51,13 @@ function UserRow({ user, router }) {
 export default function Discover() {
   const client = useActiveClient();
   const router = useRouter();
+  const baseUrl = client?.http?.baseUrl;
 
   const [banner, setBanner] = useState(false);
   const [query, setQuery] = useState("");
-  const [circles, setCircles] = useState([]);
-  const [circlesLoading, setCirclesLoading] = useState(true);
-  const [circlesError, setCirclesError] = useState(null);
+  const [sections, setSections] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [users, setUsers] = useState([]);
   const [usersLoading, setUsersLoading] = useState(false);
 
@@ -115,18 +77,17 @@ export default function Discover() {
   useFocusEffect(
     useCallback(() => {
       if (!client) return;
-      setCirclesLoading(true);
-      setCirclesError(null);
+      setLoading(true);
+      setError(null);
       client.feeds
-        .getCircles({ sort: "reacts", limit: 20 })
-        .then((res) => setCircles(res?.orderedItems ?? []))
-        .catch((e) =>
-          setCirclesError(e?.message || "Could not load circles.")
-        )
-        .finally(() => setCirclesLoading(false));
+        .getRecommendations()
+        .then((res) => setSections(res?.sections ?? []))
+        .catch((e) => setError(e?.message || "Couldn't load Discover."))
+        .finally(() => setLoading(false));
     }, [client])
   );
 
+  // Debounced people search.
   useEffect(() => {
     clearTimeout(debounceRef.current);
     const q = query.trim();
@@ -148,26 +109,23 @@ export default function Discover() {
     return () => clearTimeout(debounceRef.current);
   }, [query, client]);
 
-  const showUserResults = query.trim().length >= 2;
+  const searching = query.trim().length >= 2;
 
   return (
-    <SafeAreaView
-      className="flex-1 bg-base-100"
-      edges={["top", "left", "right"]}
-    >
+    <SafeAreaView className="flex-1 bg-base-100" edges={["left", "right"]}>
+      <AppHeader back title="Discover" />
       <ScrollView
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={{ paddingBottom: 48 }}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Welcome banner */}
         {banner ? (
           <View className="bg-secondary px-5 py-5 border-b-2 border-base-content">
             <Text className="font-display text-2xl text-secondary-content mb-1">
               Welcome to Kowloon.
             </Text>
             <Text className="font-ui text-sm text-secondary-content/80 leading-relaxed mb-3">
-              Search for people to add to your circles, or heart a public circle
-              below to show your support.
+              Explore what the server recommends below, or search for people to
+              add to your circles.
             </Text>
             <Pressable onPress={dismissBanner} hitSlop={12}>
               <Text className="font-ui text-xs uppercase tracking-widest text-secondary-content/60">
@@ -177,13 +135,8 @@ export default function Discover() {
           </View>
         ) : null}
 
-        <View className="px-5 pt-6">
-          <Eyebrow>Explore</Eyebrow>
-          <Heading className="text-4xl mt-1 mb-5 leading-tight">
-            Discover
-          </Heading>
-
-          {/* Search */}
+        {/* People search */}
+        <View className="px-5 pt-4">
           <TextInput
             value={query}
             onChangeText={setQuery}
@@ -192,58 +145,52 @@ export default function Discover() {
             autoCorrect={false}
             autoCapitalize="none"
             spellCheck={false}
-            className="border-2 border-base-300 bg-base-100 px-3 h-11 font-ui text-sm text-base-content mb-6"
+            className="border-2 border-base-300 bg-field px-3 h-11 font-ui text-sm text-base-content"
           />
-
-          {/* User results */}
-          {showUserResults ? (
-            <View className="mb-6">
-              <Text className="font-ui text-[10px] uppercase tracking-widest text-base-content/40 mb-2">
-                People
-              </Text>
-              {usersLoading ? (
-                <ActivityIndicator className="py-4" />
-              ) : users.length > 0 ? (
-                users.map((u) => (
-                  <UserRow key={u.id} user={u} router={router} />
-                ))
-              ) : (
-                <Text className="font-ui text-sm text-base-content/40 py-3">
-                  No people found for "{query.trim()}".
-                </Text>
-              )}
-            </View>
-          ) : null}
-
-          {/* Popular circles */}
-          {!showUserResults ? (
-            <>
-              <Text className="font-ui text-[10px] uppercase tracking-widest text-base-content/40 mb-2">
-                Popular Circles
-              </Text>
-              {circlesLoading ? (
-                <ActivityIndicator className="py-8" />
-              ) : circlesError ? (
-                <Text className="font-ui text-sm text-error py-4">
-                  {circlesError}
-                </Text>
-              ) : circles.length === 0 ? (
-                <Text className="font-ui text-sm text-base-content/40 py-4">
-                  No public circles yet. Be the first to create one.
-                </Text>
-              ) : (
-                circles.map((circle) => (
-                  <CircleCard
-                    key={circle.id}
-                    circle={circle}
-                    client={client}
-                    router={router}
-                  />
-                ))
-              )}
-            </>
-          ) : null}
         </View>
+
+        {searching ? (
+          <View className="px-5 pt-5">
+            <Text className="font-ui text-[10px] uppercase tracking-widest text-base-content/40 mb-2">
+              People
+            </Text>
+            {usersLoading ? (
+              <ActivityIndicator className="py-4" />
+            ) : users.length > 0 ? (
+              users.map((u) => <UserRow key={u.id} user={u} router={router} />)
+            ) : (
+              <Text className="font-ui text-sm text-base-content/40 py-3">
+                No people found for "{query.trim()}".
+              </Text>
+            )}
+          </View>
+        ) : (
+          <View className="pt-6">
+            {loading ? (
+              <View className="py-16 items-center">
+                <ActivityIndicator />
+              </View>
+            ) : error ? (
+              <View className="px-6 py-16 items-center">
+                <Text className="font-ui text-sm text-error text-center">{error}</Text>
+              </View>
+            ) : sections.length === 0 ? (
+              <View className="px-6 py-16 items-center">
+                <Text className="font-ui text-base text-base-content/60 text-center mb-1">
+                  Nothing recommended yet.
+                </Text>
+                <Text className="font-ui text-sm text-base-content/45 text-center leading-6">
+                  When the server curates Circles, Groups, and posts worth your
+                  time, they'll appear here.
+                </Text>
+              </View>
+            ) : (
+              sections.map((s) => (
+                <RecShelf key={s.id} section={s} baseUrl={baseUrl} />
+              ))
+            )}
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
