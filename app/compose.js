@@ -497,7 +497,7 @@ export default function Compose() {
     <View className="flex-1 bg-base-100">
       {/* Klein masthead — the type selector is the page title. */}
       <SafeAreaView edges={["top"]} className="bg-header">
-        <View className="px-5 pt-2 pb-3 flex-row items-baseline">
+        <View className="px-5 pt-2 pb-3 flex-row items-center">
           <Text className="font-ui text-2xl text-header-content mr-2">New</Text>
           <PostTypeDropdown value={type} onChange={setType} variant="title" />
         </View>

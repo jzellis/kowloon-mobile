@@ -3,6 +3,7 @@
 
 import { useRef, useState } from "react";
 import { Modal, Pressable, Text, View } from "react-native";
+import { ChevronDown } from "lucide-react-native";
 
 import { POST_TYPE_NAMES, POST_TYPES } from "../../lib/postTypes.js";
 import { PostTypeIcon } from "./PostTypeIcon.jsx";
@@ -43,12 +44,14 @@ export function PostTypeDropdown({ value, onChange, variant = "inline" }) {
       >
         {isTitle ? (
           <>
-            <Text className="font-ui text-2xl font-bold text-header-content mr-2">
+            <Text className="font-ui text-2xl font-bold text-header-content mr-1">
               {value}
             </Text>
-            <Text className="font-ui text-3xl text-header-content/80 mt-[-2px]">
-              ▾
-            </Text>
+            <ChevronDown
+              size={24}
+              color="rgba(255,255,255,0.85)"
+              strokeWidth={2.5}
+            />
           </>
         ) : (
           <>
