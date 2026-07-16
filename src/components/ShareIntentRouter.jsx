@@ -12,7 +12,7 @@
 //   files -> Media, added as attachments
 
 import { useEffect } from "react";
-import { router } from "expo-router";
+import { router, useRootNavigationState } from "expo-router";
 import { useShareIntentContext } from "expo-share-intent";
 
 import { setPendingShare } from "../lib/pendingShare.js";
@@ -22,9 +22,14 @@ const URL_RE = /https?:\/\/\S+/i;
 export function ShareIntentRouter() {
   const { hasShareIntent, shareIntent, resetShareIntent } =
     useShareIntentContext();
+  // On a cold-start share the handler can fire before the navigator mounts —
+  // navigating then throws "Attempted to navigate before mounting the Root
+  // Layout". Wait until the root navigation state has a key (= mounted).
+  const navState = useRootNavigationState();
+  const navReady = !!navState?.key;
 
   useEffect(() => {
-    if (!hasShareIntent || !shareIntent) return;
+    if (!navReady || !hasShareIntent || !shareIntent) return;
 
     // Prefer an explicit web-url; otherwise pull the first URL out of the shared
     // text (Feedly & many apps share "Title https://…" as text/plain).
@@ -51,7 +56,7 @@ export function ShareIntentRouter() {
 
     resetShareIntent();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasShareIntent, shareIntent]);
+  }, [navReady, hasShareIntent, shareIntent]);
 
   return null;
 }
