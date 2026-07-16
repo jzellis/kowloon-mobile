@@ -26,10 +26,13 @@ const DEFAULT_FONTS = {
   italic: fontName("inter", "italic"),
 };
 
-function buildTagStyles(fonts, fontSize) {
+function buildTagStyles(fonts, fontSize, lineHeight) {
   return {
     body: { color: INK },
-    p: { marginTop: 0, marginBottom: fontSize * 0.7 },
+    // lineHeight must live on the tag styles — react-native-render-html doesn't
+    // reliably cascade baseStyle.lineHeight into paragraph text, so the reading
+    // line-spacing preference was being ignored (lines rendered tight).
+    p: { marginTop: 0, marginBottom: fontSize * 0.7, lineHeight },
     strong: { fontFamily: fonts.bold },
     b: { fontFamily: fonts.bold },
     em: { fontFamily: fonts.italic },
@@ -64,7 +67,7 @@ function buildTagStyles(fonts, fontSize) {
     },
     ul: { marginTop: 0, marginBottom: fontSize * 0.7 },
     ol: { marginTop: 0, marginBottom: fontSize * 0.7 },
-    li: { marginBottom: fontSize * 0.2 },
+    li: { marginBottom: fontSize * 0.2, lineHeight },
     code: {
       fontFamily: "monospace",
       backgroundColor: CODE_BG,
@@ -95,19 +98,21 @@ export function HtmlContent({
 }) {
   const { width } = useWindowDimensions();
 
+  const effectiveLineHeight = lineHeight || Math.round(fontSize * 1.55);
+
   const baseStyle = useMemo(
     () => ({
       fontFamily: fonts.regular,
       fontSize,
-      lineHeight: lineHeight || Math.round(fontSize * 1.55),
+      lineHeight: effectiveLineHeight,
       color,
     }),
-    [fonts.regular, fontSize, lineHeight, color]
+    [fonts.regular, fontSize, effectiveLineHeight, color]
   );
 
   const tagsStyles = useMemo(
-    () => buildTagStyles(fonts, fontSize),
-    [fonts, fontSize]
+    () => buildTagStyles(fonts, fontSize, effectiveLineHeight),
+    [fonts, fontSize, effectiveLineHeight]
   );
 
   const systemFonts = useMemo(
