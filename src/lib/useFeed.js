@@ -1,8 +1,8 @@
 // Feed data hook — loads posts for the active filter selection.
 //
 // `viewKey` chooses the source:
-//   "public"           → GET /posts?to=public    (public firehose, page-based)
-//   "server"           → GET /posts?to=server    (server-only,     page-based)
+//   "all" (or any non-subject key) → GET /posts   (merged public + server for
+//                                     authed users, page-based)
 //   "circle:<id>@..."  → GET /circles/:id/posts  (circle posts,    cursor-based)
 //   "group:<id>@..."   → GET /groups/:id/posts   (group posts,     page-based)
 //
@@ -137,14 +137,15 @@ export function useFeed({ viewKey = "public", activeTypes = [], accountId } = {}
           setHasMore(page < totalPages);
           cursor.current = page;
         } else {
-          // Server feed (public or server) — page-based.
-          const to = viewKey === "server" ? "server" : "public";
+          // "All Posts" — the merged firehose, page-based. Omit `to` so the
+          // server returns its default: public + server for authed local users
+          // (public only for logged-out / remote). No client-side public vs
+          // server split.
           const page =
             mode === "more"
               ? (typeof cursor.current === "number" ? cursor.current : 0) + 1
               : 1;
           res = await client.feeds.getServerPosts({
-            to,
             types: activeTypes,
             page,
           });

@@ -11,7 +11,7 @@
 import { useEffect, useRef, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const HARD_DEFAULTS = { viewKey: "public", activeTypes: [] };
+const HARD_DEFAULTS = { viewKey: "all", activeTypes: [] };
 
 function keyFor(accountId) {
   return accountId ? `kowloon:${accountId}:feedFilter` : null;

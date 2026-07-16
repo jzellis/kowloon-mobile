@@ -1,12 +1,11 @@
 // FeedViewSelector — pick what you're reading.
 //
-// Choices: Public, Server, one of the user's circles, or a joined group.
-// The trigger is the current view's title; tapping opens a dropdown anchored
-// directly below the trigger (not a bottom sheet).
+// Choices: All Posts (merged public + server), one of the user's circles, or a
+// joined group. The trigger is the current view's title; tapping opens a
+// dropdown anchored directly below the trigger (not a bottom sheet).
 //
 // Returns the active feed view key:
-//   "public"       — getServerPosts({ to: 'public' })
-//   "server"       — getServerPosts({ to: 'server' })
+//   "all"          — getServerPosts()  (merged public + server firehose)
 //   "circle:<id>"  — getCirclePosts({ circleId })
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -35,6 +34,11 @@ export function FeedViewSelector({ value, onChange, subject }) {
   // behind `value` when it isn't one of your own — used so the trigger shows
   // its real name/icon instead of falling back to "Public".
   const subjectForValue = subject?.id === value ? subject : null;
+  // Any key that isn't a circle/group is the merged "All Posts" view (covers
+  // "all" plus legacy "public"/"server"/"" persisted values).
+  const isSubjectView =
+    typeof value === "string" &&
+    (value.startsWith("circle:") || value.startsWith("group:"));
   const account = useSelector(selectActiveAccount);
   const client = useActiveClient();
   const triggerRef = useRef(null);
@@ -49,14 +53,11 @@ export function FeedViewSelector({ value, onChange, subject }) {
   const serverViews = useMemo(
     () => [
       {
-        value: "public",
-        label: "Public",
-        summary: "Anyone, anywhere on the network.",
-      },
-      {
-        value: "server",
-        label: "Server",
-        summary: `Members of ${account?.serverName || account?.server || "this server"}.`,
+        value: "all",
+        label: "All Posts",
+        summary: `Everything across the network and ${
+          account?.serverName || account?.server || "this server"
+        }.`,
       },
     ],
     [account?.serverName, account?.server]
@@ -101,9 +102,6 @@ export function FeedViewSelector({ value, onChange, subject }) {
   // Icon for the collapsed trigger: server overlay for Public/Server, the
   // circle's / group's hex avatar otherwise.
   function iconFor(value, size = 20) {
-    if (value === "server") {
-      return <ServerFeedIcon iconUrl={serverIcon} variant="server" size={size} />;
-    }
     const circle = circles.find((c) => c.id === value);
     if (circle) {
       return <HexAvatar uri={resolveImageUrl(circle.icon, baseUrl)} size={size} />;
@@ -118,15 +116,15 @@ export function FeedViewSelector({ value, onChange, subject }) {
         <HexAvatar uri={resolveImageUrl(subjectForValue.icon, baseUrl)} size={size} />
       );
     }
+    // "All Posts" — the server icon under a globe (the whole network mix).
     return <ServerFeedIcon iconUrl={serverIcon} variant="public" size={size} />;
   }
 
   const currentLabel =
-    serverViews.find((v) => v.value === value)?.label ||
     circles.find((c) => c.id === value)?.name ||
     groups.find((g) => g.id === value)?.name ||
     subjectForValue?.name ||
-    "Public";
+    "All Posts";
 
   function openDropdown() {
     // Refetch circles on every open so newly added circles appear immediately
@@ -209,14 +207,10 @@ export function FeedViewSelector({ value, onChange, subject }) {
                   key={v.value}
                   label={v.label}
                   summary={v.summary}
-                  selected={value === v.value}
+                  selected={!isSubjectView}
                   onPress={() => select(v.value)}
                   icon={
-                    <ServerFeedIcon
-                      iconUrl={serverIcon}
-                      variant={v.value === "server" ? "server" : "public"}
-                      size={22}
-                    />
+                    <ServerFeedIcon iconUrl={serverIcon} variant="public" size={22} />
                   }
                 />
               ))}
