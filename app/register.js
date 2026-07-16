@@ -117,7 +117,13 @@ export default function Register() {
     setServerInfo(null);
     setAcknowledged({});
     try {
-      const res = await fetch(`${url}/`, { method: "GET" });
+      // Must ask for JSON explicitly: the server root content-negotiates, and
+      // without this header it returns the SPA landing HTML (frontend enabled),
+      // which fails to parse ("Unexpected character: <").
+      const res = await fetch(`${url}/`, {
+        method: "GET",
+        headers: { Accept: "application/json" },
+      });
       if (!res.ok) throw new Error(`Server returned ${res.status}`);
       const info = await res.json();
       if (info?.type !== "Service") {
