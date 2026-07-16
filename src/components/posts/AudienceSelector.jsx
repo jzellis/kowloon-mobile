@@ -30,7 +30,7 @@ export function AudienceSelector({ value, onChange }) {
       },
       {
         value: serverTo,
-        label: "Server",
+        label: "Community",
         summary: `Members of ${account?.serverName || account?.server || "this server"}.`,
       },
     ],

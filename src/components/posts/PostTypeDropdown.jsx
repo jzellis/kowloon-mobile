@@ -9,7 +9,8 @@ import { PostTypeIcon } from "./PostTypeIcon.jsx";
 
 const DROPDOWN_WIDTH = 200;
 
-export function PostTypeDropdown({ value, onChange }) {
+export function PostTypeDropdown({ value, onChange, variant = "inline" }) {
+  const isTitle = variant === "title";
   const triggerRef = useRef(null);
   const [open, setOpen] = useState(false);
   const [dropPos, setDropPos] = useState({ top: 0, left: 0 });
@@ -40,13 +41,24 @@ export function PostTypeDropdown({ value, onChange }) {
         hitSlop={8}
         className="flex-row items-center"
       >
-        <Text
-          className="font-ui text-sm tracking-tight mr-1"
-          style={{ color: typeColor }}
-        >
-          {value}
-        </Text>
-        <Text className="font-ui text-xs text-base-content/40">▾</Text>
+        {isTitle ? (
+          <>
+            <Text className="font-ui text-2xl text-header-content mr-1.5">
+              {value}
+            </Text>
+            <Text className="font-ui text-lg text-header-content/70">▾</Text>
+          </>
+        ) : (
+          <>
+            <Text
+              className="font-ui text-sm tracking-tight mr-1"
+              style={{ color: typeColor }}
+            >
+              {value}
+            </Text>
+            <Text className="font-ui text-xs text-base-content/40">▾</Text>
+          </>
+        )}
       </Pressable>
 
       <Modal

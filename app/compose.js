@@ -27,7 +27,9 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import {
+  CoreBridge,
   RichText,
+  TenTapStartKit,
   Toolbar,
   useBridgeState,
   useEditorBridge,
@@ -35,6 +37,7 @@ import {
 
 import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
+import { ImagePlus } from "lucide-react-native";
 
 import { PostTypeDropdown } from "../src/components/posts/PostTypeDropdown.jsx";
 import { PostTypeIcon } from "../src/components/posts/PostTypeIcon.jsx";
@@ -231,6 +234,14 @@ export default function Compose() {
     autofocus: true,
     avoidIosKeyboard: true,
     initialContent: "",
+    // Give the editor content breathing room from the border — the WebView has
+    // no horizontal padding by default, so text sat flush against the edge.
+    bridgeExtensions: [
+      ...TenTapStartKit,
+      CoreBridge.configureCSS(`
+        .ProseMirror { padding: 10px 16px; }
+      `),
+    ],
   });
   const editorState = useBridgeState(editor);
   const handedOff = useRef(false);
@@ -484,16 +495,17 @@ export default function Compose() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-base-100" edges={["top"]}>
+    <View className="flex-1 bg-base-100">
+      {/* Klein masthead — the type selector is the page title. */}
+      <SafeAreaView edges={["top"]} className="bg-header">
+        <View className="px-5 pt-2 pb-3 flex-row items-baseline">
+          <Text className="font-ui text-2xl text-header-content mr-2">New</Text>
+          <PostTypeDropdown value={type} onChange={setType} variant="title" />
+        </View>
+      </SafeAreaView>
+
       {/* Content area shrinks to clear the keyboard. */}
       <View className="flex-1" style={{ paddingBottom: bottomPad }}>
-        {/* Title bar — "Add New [type ▾]" dropdown replaces the icon strip */}
-        <View className="flex-row items-center border-b-2 border-base-content px-4 py-3">
-          <Text className="font-ui text-[11px] uppercase tracking-[0.18em] text-base-content/45 mr-2">
-            Add New
-          </Text>
-          <PostTypeDropdown value={type} onChange={setType} />
-        </View>
 
         {composable && (
           <>
@@ -716,11 +728,14 @@ export default function Compose() {
                   <Pressable
                     onPress={pickFeaturedImage}
                     android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-                    className="border-2 border-base-300 bg-white py-5 items-center"
+                    hitSlop={6}
+                    className="self-start border-2 border-base-300 bg-base-100 p-3"
                   >
-                    <Text className="font-ui uppercase tracking-[0.14em] text-xs text-base-content/55">
-                      + Add featured image
-                    </Text>
+                    <ImagePlus
+                      size={20}
+                      color="rgba(26,26,32,0.6)"
+                      strokeWidth={1.75}
+                    />
                   </Pressable>
                 )}
               </View>
@@ -792,6 +807,6 @@ export default function Compose() {
           </>
         )}
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
