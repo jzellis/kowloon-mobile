@@ -43,16 +43,19 @@ export function PostTypeDropdown({ value, onChange, variant = "inline" }) {
         className="flex-row items-center"
       >
         {isTitle ? (
-          <>
-            <Text className="font-ui text-2xl font-bold text-header-content mr-1">
+          <View className="flex-row items-center border border-header-content/40 bg-header-content/10 px-2.5 py-1">
+            <Text
+              className="font-ui text-2xl font-bold text-header-content mr-1.5"
+              style={{ includeFontPadding: false }}
+            >
               {value}
             </Text>
             <ChevronDown
-              size={24}
-              color="rgba(255,255,255,0.85)"
+              size={22}
+              color="rgba(255,255,255,0.9)"
               strokeWidth={2.5}
             />
-          </>
+          </View>
         ) : (
           <>
             <Text

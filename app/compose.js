@@ -498,7 +498,12 @@ export default function Compose() {
       {/* Klein masthead — the type selector is the page title. */}
       <SafeAreaView edges={["top"]} className="bg-header">
         <View className="px-5 pt-2 pb-3 flex-row items-center">
-          <Text className="font-ui text-2xl text-header-content mr-2">New</Text>
+          <Text
+            className="font-ui text-2xl text-header-content mr-2.5"
+            style={{ includeFontPadding: false }}
+          >
+            New
+          </Text>
           <PostTypeDropdown value={type} onChange={setType} variant="title" />
         </View>
       </SafeAreaView>
