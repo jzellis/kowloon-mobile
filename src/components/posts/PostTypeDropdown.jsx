@@ -10,7 +10,7 @@ import { PostTypeIcon } from "./PostTypeIcon.jsx";
 
 const DROPDOWN_WIDTH = 200;
 
-export function PostTypeDropdown({ value, onChange }) {
+export function PostTypeDropdown({ value, onChange, prefix }) {
   const triggerRef = useRef(null);
   const [open, setOpen] = useState(false);
   const [dropPos, setDropPos] = useState({ top: 0, left: 0 });
@@ -41,11 +41,14 @@ export function PostTypeDropdown({ value, onChange }) {
         hitSlop={8}
         className="flex-row items-center"
       >
+        {/* "Add New" and the type share ONE text run, so their baselines can't
+            drift — center-aligning two separate texts was off by a pixel. */}
         <Text
-          className="font-ui text-2xl font-bold tracking-tight mr-1"
-          style={{ color: typeColor, includeFontPadding: false }}
+          className="font-ui text-2xl font-bold tracking-tight text-base-content mr-1"
+          style={{ includeFontPadding: false }}
         >
-          {value}
+          {prefix ? `${prefix} ` : ""}
+          <Text style={{ color: typeColor }}>{value}</Text>
         </Text>
         <ChevronDown size={22} color="rgba(26,26,32,0.5)" strokeWidth={2.5} />
       </Pressable>

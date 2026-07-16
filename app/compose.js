@@ -499,13 +499,7 @@ export default function Compose() {
       <View className="flex-1" style={{ paddingBottom: bottomPad }}>
         {/* Title bar — "Add New [type ▾]" dropdown replaces the icon strip */}
         <View className="flex-row items-center border-b-2 border-base-content px-4 py-3">
-          <Text
-            className="font-ui text-2xl font-bold tracking-tight text-base-content mr-2"
-            style={{ includeFontPadding: false }}
-          >
-            Add New
-          </Text>
-          <PostTypeDropdown value={type} onChange={setType} />
+          <PostTypeDropdown value={type} onChange={setType} prefix="Add New" />
         </View>
 
         {composable && (
