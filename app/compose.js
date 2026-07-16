@@ -28,6 +28,8 @@ import {
 } from "react-native-safe-area-context";
 import {
   CoreBridge,
+  DEFAULT_TOOLBAR_ITEMS,
+  Images,
   RichText,
   TenTapStartKit,
   Toolbar,
@@ -52,6 +54,12 @@ import { uploadFile } from "../src/lib/uploadFile.js";
 import { COMPOSABLE_TYPES, POST_TYPES } from "../src/lib/postTypes.js";
 
 const TOOLBAR_HEIGHT = 44;
+
+// The default editor toolbar minus the task-list (checkbox) button — matched by
+// its checkList image so it survives item-order changes across versions.
+const TOOLBAR_ITEMS = DEFAULT_TOOLBAR_ITEMS.filter(
+  (item) => item.image?.() !== Images.checkList
+);
 
 // Event date/time helpers — see project_event_datetime_logic memory.
 const pad = (n) => String(n).padStart(2, "0");
@@ -750,7 +758,7 @@ export default function Compose() {
                 style={{ height: TOOLBAR_HEIGHT }}
                 className="border-b-2 border-base-300"
               >
-                <Toolbar editor={editor} hidden={false} />
+                <Toolbar editor={editor} hidden={false} items={TOOLBAR_ITEMS} />
               </View>
               <View className="flex-1">
                 <RichText editor={editor} />
