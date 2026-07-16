@@ -196,7 +196,7 @@ export default function Register() {
 
       await dispatch(addAccountAndPersist(account));
       await rootStorage.setItem(BANNER_KEY, "1");
-      router.replace("/discover");
+      router.replace("/get-started");
     } catch (e) {
       forgetClient(accountId);
       await purgeAccountStorage(accountId).catch(() => {});
