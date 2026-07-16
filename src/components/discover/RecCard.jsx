@@ -12,7 +12,8 @@ import { useSelector } from "react-redux";
 import { Bookmark as BookmarkIcon, Copy, ExternalLink, Newspaper, Users } from "lucide-react-native";
 
 import { Avatar } from "../posts/Avatar.jsx";
-import { HexAvatar } from "../ui/HexAvatar.jsx";
+import { CircleAvatar } from "../circles/CircleAvatar.jsx";
+import { GroupAvatar } from "../groups/GroupAvatar.jsx";
 import { useActiveClient } from "../../lib/useActiveClient.js";
 import { resolveImageUrl } from "../../lib/resolveImageUrl.js";
 import { saveCircle } from "../../lib/saveCircle.js";
@@ -27,8 +28,8 @@ function MiniButton({ label, onPress, filled, disabled, icon }) {
       onPress={onPress}
       disabled={disabled}
       android_ripple={{ color: "rgba(0,0,0,0.08)" }}
-      className={`flex-1 flex-row items-center justify-center px-2 py-2 border-2 ${
-        filled ? "bg-primary border-primary" : "border-base-content"
+      className={`flex-1 flex-row items-center justify-center px-2 py-2 border ${
+        filled ? "bg-primary border-primary" : "bg-base-200 border-base-300"
       }`}
     >
       {icon}
@@ -53,7 +54,7 @@ function PostCard({ item, baseUrl, onPress }) {
         onPress={onPress}
         android_ripple={{ color: "rgba(0,0,0,0.06)" }}
         style={{ width: POST_W }}
-        className="border-2 border-base-content bg-base-300 mr-3"
+        className="border border-base-300 bg-base-300 mr-3"
       >
         <View style={{ width: "100%", height: 168 }}>
           <Image source={{ uri: img }} style={{ width: "100%", height: 168 }} resizeMode="cover" />
@@ -80,7 +81,7 @@ function PostCard({ item, baseUrl, onPress }) {
       onPress={onPress}
       android_ripple={{ color: "rgba(0,0,0,0.05)" }}
       style={{ width: CARD_W }}
-      className="border-2 border-base-content bg-base-200 p-3 mr-3"
+      className="border border-base-300 bg-base-200 p-3 mr-3"
     >
       <View className="flex-row items-center mb-2">
         <Newspaper size={12} color="rgba(26,26,32,0.5)" strokeWidth={1.75} />
@@ -125,10 +126,10 @@ function CircleCard({ item, baseUrl, onView }) {
   return (
     <View
       style={{ width: CARD_W }}
-      className="border-2 border-base-content bg-base-100 p-3 mr-3"
+      className="border border-base-300 bg-base-100 p-3 mr-3"
     >
       <View className="flex-row items-center">
-        <HexAvatar uri={resolveImageUrl(item.icon, baseUrl)} size={40} />
+        <CircleAvatar circle={item} size={40} baseUrl={baseUrl} />
         <View className="flex-1 ml-3 min-w-0">
           <Text className="font-ui text-sm font-bold text-base-content" numberOfLines={1}>
             {item.name}
@@ -165,10 +166,10 @@ function GroupCard({ item, baseUrl, onView, onPosts }) {
   return (
     <View
       style={{ width: CARD_W }}
-      className="border-2 border-base-content bg-base-100 p-3 mr-3"
+      className="border border-base-300 bg-base-100 p-3 mr-3"
     >
       <View className="flex-row items-center">
-        <HexAvatar uri={resolveImageUrl(item.icon, baseUrl)} size={40} />
+        <GroupAvatar group={item} size={40} baseUrl={baseUrl} />
         <View className="flex-1 ml-3 min-w-0">
           <Text className="font-ui text-sm font-bold text-base-content" numberOfLines={1}>
             {item.name}
@@ -200,7 +201,7 @@ function LinkCard({ item, baseUrl, icon, onPress }) {
       onPress={onPress}
       android_ripple={{ color: "rgba(0,0,0,0.05)" }}
       style={{ width: CARD_W }}
-      className="border-2 border-base-content bg-base-100 mr-3"
+      className="border border-base-300 bg-base-100 mr-3"
     >
       {img ? (
         <Image source={{ uri: img }} style={{ width: "100%", height: 110 }} resizeMode="cover" />

@@ -34,7 +34,11 @@ export function HexAvatar({
   // React's useId returns strings like ":r0:" — strip non-alphanumeric for SVG IDs
   const clipId = `hex${uid.replace(/[^a-zA-Z0-9]/g, "")}`;
   const [failed, setFailed] = useState(false);
-  const showImage = !!uri && !failed;
+  // react-native-svg's <Image> can't render an SVG href (default placeholder
+  // icons are .svg) and doesn't fire onError on it — it just draws nothing. So
+  // treat .svg URIs as "no image" and fall through to the fallback polygon/glyph.
+  const isSvg = typeof uri === "string" && uri.split("?")[0].toLowerCase().endsWith(".svg");
+  const showImage = !!uri && !failed && !isSvg;
   const points = hexPoints(size);
 
   return (
