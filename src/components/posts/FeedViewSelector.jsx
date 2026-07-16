@@ -54,7 +54,7 @@ export function FeedViewSelector({ value, onChange, subject }) {
     () => [
       {
         value: "all",
-        label: "All Posts",
+        label: "Community Posts",
         summary: `Everything across the network and ${
           account?.serverName || account?.server || "this server"
         }.`,
@@ -124,7 +124,7 @@ export function FeedViewSelector({ value, onChange, subject }) {
     circles.find((c) => c.id === value)?.name ||
     groups.find((g) => g.id === value)?.name ||
     subjectForValue?.name ||
-    "All Posts";
+    "Community Posts";
 
   function openDropdown() {
     // Refetch circles on every open so newly added circles appear immediately
