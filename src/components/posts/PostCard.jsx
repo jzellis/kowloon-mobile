@@ -66,12 +66,26 @@ export function PostCard({ post, onDeleted }) {
   const currentUser = client?.auth?.getUser?.() || null;
   const meta = TYPE_META[post?.type] || TYPE_META.Note;
   const { resolved } = useTypography();
-  // Font family from the user's reading preference, applied to content text.
-  // UI chrome (titles, labels, timestamps) stays in font-ui regardless.
+  // Font family + sizes from the user's reading preference, applied to the
+  // post's content: body, title, and the author name/handle — so a post reads
+  // cohesively in the chosen face. (Type label + timestamp stay UI chrome.)
   const contentFonts = {
     regular: resolved.regularFamily,
     bold: resolved.boldFamily,
     italic: resolved.italicFamily,
+  };
+  const titleStyle = {
+    fontFamily: resolved.boldFamily,
+    fontSize: Math.round(resolved.fontSize * 1.4),
+    lineHeight: Math.round(resolved.fontSize * 1.6),
+  };
+  const nameStyle = {
+    fontFamily: resolved.boldFamily,
+    fontSize: Math.round(resolved.fontSize * 0.95),
+  };
+  const handleStyle = {
+    fontFamily: resolved.regularFamily,
+    fontSize: Math.round(resolved.fontSize * 0.8),
   };
 
   const actor = post?.actor || {};
@@ -130,14 +144,15 @@ export function PostCard({ post, onDeleted }) {
             <Avatar actor={actor} size={38} />
             <View className="flex-1 ml-3">
               <Text
-                className="text-sm text-base-content"
-                style={{ fontFamily: "inter-medium" }}
+                className="text-base-content"
+                style={nameStyle}
                 numberOfLines={1}
               >
                 {name}
               </Text>
               <Text
-                className="font-ui text-xs text-base-content/50"
+                className="text-base-content/50"
+                style={handleStyle}
                 numberOfLines={1}
               >
                 {handle}
@@ -163,7 +178,7 @@ export function PostCard({ post, onDeleted }) {
              field for older posts that pre-date attachments. */
           <>
             {title ? (
-              <Text className="font-ui text-xl text-base-content leading-tight mb-1.5">
+              <Text className="text-base-content mb-1.5" style={titleStyle}>
                 {title}
               </Text>
             ) : null}
@@ -254,7 +269,7 @@ export function PostCard({ post, onDeleted }) {
             ) : null}
             {title ? (
               <Pressable onPress={openExternal}>
-                <Text className={`font-ui text-xl ${meta.accent} leading-tight mb-1`}>
+                <Text className={`${meta.accent} mb-1`} style={titleStyle}>
                   {title}
                 </Text>
               </Pressable>
@@ -279,7 +294,7 @@ export function PostCard({ post, onDeleted }) {
              for Note, Article, and Event. */
           <>
             {title ? (
-              <Text className="font-ui text-xl text-base-content leading-tight mb-1.5">
+              <Text className="text-base-content mb-1.5" style={titleStyle}>
                 {title}
               </Text>
             ) : null}
