@@ -34,6 +34,13 @@ import {
   updateAccountAndPersist,
 } from "../src/state/accountsSlice.js";
 
+// Order-independent equality for the active-types array ([] === "all").
+function sameTypes(a, b) {
+  const x = [...(a || [])].sort();
+  const y = [...(b || [])].sort();
+  return x.length === y.length && x.every((v, i) => v === y[i]);
+}
+
 export default function Feed() {
   const router = useRouter();
   const dispatch = useDispatch();
@@ -101,8 +108,17 @@ export default function Feed() {
   // Persisted filter state — viewKey (public/server/circleId/groupId) +
   // activeTypes. Falls back to the user's saved server-side defaults on first
   // hydration.
-  const { hydrated, viewKey, setViewKey, activeTypes, setActiveTypes } =
-    usePersistedFilter(account?.id, fallbackDefaults);
+  const {
+    hydrated,
+    viewKey,
+    setViewKey,
+    activeTypes,
+    setActiveTypes,
+    defaultView,
+    defaultTypes,
+    saveDefaultView,
+    saveDefaultTypes,
+  } = usePersistedFilter(account?.id, fallbackDefaults);
 
   // If we arrived via `?view=...` (e.g. "View Feed" on a circle/group), apply
   // it once. Gate on `hydrated` so the override runs AFTER the persisted-filter
@@ -118,52 +134,35 @@ export default function Feed() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.view, hydrated]);
 
-  // Auto-sync: every user-driven filter change writes to user.prefs (debounced).
-  // The pending value is held in a ref so a quick succession of taps coalesces
-  // into a single write.
-  const syncTimer = useRef(null);
-  const pendingSync = useRef(null);
-
-  function scheduleSync(nextViewKey, nextActiveTypes) {
-    if (!client) return;
-    pendingSync.current = { viewKey: nextViewKey, activeTypes: nextActiveTypes };
-    if (syncTimer.current) clearTimeout(syncTimer.current);
-    syncTimer.current = setTimeout(() => {
-      syncTimer.current = null;
-      const payload = pendingSync.current;
-      pendingSync.current = null;
-      if (!payload || !client) return;
-      client.activities
-        ?.updateProfile({
-          updates: {
-            prefs: {
-              defaultFeedView: payload.viewKey,
-              defaultPostView: payload.activeTypes,
-            },
-          },
-        })
-        .catch(() => {
-          // Non-fatal: local state still applies; a later change reconciles.
-        });
-    }, 500);
-  }
-
-  useEffect(() => {
-    return () => {
-      if (syncTimer.current) clearTimeout(syncTimer.current);
-    };
-  }, []);
-
-  // Wrapped setters that update local state and schedule the prefs sync.
+  // Changing the view/filter is ephemeral — it no longer touches the saved
+  // default. Only the explicit "set as default" actions persist.
   function handleViewChange(v) {
     setViewKey(v);
-    scheduleSync(v, activeTypes);
   }
 
   function handleSetTypes(types) {
     setActiveTypes(types);
-    scheduleSync(viewKey, types);
   }
+
+  // Explicit, independent "set current as default": persists locally (via the
+  // hook) and to server prefs so it follows the account across devices. Each
+  // axis writes only its own pref (the Update handler merges prefs).
+  function handleSetDefaultView() {
+    const v = saveDefaultView();
+    client?.activities
+      ?.updateProfile({ updates: { prefs: { defaultFeedView: v } } })
+      .catch(() => {});
+  }
+
+  function handleSetDefaultTypes() {
+    const t = saveDefaultTypes();
+    client?.activities
+      ?.updateProfile({ updates: { prefs: { defaultPostView: t } } })
+      .catch(() => {});
+  }
+
+  const isViewDefault = viewKey === defaultView;
+  const isTypesDefault = sameTypes(activeTypes, defaultTypes);
 
   const {
     posts,
@@ -290,6 +289,10 @@ export default function Feed() {
         onViewChange={handleViewChange}
         activeTypes={activeTypes}
         onSetTypes={handleSetTypes}
+        isViewDefault={isViewDefault}
+        isTypesDefault={isTypesDefault}
+        onSetDefaultView={handleSetDefaultView}
+        onSetDefaultTypes={handleSetDefaultTypes}
       />
 
       <FlatList

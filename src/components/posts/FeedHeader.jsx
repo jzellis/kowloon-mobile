@@ -1,12 +1,13 @@
-// FeedHeader — single-line bar: view selector + contextual action (left) and
-// type icons (right). The action (Copy a circle / Join a group) appears only
-// when you're reading someone else's circle or group.
+// FeedHeader — single-line bar: view selector + contextual action (left), type
+// icons and the defaults overflow menu (right). The action (Copy a circle /
+// Join a group) appears only when you're reading someone else's circle or group.
 
 import { View } from "react-native";
 
 import { FeedViewSelector } from "./FeedViewSelector.jsx";
 import { FeedViewAction } from "./FeedViewAction.jsx";
 import { TypeFilter } from "./TypeFilter.jsx";
+import { FeedDefaultsMenu } from "./FeedDefaultsMenu.jsx";
 import { useFeedSubject } from "../../lib/useFeedSubject.js";
 
 export function FeedHeader({
@@ -14,6 +15,10 @@ export function FeedHeader({
   onViewChange,
   activeTypes,
   onSetTypes,
+  isViewDefault,
+  isTypesDefault,
+  onSetDefaultView,
+  onSetDefaultTypes,
 }) {
   // Resolve the circle/group behind the current view once, here — both the
   // selector's label fallback and the contextual action read from it.
@@ -39,6 +44,12 @@ export function FeedHeader({
         </View>
       </View>
       <TypeFilter activeTypes={activeTypes} onSetTypes={onSetTypes} />
+      <FeedDefaultsMenu
+        isViewDefault={isViewDefault}
+        isTypesDefault={isTypesDefault}
+        onSetDefaultView={onSetDefaultView}
+        onSetDefaultTypes={onSetDefaultTypes}
+      />
     </View>
   );
 }

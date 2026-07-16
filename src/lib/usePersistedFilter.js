@@ -1,12 +1,14 @@
-// Persisted feed-filter state, account-scoped.
+// Feed filter state, account-scoped: the *current* view/types (ephemeral this
+// session) plus the persisted *default* the feed opens to.
 //
-// Holds the user's current viewKey ("public" | "server" | circle id) and
-// active post-type filter. Hydrates from AsyncStorage on mount and writes
-// back on every change so the filter survives app restarts.
+// The feed hydrates to the saved default, and the user can then change the view
+// or type filter freely without disturbing it. Only an explicit "set as
+// default" (saveDefaultView / saveDefaultTypes) writes the default — locally
+// here, and to server prefs by the caller. The two axes are independent.
 //
-// `fallbackDefaults` (optional): used only on initial hydration when
-// AsyncStorage has no entry yet for this account — typically the user's
-// server-side defaults so a fresh login lands on their saved view.
+// `fallbackDefaults` (optional): used only on first hydration when AsyncStorage
+// has no entry yet for this account — typically the user's server-side prefs so
+// a fresh device lands on their saved default.
 
 import { useEffect, useRef, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -27,21 +29,27 @@ function fallbackHasValues(f) {
 
 export function usePersistedFilter(accountId, fallbackDefaults) {
   const [hydrated, setHydrated] = useState(false);
+  // Current (ephemeral) selection.
   const [viewKey, setViewKey] = useState(HARD_DEFAULTS.viewKey);
   const [activeTypes, setActiveTypes] = useState(HARD_DEFAULTS.activeTypes);
+  // Persisted default the feed opens to.
+  const [defaultView, setDefaultView] = useState(HARD_DEFAULTS.viewKey);
+  const [defaultTypes, setDefaultTypes] = useState(HARD_DEFAULTS.activeTypes);
 
   const storageKey = keyFor(accountId);
-
-  // Set when AsyncStorage was empty at hydrate AND we haven't yet been able
-  // to apply the caller's fallback defaults. A second effect watches the
-  // fallback and applies it as soon as it has values — this avoids the race
-  // where AsyncStorage finishes reading before the user's server-side
-  // prefs have loaded.
   const awaitingFallback = useRef(false);
 
-  function applyFallback(f) {
-    if (typeof f.viewKey === "string" && f.viewKey) setViewKey(f.viewKey);
-    if (Array.isArray(f.activeTypes)) setActiveTypes(f.activeTypes);
+  // Apply a default to BOTH the default and the current selection (used on
+  // hydration — the feed opens to its default).
+  function applyDefault(v, t) {
+    if (typeof v === "string" && v) {
+      setViewKey(v);
+      setDefaultView(v);
+    }
+    if (Array.isArray(t)) {
+      setActiveTypes(t);
+      setDefaultTypes(t);
+    }
   }
 
   // Hydrate on account change.
@@ -59,17 +67,18 @@ export function usePersistedFilter(accountId, fallbackDefaults) {
         if (cancelled) return;
         if (raw) {
           const parsed = JSON.parse(raw);
-          if (typeof parsed.viewKey === "string") setViewKey(parsed.viewKey);
-          if (Array.isArray(parsed.activeTypes))
-            setActiveTypes(parsed.activeTypes);
+          applyDefault(
+            typeof parsed.viewKey === "string" ? parsed.viewKey : undefined,
+            Array.isArray(parsed.activeTypes) ? parsed.activeTypes : undefined
+          );
         } else if (fallbackHasValues(fallbackDefaults)) {
-          applyFallback(fallbackDefaults);
+          applyDefault(fallbackDefaults.viewKey, fallbackDefaults.activeTypes);
         } else {
-          // Storage empty, no fallback yet — try again when it arrives.
+          // Storage empty, no fallback yet — apply it when it arrives.
           awaitingFallback.current = true;
         }
       } catch {
-        // ignore — fall back to defaults
+        // ignore — fall back to hard defaults
       }
       if (!cancelled) setHydrated(true);
     })();
@@ -79,25 +88,35 @@ export function usePersistedFilter(accountId, fallbackDefaults) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storageKey]);
 
-  // Late-arriving fallback (user prefs loaded after the storage read).
+  // Late-arriving fallback (server prefs loaded after the storage read).
   const fallbackSig = JSON.stringify(fallbackDefaults || null);
   useEffect(() => {
     if (!awaitingFallback.current) return;
     if (fallbackHasValues(fallbackDefaults)) {
-      applyFallback(fallbackDefaults);
+      applyDefault(fallbackDefaults.viewKey, fallbackDefaults.activeTypes);
       awaitingFallback.current = false;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fallbackSig]);
 
-  // Persist on change (post-hydration).
-  useEffect(() => {
-    if (!hydrated || !storageKey) return;
-    AsyncStorage.setItem(
-      storageKey,
-      JSON.stringify({ viewKey, activeTypes })
-    ).catch(() => {});
-  }, [hydrated, storageKey, viewKey, activeTypes]);
+  function persistDefault(next) {
+    if (!storageKey) return;
+    AsyncStorage.setItem(storageKey, JSON.stringify(next)).catch(() => {});
+  }
+
+  // Save the current view as the default (leaves the type-filter default alone).
+  function saveDefaultView() {
+    setDefaultView(viewKey);
+    persistDefault({ viewKey, activeTypes: defaultTypes });
+    return viewKey;
+  }
+
+  // Save the current type filter as the default (leaves the view default alone).
+  function saveDefaultTypes() {
+    setDefaultTypes(activeTypes);
+    persistDefault({ viewKey: defaultView, activeTypes });
+    return activeTypes;
+  }
 
   function toggleType(type) {
     setActiveTypes((prev) =>
@@ -115,6 +134,10 @@ export function usePersistedFilter(accountId, fallbackDefaults) {
     setViewKey,
     activeTypes,
     setActiveTypes,
+    defaultView,
+    defaultTypes,
+    saveDefaultView,
+    saveDefaultTypes,
     toggleType,
     clearTypes,
   };
