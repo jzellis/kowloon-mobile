@@ -4,9 +4,10 @@
 // Post types: Note, Article, Media, Link, Event. Each gets an accent color
 // and type-appropriate treatment.
 
-import { Image, Linking, Pressable, Text, View } from "react-native";
+import { Linking, Pressable, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 
+import { SmartImage as Image } from "../ui/SmartImage.jsx";
 import { Avatar } from "./Avatar.jsx";
 import { AudioAttachment } from "./AudioAttachment.jsx";
 import { VideoAttachment } from "./VideoAttachment.jsx";

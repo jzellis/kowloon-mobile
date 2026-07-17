@@ -64,10 +64,18 @@
             "NSExtensionActivationSupportsImageWithMaxCount": 10,
             "NSExtensionActivationSupportsMovieWithMaxCount": 1
           },
-          "androidIntentFilters": ["text/*", "image/*", "video/*"],
-          "androidMultiIntentFilters": ["image/*", "video/*"]
+          "androidIntentFilters": [
+            "text/*",
+            "image/*",
+            "video/*"
+          ],
+          "androidMultiIntentFilters": [
+            "image/*",
+            "video/*"
+          ]
         }
-      ]
+      ],
+      "expo-image"
     ],
     "extra": {
       "router": {},

@@ -11,8 +11,9 @@
 // Reading typography (font family, size, line-height) is passed in via `fonts`/
 // `fontSize`/`lineHeight` so the detail screen can apply the user's prefs.
 
-import { Image, Linking, Pressable, Text, View } from "react-native";
+import { Linking, Pressable, Text, View } from "react-native";
 
+import { SmartImage as Image } from "../ui/SmartImage.jsx";
 import { AudioAttachment } from "./AudioAttachment.jsx";
 import { VideoAttachment } from "./VideoAttachment.jsx";
 import { LocationLine } from "./LocationLine.jsx";

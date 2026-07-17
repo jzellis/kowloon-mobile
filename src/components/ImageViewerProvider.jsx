@@ -9,13 +9,14 @@ import { createContext, useCallback, useContext, useState } from "react";
 import {
   Dimensions,
   FlatList,
-  Image,
   Modal,
   Pressable,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { X } from "lucide-react-native";
+
+import { SmartImage as Image } from "./ui/SmartImage.jsx";
 
 const ImageViewerContext = createContext(null);
 
