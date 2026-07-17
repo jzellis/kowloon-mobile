@@ -105,11 +105,11 @@ export default function TypographySettings() {
                 <Pressable
                   key={font.key}
                   onPress={() => setTypography({ fontFamily: font.key })}
-                  className={`mr-3  px-4 py-4 w-40 ${
-                    active
-                      ? " bg-primary/10"
-                      : " bg-base-100"
-                  }`}
+                  className="mr-3 px-4 py-4 w-40"
+                  // Inline background so switching typeface repaints reliably.
+                  style={{
+                    backgroundColor: active ? "rgba(85,136,177,0.12)" : "#FFFFFF",
+                  }}
                   android_ripple={{ color: "rgba(0,0,0,0.06)" }}
                 >
                   <Text

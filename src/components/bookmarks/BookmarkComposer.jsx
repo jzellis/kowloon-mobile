@@ -446,14 +446,13 @@ function FolderChip({ label, selected, onPress }) {
     <Pressable
       onPress={onPress}
       android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-      className={` px-3 py-2 ${
-        selected ? " bg-primary" : ""
-      }`}
+      className="px-3 py-2"
+      // Inline bg so deselecting a chip repaints (bare className leaves it stuck).
+      style={{ backgroundColor: selected ? "#5588B1" : "#F4F4F4" }}
     >
       <Text
-        className={`font-ui uppercase tracking-[0.14em] text-[11px] ${
-          selected ? "text-primary-content" : "text-base-content/70"
-        }`}
+        className="font-ui uppercase tracking-[0.14em] text-[11px]"
+        style={{ color: selected ? "#F4F5F7" : "rgba(26,26,32,0.7)" }}
         numberOfLines={1}
       >
         {label}

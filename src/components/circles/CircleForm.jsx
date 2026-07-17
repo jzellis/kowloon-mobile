@@ -217,14 +217,14 @@ export function CircleForm({
                   key={opt.label}
                   onPress={() => setTo(opt.value)}
                   android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-                  className={`flex-1  px-2 py-2.5 ${
-                    selected ? " bg-primary" : ""
-                  }`}
+                  className="flex-1 px-2 py-2.5"
+                  // Inline background so deselecting actually repaints (a bare
+                  // className with no bg leaves the old blue stuck on Android).
+                  style={{ backgroundColor: selected ? "#5588B1" : "#F4F4F4" }}
                 >
                   <Text
-                    className={`font-ui uppercase tracking-[0.12em] text-[11px] text-center ${
-                      selected ? "text-primary-content" : "text-base-content/70"
-                    }`}
+                    className="font-ui uppercase tracking-[0.12em] text-[11px] text-center"
+                    style={{ color: selected ? "#F4F5F7" : "rgba(26,26,32,0.7)" }}
                   >
                     {opt.label}
                   </Text>
