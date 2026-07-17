@@ -11,7 +11,7 @@
 //   text  -> Note, editor seeded with the text
 //   files -> Media, added as attachments
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { router, useRootNavigationState } from "expo-router";
 import { useShareIntentContext } from "expo-share-intent";
 
@@ -19,42 +19,61 @@ import { setPendingShare } from "../lib/pendingShare.js";
 
 const URL_RE = /https?:\/\/\S+/i;
 
+// Build the /compose target from a share payload; stashes text/files for the
+// composer to consume, returns the route to navigate to (or null).
+function targetFor(shareIntent) {
+  const textMatch =
+    typeof shareIntent.text === "string" ? shareIntent.text.match(URL_RE) : null;
+  const url = shareIntent.webUrl || (textMatch ? textMatch[0] : null);
+  if (url) return `/compose?type=Link&href=${encodeURIComponent(url)}`;
+  if (Array.isArray(shareIntent.files) && shareIntent.files.length) {
+    setPendingShare({
+      kind: "files",
+      files: shareIntent.files.map((f) => ({
+        uri: f.path,
+        name: f.fileName,
+        mimeType: f.mimeType,
+      })),
+    });
+    return "/compose?fromShare=1";
+  }
+  if (shareIntent.text) {
+    setPendingShare({ kind: "text", text: shareIntent.text });
+    return "/compose?fromShare=1";
+  }
+  return null;
+}
+
 export function ShareIntentRouter() {
   const { hasShareIntent, shareIntent, resetShareIntent } =
     useShareIntentContext();
   // On a cold-start share the handler can fire before the navigator mounts —
   // navigating then throws "Attempted to navigate before mounting the Root
-  // Layout". Wait until the root navigation state has a key (= mounted).
+  // Layout". Gate on the root nav state having a key AND defer the push to the
+  // next tick, so the navigation container has actually finished initializing.
   const navState = useRootNavigationState();
   const navReady = !!navState?.key;
+  const handledRef = useRef(false);
+
+  // Allow a fresh share to be handled again once the previous one cleared.
+  useEffect(() => {
+    if (!hasShareIntent) handledRef.current = false;
+  }, [hasShareIntent]);
 
   useEffect(() => {
-    if (!navReady || !hasShareIntent || !shareIntent) return;
-
-    // Prefer an explicit web-url; otherwise pull the first URL out of the shared
-    // text (Feedly & many apps share "Title https://…" as text/plain).
-    const textMatch =
-      typeof shareIntent.text === "string" ? shareIntent.text.match(URL_RE) : null;
-    const url = shareIntent.webUrl || (textMatch ? textMatch[0] : null);
-
-    if (url) {
-      router.push(`/compose?type=Link&href=${encodeURIComponent(url)}`);
-    } else if (Array.isArray(shareIntent.files) && shareIntent.files.length) {
-      setPendingShare({
-        kind: "files",
-        files: shareIntent.files.map((f) => ({
-          uri: f.path,
-          name: f.fileName,
-          mimeType: f.mimeType,
-        })),
-      });
-      router.push("/compose?fromShare=1");
-    } else if (shareIntent.text) {
-      setPendingShare({ kind: "text", text: shareIntent.text });
-      router.push("/compose?fromShare=1");
+    if (!navReady || !hasShareIntent || !shareIntent || handledRef.current)
+      return;
+    const target = targetFor(shareIntent);
+    if (!target) {
+      resetShareIntent();
+      return;
     }
-
-    resetShareIntent();
+    handledRef.current = true;
+    const t = setTimeout(() => {
+      router.push(target);
+      resetShareIntent();
+    }, 0);
+    return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navReady, hasShareIntent, shareIntent]);
 

@@ -1,0 +1,30 @@
+diff --git a/node_modules/expo-share-intent/android/src/main/java/expo/modules/shareintent/ExpoShareIntentModule.kt b/node_modules/expo-share-intent/android/src/main/java/expo/modules/shareintent/ExpoShareIntentModule.kt
+index 0153c89..a0d0a14 100644
+--- a/node_modules/expo-share-intent/android/src/main/java/expo/modules/shareintent/ExpoShareIntentModule.kt
++++ b/node_modules/expo-share-intent/android/src/main/java/expo/modules/shareintent/ExpoShareIntentModule.kt
+@@ -121,6 +121,25 @@ class ExpoShareIntentModule : Module() {
+                 activity.finish()
+                 return
+             }
++            // Broadened: treat any ACTION_SEND carrying text (EXTRA_TEXT or
++            // ClipData) as a text/URL share, regardless of MIME type. Firefox,
++            // Feedly and others share URLs as text/html or with a null type,
++            // which the original text/plain-only gate silently dropped.
++            if (intent.action == Intent.ACTION_SEND &&
++                intent.parcelable<Uri>(Intent.EXTRA_STREAM) == null) {
++                val sharedText = intent.getStringExtra(Intent.EXTRA_TEXT)
++                    ?: intent.clipData?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.text?.toString()
++                if (sharedText != null) {
++                    notifyShareIntent(mapOf(
++                        "text" to sharedText,
++                        "type" to "text",
++                        "meta" to mapOf(
++                            "title" to intent.getCharSequenceExtra(Intent.EXTRA_TITLE),
++                        )
++                    ))
++                    return
++                }
++            }
+             if (intent.type == null) return
+             if (intent.type!!.startsWith("text/plain")) {
+                 // text / urls
