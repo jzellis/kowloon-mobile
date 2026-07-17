@@ -23,6 +23,7 @@ import { FONT_ASSETS } from "../src/lib/typography.js";
 import { TypographyProvider } from "../src/lib/TypographyContext.js";
 import { UnreadCountProvider } from "../src/lib/UnreadCountContext.js";
 import { ShareIntentRouter } from "../src/components/ShareIntentRouter.jsx";
+import { ImageViewerProvider } from "../src/components/ImageViewerProvider.jsx";
 
 // Hold the native splash screen until fonts are ready — no flash of fallback
 // text. preventAutoHideAsync can reject during fast-refresh; ignore that.
@@ -58,15 +59,17 @@ export default function RootLayout() {
           <SafeAreaProvider>
             <TypographyProvider>
               <UnreadCountProvider>
-                <StatusBar style="auto" />
-                <HydrationBoot />
-                <ShareIntentRouter />
-                <Stack
-                  screenOptions={{
-                    headerShown: false,
-                    contentStyle: { backgroundColor: "#FFFFFF" },
-                  }}
-                />
+                <ImageViewerProvider>
+                  <StatusBar style="auto" />
+                  <HydrationBoot />
+                  <ShareIntentRouter />
+                  <Stack
+                    screenOptions={{
+                      headerShown: false,
+                      contentStyle: { backgroundColor: "#FFFFFF" },
+                    }}
+                  />
+                </ImageViewerProvider>
               </UnreadCountProvider>
             </TypographyProvider>
           </SafeAreaProvider>

@@ -17,6 +17,7 @@ import { AudioAttachment } from "./AudioAttachment.jsx";
 import { VideoAttachment } from "./VideoAttachment.jsx";
 import { LocationLine } from "./LocationLine.jsx";
 import { HtmlContent } from "../HtmlContent.jsx";
+import { useImageViewer } from "../ImageViewerProvider.jsx";
 
 function attachmentKind(att) {
   const mime = (att?.mediaType || "").toLowerCase();
@@ -86,15 +87,20 @@ function formatEventRange(post) {
 }
 
 // 2-column image grid identical to the feed card, but without the 2-row cap.
+// Tapping an image opens it fullscreen (swipeable across all the post's images).
 function ImageGrid({ images }) {
+  const viewer = useImageViewer();
   if (images.length === 0) return null;
+  const urls = images.map((im) => im.url);
   if (images.length === 1) {
     return (
-      <Image
-        source={{ uri: images[0].url }}
-        className="w-full h-80 mb-3   bg-base-200"
-        resizeMode="cover"
-      />
+      <Pressable onPress={() => viewer?.open(urls, 0)}>
+        <Image
+          source={{ uri: images[0].url }}
+          className="w-full h-80 mb-3 bg-base-200"
+          resizeMode="cover"
+        />
+      </Pressable>
     );
   }
   return (
@@ -102,16 +108,17 @@ function ImageGrid({ images }) {
       {images.map((img, i) => {
         const lastOdd = images.length % 2 === 1 && i === images.length - 1;
         return (
-          <View
+          <Pressable
             key={`${img.url}-${i}`}
+            onPress={() => viewer?.open(urls, i)}
             style={{ width: lastOdd ? "100%" : "49%" }}
           >
             <Image
               source={{ uri: img.url }}
-              className="w-full h-48   bg-base-200"
+              className="w-full h-48 bg-base-200"
               resizeMode="cover"
             />
-          </View>
+          </Pressable>
         );
       })}
     </View>
@@ -136,6 +143,7 @@ function MediaAttachments({ attachments }) {
 }
 
 export function PostBody({ post, typography }) {
+  const viewer = useImageViewer();
   const title = post?.title || post?.name;
   const html = post?.body || "";
   const fonts = typography?.fonts;
@@ -228,11 +236,13 @@ export function PostBody({ post, typography }) {
             />
           </Pressable>
         ) : (
-          <Image
-            source={{ uri: hero }}
-            className="w-full h-72 mb-5   bg-base-200"
-            resizeMode="cover"
-          />
+          <Pressable onPress={() => viewer?.open([hero], 0)}>
+            <Image
+              source={{ uri: hero }}
+              className="w-full h-72 mb-5 bg-base-200"
+              resizeMode="cover"
+            />
+          </Pressable>
         )
       ) : null}
 
