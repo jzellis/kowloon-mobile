@@ -42,13 +42,27 @@ export function PostTypeDropdown({ value, onChange, prefix }) {
         className="flex-row items-center"
       >
         {/* "Add New" and the type share ONE text run, so their baselines can't
-            drift — center-aligning two separate texts was off by a pixel. */}
+            drift — center-aligning two separate texts was off by a pixel. The
+            nested type word carries EXPLICIT font styling: on Android a nested
+            <Text> that overrides only `color` can fail to inherit a custom
+            (non-system) fontFamily from its parent and render blank, so we pin
+            family/size/weight here rather than relying on inheritance. */}
         <Text
           className="font-ui text-2xl font-bold tracking-tight text-base-content mr-1"
           style={{ includeFontPadding: false }}
         >
           {prefix ? `${prefix} ` : ""}
-          <Text style={{ color: typeColor }}>{value}</Text>
+          <Text
+            style={{
+              color: typeColor,
+              fontFamily: "inter-regular",
+              fontSize: 24,
+              fontWeight: "700",
+              includeFontPadding: false,
+            }}
+          >
+            {value}
+          </Text>
         </Text>
         <ChevronDown size={22} color="rgba(26,26,32,0.5)" strokeWidth={2.5} />
       </Pressable>
