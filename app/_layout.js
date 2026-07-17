@@ -52,7 +52,7 @@ export default function RootLayout() {
   }
 
   return (
-    <ShareIntentProvider options={{ debug: true, resetOnBackground: false }}>
+    <ShareIntentProvider options={{ resetOnBackground: false }}>
       <Provider store={store}>
         <GestureHandlerRootView style={{ flex: 1 }}>
           <SafeAreaProvider>
