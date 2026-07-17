@@ -90,6 +90,19 @@ export default function PostDetail() {
     load();
   }, [load]);
 
+  // Refresh just the replies list, WITHOUT toggling the top-level `loading`
+  // state — a full load() collapses the screen to a spinner and resets scroll
+  // to the top. Used after posting a reply so we can land on the new reply.
+  const reloadReplies = useCallback(async () => {
+    if (!client || !id) return;
+    try {
+      const res = await client.feeds.getReplies({ postId: String(id) });
+      setReplies(res?.orderedItems || res?.items || []);
+    } catch {
+      // keep the existing replies on a transient error
+    }
+  }, [client, id]);
+
   const actor = post?.actor || {};
   const type = post?.type || "Note";
   const typeBar = TYPE_BAR[type] || TYPE_BAR.Note;
@@ -229,7 +242,15 @@ export default function PostDetail() {
                 canReply={post.canReply}
                 autoFocus={shouldFocusReply && !loading && !!post}
                 onSubmitted={({ duplicated }) => {
-                  if (!duplicated) load();
+                  if (duplicated) return;
+                  // Quietly refresh replies (no full-screen spinner), then
+                  // scroll to the new reply at the bottom of the thread.
+                  reloadReplies().then(() => {
+                    setTimeout(
+                      () => scrollRef.current?.scrollToEnd({ animated: true }),
+                      120
+                    );
+                  });
                 }}
               />
             </View>
