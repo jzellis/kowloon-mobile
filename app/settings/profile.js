@@ -25,6 +25,7 @@ import { Avatar } from "../../src/components/posts/Avatar.jsx";
 import { Eyebrow, Heading } from "../../src/components/ui/Heading.jsx";
 import { AppHeader } from "../../src/components/nav/AppHeader.jsx";
 import { Button } from "../../src/components/ui/Button.jsx";
+import { LocationField } from "../../src/components/posts/LocationField.jsx";
 import { useActiveClient } from "../../src/lib/useActiveClient.js";
 import {
   selectActiveAccount,
@@ -60,6 +61,16 @@ export default function ProfileSettings() {
   const [pronouns, setPronouns] = useState(profile.pronouns || "");
   const [urls, setUrls] = useState(profile.urls || []);
   const [urlInput, setUrlInput] = useState("");
+
+  // Location — the schema stores a GeoPoint ({ name, type:"Point",
+  // coordinates:[lon,lat] }); LocationField works in { name, lat, lon }.
+  const [location, setLocation] = useState(() => {
+    const loc = profile.location;
+    if (Array.isArray(loc?.coordinates) && loc.coordinates.length === 2) {
+      return { name: loc.name || "", lon: loc.coordinates[0], lat: loc.coordinates[1] };
+    }
+    return null;
+  });
 
   // avatarPick / featuredPick — local uri to display + upload on save; null = no change
   const [avatarPick, setAvatarPick] = useState(null);
@@ -150,14 +161,34 @@ export default function ProfileSettings() {
         featuredUrl = upload?.file?.url || featuredUrl;
       }
 
+      // Flush a URL that was typed but not yet "+"-added — otherwise a link the
+      // user clearly intended to save is silently dropped.
+      let finalUrls = urls;
+      const pendingUrl = urlInput.trim();
+      if (pendingUrl && !finalUrls.includes(pendingUrl) && finalUrls.length < 3) {
+        finalUrls = [...finalUrls, pendingUrl];
+      }
+
+      // Location — send the GeoPoint shape the schema expects (Update, unlike
+      // Create, doesn't normalize), or null to clear.
+      const locationPayload =
+        location && Number.isFinite(location.lat) && Number.isFinite(location.lon)
+          ? {
+              name: location.name || "",
+              type: "Point",
+              coordinates: [location.lon, location.lat],
+            }
+          : null;
+
       await client.activities.updateProfile({
         profile: {
           name: displayName.trim(),
           description: bio.trim(),
           pronouns: pronouns.trim(),
-          urls,
+          urls: finalUrls,
           icon: iconUrl,
           featuredImage: featuredUrl,
+          location: locationPayload,
         },
       });
 
@@ -168,9 +199,10 @@ export default function ProfileSettings() {
             name: displayName.trim(),
             description: bio.trim(),
             pronouns: pronouns.trim(),
-            urls,
+            urls: finalUrls,
             icon: iconUrl,
             featuredImage: featuredUrl,
+            location: locationPayload,
           },
         })
       );
@@ -291,6 +323,11 @@ export default function ProfileSettings() {
                 placeholderTextColor="rgba(26,26,32,0.35)"
                 autoCorrect={false}
               />
+            </Field>
+
+            {/* Location */}
+            <Field label="Location">
+              <LocationField value={location} onChange={setLocation} />
             </Field>
 
             {/* URLs */}
