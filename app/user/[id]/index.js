@@ -31,6 +31,7 @@ import {
 } from "../../../src/components/bookmarks/BookmarkActionSheet.jsx";
 import { Button } from "../../../src/components/ui/Button.jsx";
 import { CircleCard } from "../../../src/components/circles/CircleCard.jsx";
+import { ProfileActions } from "../../../src/components/profile/ProfileActions.jsx";
 import { HtmlContent } from "../../../src/components/HtmlContent.jsx";
 import { PostCard } from "../../../src/components/posts/PostCard.jsx";
 import { useActiveClient } from "../../../src/lib/useActiveClient.js";
@@ -218,6 +219,16 @@ export default function UserProfile() {
             </View>
           ) : null}
         </View>
+
+        {/* Relationship actions — only on someone else's profile. */}
+        {!isSelf ? (
+          <ProfileActions
+            client={client}
+            account={account}
+            targetId={userId}
+            name={name}
+          />
+        ) : null}
 
         {/* Tabs */}
         <View className="flex-row  ">
