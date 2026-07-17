@@ -7,6 +7,7 @@
 // Returns the active feed view key:
 //   "all"          — getServerPosts()  (merged public + server firehose)
 //   "circle:<id>"  — getCirclePosts({ circleId })
+//   "group:<id>"   — getGroupPosts({ groupId })   (joined groups)
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -49,7 +50,7 @@ export function FeedViewSelector({ value, onChange, subject }) {
   const [dropPos, setDropPos] = useState({ top: 0, left: 0 });
   const [circles, setCircles] = useState([]);
   const [search, setSearch] = useState("");
-  const { groups } = useJoinedGroups();
+  const { groups, refresh: refreshGroups } = useJoinedGroups();
   const baseUrl = client?.http?.baseUrl;
   const [serverIcon, setServerIcon] = useState(null);
 
@@ -130,7 +131,8 @@ export function FeedViewSelector({ value, onChange, subject }) {
     "Community Posts";
 
   function openDropdown() {
-    // Refetch circles on every open so newly added circles appear immediately
+    // Refetch circles AND groups on every open so newly added circles / joined
+    // groups appear immediately (and a mount-time load that raced auth is retried).
     if (client && account?.id) {
       client.feeds
         .getUserCircles({ userId: account.id })
@@ -140,6 +142,7 @@ export function FeedViewSelector({ value, onChange, subject }) {
         })
         .catch(() => {});
     }
+    refreshGroups?.();
     triggerRef.current?.measureInWindow((x, y, _w, h) => {
       setDropPos({ top: y + h, left: x });
       setOpen(true);
