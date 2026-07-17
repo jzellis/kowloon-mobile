@@ -7,16 +7,20 @@ import { Globe, Server, Users, Lock } from "lucide-react-native";
 
 function describe(to) {
   if (!to || to === "@public") return { Icon: Globe, label: "Public" };
-  if (typeof to === "string" && to.startsWith("@")) {
-    return { Icon: Server, label: "Server" };
-  }
   if (typeof to === "string" && to.startsWith("circle:")) {
     return { Icon: Users, label: "Circle" };
   }
   if (typeof to === "string" && to.startsWith("group:")) {
     return { Icon: Users, label: "Group" };
   }
-  return { Icon: Lock, label: "Private" };
+  if (typeof to === "string" && to.startsWith("@")) {
+    // "@user@domain" (two segments) is self-only; "@domain" (one) is server.
+    const isUserHandle = to.slice(1).includes("@");
+    return isUserHandle
+      ? { Icon: Lock, label: "Only Me" }
+      : { Icon: Server, label: "Server" };
+  }
+  return { Icon: Lock, label: "Only Me" };
 }
 
 export function VisibilityChip({ to, compact = false }) {

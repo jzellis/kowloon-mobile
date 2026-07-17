@@ -395,7 +395,11 @@ export function BookmarkComposer({
             {/* Audience */}
             <View className="mb-4">
               <FieldLabel>Visibility</FieldLabel>
-              <AudienceSelector value={audience} onChange={setAudience} />
+              <AudienceSelector
+                value={audience}
+                onChange={setAudience}
+                allowPrivate
+              />
             </View>
 
             {error ? (

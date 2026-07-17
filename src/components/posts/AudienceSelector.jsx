@@ -13,7 +13,9 @@ import { useSelector } from "react-redux";
 import { useActiveClient } from "../../lib/useActiveClient.js";
 import { selectActiveAccount } from "../../state/accountsSlice.js";
 
-export function AudienceSelector({ value, onChange }) {
+// `allowPrivate` opts in to a self-only ("Only Me") tier, addressed to the
+// user's own ID. Off by default — bookmarks enable it; the post composer does not.
+export function AudienceSelector({ value, onChange, allowPrivate = false }) {
   const account = useSelector(selectActiveAccount);
   const client = useActiveClient();
   const [open, setOpen] = useState(false);
@@ -33,8 +35,17 @@ export function AudienceSelector({ value, onChange }) {
         label: "Community",
         summary: `Members of ${account?.serverName || account?.server || "this server"}.`,
       },
+      ...(allowPrivate && account?.id
+        ? [
+            {
+              value: account.id,
+              label: "Only Me",
+              summary: "Only you can see this.",
+            },
+          ]
+        : []),
     ],
-    [serverTo, account?.serverName, account?.server]
+    [serverTo, account?.serverName, account?.server, allowPrivate, account?.id]
   );
 
   // Load the user's circles once we have a client.
