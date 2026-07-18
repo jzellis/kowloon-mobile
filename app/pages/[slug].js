@@ -5,9 +5,18 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ActivityIndicator, Image, ScrollView, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  Modal,
+  Pressable,
+  ScrollView,
+  Share,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { BookOpen, Tag } from "lucide-react-native";
+import { Link2, Share2, Tag, X } from "lucide-react-native";
 
 import { Avatar } from "../../src/components/posts/Avatar.jsx";
 import { AppHeader } from "../../src/components/nav/AppHeader.jsx";
@@ -41,6 +50,7 @@ export default function PageDetail() {
   const [page, setPage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [shareOpen, setShareOpen] = useState(false);
 
   const load = useCallback(async () => {
     if (!client || !slug) return;
@@ -68,6 +78,36 @@ export default function PageDetail() {
     ? page.updatedAt
     : null;
 
+  // Public URL for this page — used by both share paths.
+  const baseUrl = client?.http?.baseUrl;
+  const pageUrl =
+    page?.url ||
+    (baseUrl
+      ? `${baseUrl.replace(/\/$/, "")}/pages/${encodeURIComponent(
+          page?.slug || String(slug)
+        )}`
+      : null);
+
+  function shareAsLink() {
+    setShareOpen(false);
+    if (!pageUrl) return;
+    router.push(`/compose?type=Link&href=${encodeURIComponent(pageUrl)}`);
+  }
+
+  async function shareToApps() {
+    setShareOpen(false);
+    if (!pageUrl) return;
+    try {
+      await Share.share({
+        message: pageUrl,
+        url: pageUrl,
+        title: page?.title || page?.name,
+      });
+    } catch {
+      // user dismissed or share unavailable — no-op
+    }
+  }
+
   const typography = {
     fonts: {
       regular: resolved.regularFamily,
@@ -80,7 +120,23 @@ export default function PageDetail() {
 
   return (
     <SafeAreaView className="flex-1 bg-base-100" edges={["left", "right"]}>
-      <AppHeader back title={page?.title || page?.name} />
+      <AppHeader
+        back
+        title={page?.title || page?.name}
+        right={
+          page ? (
+            <Pressable
+              onPress={() => setShareOpen(true)}
+              hitSlop={8}
+              android_ripple={{ color: "rgba(255,255,255,0.18)", borderless: true }}
+              className="w-9 h-9 items-center justify-center"
+              accessibilityLabel="Share page"
+            >
+              <Share2 size={18} color="#FFFFFF" strokeWidth={1.9} />
+            </Pressable>
+          ) : null
+        }
+      />
       <ScrollView contentContainerStyle={{ paddingBottom: 48 }}>
         {loading ? (
           <View className="py-20 items-center">
@@ -116,48 +172,32 @@ export default function PageDetail() {
                 </Text>
               ) : null}
 
-              {/* Author + updated/created + word count */}
-              <View className="flex-row items-center mb-3   pb-4">
-                {author ? (
-                  <>
-                    <Avatar
-                      actor={author}
-                      size={36}
-                      baseUrl={client?.http?.baseUrl}
-                    />
-                    <View className="ml-3 flex-1">
-                      <Text
-                        className="font-ui text-sm font-bold text-base-content"
-                        numberOfLines={1}
-                      >
-                        {author.name || author.id}
-                      </Text>
-                      <Text
-                        className="font-ui text-[11px] uppercase tracking-[0.14em] text-base-content/55"
-                        numberOfLines={1}
-                      >
-                        {updatedAt
-                          ? `Updated · ${timeAgo(updatedAt)}`
-                          : timeAgo(page.createdAt || page.publishedAt)}
-                      </Text>
-                    </View>
-                  </>
-                ) : (
-                  <View className="flex-1" />
-                )}
-                {page.wordCount > 0 ? (
-                  <View className="flex-row items-center">
-                    <BookOpen
-                      size={12}
-                      color="rgba(26,26,32,0.45)"
-                      strokeWidth={1.75}
-                    />
-                    <Text className="font-ui text-[11px] uppercase tracking-[0.14em] text-base-content/45 ml-1.5">
-                      {page.wordCount} words
+              {/* Author + updated/created */}
+              {author ? (
+                <View className="flex-row items-center mb-3   pb-4">
+                  <Avatar
+                    actor={author}
+                    size={36}
+                    baseUrl={client?.http?.baseUrl}
+                  />
+                  <View className="ml-3 flex-1">
+                    <Text
+                      className="font-ui text-sm font-bold text-base-content"
+                      numberOfLines={1}
+                    >
+                      {author.name || author.id}
+                    </Text>
+                    <Text
+                      className="font-ui text-[11px] uppercase tracking-[0.14em] text-base-content/55"
+                      numberOfLines={1}
+                    >
+                      {updatedAt
+                        ? `Updated · ${timeAgo(updatedAt)}`
+                        : timeAgo(page.createdAt || page.publishedAt)}
                     </Text>
                   </View>
-                ) : null}
-              </View>
+                </View>
+              ) : null}
 
               {page.tags?.length > 0 ? (
                 <View className="flex-row items-center flex-wrap mb-3">
@@ -199,6 +239,53 @@ export default function PageDetail() {
           </>
         ) : null}
       </ScrollView>
+
+      {/* Share sheet — as a Kowloon Link post, or via the OS share sheet. */}
+      <Modal
+        visible={shareOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShareOpen(false)}
+        statusBarTranslucent
+      >
+        <Pressable
+          className="flex-1 bg-black/50 justify-end"
+          onPress={() => setShareOpen(false)}
+        >
+          <Pressable onPress={() => {}}>
+            <SafeAreaView edges={["bottom"]} className="bg-base-100">
+              <View className="flex-row items-center justify-between px-5 pt-4 pb-2">
+                <Text className="font-ui uppercase tracking-[0.18em] text-[11px] text-base-content/50">
+                  Share Page
+                </Text>
+                <Pressable onPress={() => setShareOpen(false)} hitSlop={8}>
+                  <X size={18} color="rgba(26,26,32,0.6)" strokeWidth={2} />
+                </Pressable>
+              </View>
+              <Pressable
+                onPress={shareAsLink}
+                android_ripple={{ color: "rgba(0,0,0,0.06)" }}
+                className="flex-row items-center px-5 py-4"
+              >
+                <Link2 size={18} color="rgba(26,26,32,0.85)" strokeWidth={1.75} />
+                <Text className="font-ui text-base text-base-content ml-3">
+                  Share as a Post
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={shareToApps}
+                android_ripple={{ color: "rgba(0,0,0,0.06)" }}
+                className="flex-row items-center px-5 py-4"
+              >
+                <Share2 size={18} color="rgba(26,26,32,0.85)" strokeWidth={1.75} />
+                <Text className="font-ui text-base text-base-content ml-3">
+                  Share to Other Apps
+                </Text>
+              </Pressable>
+            </SafeAreaView>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
