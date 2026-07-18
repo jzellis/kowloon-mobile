@@ -23,15 +23,17 @@ function isLocalToServer(userId, serverDomain) {
 // `kind`, `subject`, `isOwner`, `isMember` come from useFeedSubject, resolved
 // once by the parent (FeedHeader) so the selector label and this action share
 // a single fetch.
-export function FeedViewAction({ kind, subject, isOwner, isMember }) {
+export function FeedViewAction({ kind, subject, isOwner, isMember, membershipLoading }) {
   if (!kind || !subject || isOwner) return null;
 
   if (kind === "circle") {
     return <CopyCircleMenu circle={subject} compact />;
   }
 
-  // group
-  if (isMember || !canJoinGroup(subject.rsvpPolicy)) return null;
+  // group — don't offer "Join" until membership is known (avoids showing it on
+  // a group you're already in while the joined-groups list is still loading),
+  // and never for a member or an invite-only group.
+  if (membershipLoading || isMember || !canJoinGroup(subject.rsvpPolicy)) return null;
   return <JoinGroupButton group={subject} />;
 }
 

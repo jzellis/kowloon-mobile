@@ -26,7 +26,7 @@ function kindOf(viewKey) {
 export function useFeedSubject(viewKey) {
   const client = useActiveClient();
   const account = useSelector(selectActiveAccount);
-  const { groups: joinedGroups } = useJoinedGroups();
+  const { groups: joinedGroups, loading: groupsLoading } = useJoinedGroups();
 
   const kind = kindOf(viewKey);
   const [subject, setSubject] = useState(null);
@@ -67,5 +67,10 @@ export function useFeedSubject(viewKey) {
       ? !!account?.id && joinedGroups.some((g) => g.id === viewKey)
       : subject?.isMember === true;
 
-  return { kind, subject, isOwner, isMember, loading };
+  // For groups, membership isn't known until the joined-groups list loads —
+  // callers should hold off on a "Join" prompt until then so it doesn't flash
+  // on a group you're already in.
+  const membershipLoading = kind === "group" ? groupsLoading : loading;
+
+  return { kind, subject, isOwner, isMember, loading, membershipLoading };
 }

@@ -10,11 +10,17 @@
 // Group records — enough for a list display and tap-into-detail.
 
 import { useCallback, useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 
 import { useActiveClient } from "./useActiveClient.js";
+import { selectActiveAccount } from "../state/accountsSlice.js";
 
 export function useJoinedGroups() {
   const client = useActiveClient();
+  // Depend on the active account so this reloads once the session is ready.
+  // Without it, an early mount (before auth restores) resolves to [] and never
+  // retries, leaving "joined?" checks permanently false.
+  const account = useSelector(selectActiveAccount);
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -56,7 +62,7 @@ export function useJoinedGroups() {
         setLoading(false);
       }
     },
-    [client]
+    [client, account?.id]
   );
 
   useEffect(() => {
