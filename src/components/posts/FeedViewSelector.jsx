@@ -223,12 +223,19 @@ export function FeedViewSelector({ value, onChange, subject }) {
               top: dropPos.top,
               left: dropPos.left,
               width: DROPDOWN_WIDTH,
+              // Subtle border + light shadow so the dropdown reads as a floating
+              // panel over content (the borderless white was blending in).
+              elevation: 8,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.12,
+              shadowRadius: 12,
             }}
-            className="bg-base-100  "
+            className="bg-base-100 border border-base-300"
           >
             {/* Unified search — filters circles + groups together */}
             {showSearch ? (
-              <View className="  px-3 py-2">
+              <View className="px-3 py-2 border-b border-base-200">
                 <TextInput
                   value={search}
                   onChangeText={setSearch}
@@ -236,8 +243,8 @@ export function FeedViewSelector({ value, onChange, subject }) {
                   placeholderTextColor="rgba(26,26,32,0.3)"
                   autoCorrect={false}
                   autoCapitalize="none"
-                  className="font-ui text-xs text-base-content"
-                  style={{ paddingVertical: 2 }}
+                  className="font-ui text-sm text-base-content"
+                  style={{ paddingVertical: 3 }}
                 />
               </View>
             ) : null}
