@@ -16,11 +16,11 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Avatar } from "../src/components/posts/Avatar.jsx";
-import { AppHeader } from "../src/components/nav/AppHeader.jsx";
-import { RecShelf } from "../src/components/discover/RecShelf.jsx";
-import { useActiveClient } from "../src/lib/useActiveClient.js";
-import { rootStorage } from "../src/lib/storage.js";
+import { Avatar } from "../../src/components/posts/Avatar.jsx";
+import { AppHeader } from "../../src/components/nav/AppHeader.jsx";
+import { RecShelf } from "../../src/components/discover/RecShelf.jsx";
+import { useActiveClient } from "../../src/lib/useActiveClient.js";
+import { rootStorage } from "../../src/lib/storage.js";
 
 const BANNER_KEY = "kowloon_discover_welcomed";
 
@@ -113,7 +113,7 @@ export default function Discover() {
 
   return (
     <SafeAreaView className="flex-1 bg-base-100" edges={["left", "right"]}>
-      <AppHeader back title="Discover" />
+      <AppHeader title="Discover" />
       <ScrollView
         contentContainerStyle={{ paddingBottom: 48 }}
         keyboardShouldPersistTaps="handled"

@@ -19,8 +19,11 @@ export default function TabsLayout() {
       <Tabs.Screen name="feed" />
       <Tabs.Screen name="circles" />
       <Tabs.Screen name="groups" />
-      <Tabs.Screen name="search" />
+      <Tabs.Screen name="discover" />
       <Tabs.Screen name="notifications" />
+      {/* Search is reachable from the feed masthead (top toolbar), not the bar —
+          it stays a mounted tab route but is hidden from BottomTabBar (no META). */}
+      <Tabs.Screen name="search" />
     </Tabs>
   );
 }

@@ -23,7 +23,7 @@ import { Avatar } from "../../src/components/posts/Avatar.jsx";
 import { FeedHeader } from "../../src/components/posts/FeedHeader.jsx";
 import { UserMenu } from "../../src/components/UserMenu.jsx";
 import { LeftDrawer } from "../../src/components/drawer/LeftDrawer.jsx";
-import { Globe } from "lucide-react-native";
+import { Globe, Search } from "lucide-react-native";
 import { useFeed } from "../../src/lib/useFeed.js";
 import { consumeFeedRefresh } from "../../src/lib/feedRefreshSignal.js";
 import { useActiveClient } from "../../src/lib/useActiveClient.js";
@@ -273,6 +273,15 @@ export default function Feed() {
             >
               {account.serverName || account.server}
             </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => router.push("/search")}
+            hitSlop={8}
+            android_ripple={{ color: "rgba(255,255,255,0.15)", borderless: true }}
+            className="w-9 h-9 items-center justify-center mr-1"
+            accessibilityLabel="Search"
+          >
+            <Search size={20} color="#FFFFFF" strokeWidth={1.9} />
           </Pressable>
           <Pressable
             onPress={() => setMenuOpen(true)}

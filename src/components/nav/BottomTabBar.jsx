@@ -3,22 +3,23 @@
 // switching tabs preserves each screen's mounted state (scroll + data) instead
 // of remounting it.
 //
-// Five destinations: Feed · Circles · Groups · Search · Notify. Notify carries
-// the unread-count badge. The user's own profile is intentionally NOT a tab —
-// it's reached from the account avatar in the header.
+// Five destinations: Feed · Circles · Groups · Discover · Notify. Notify carries
+// the unread-count badge. Search moved to the feed masthead (top toolbar); the
+// user's own profile is reached from the account avatar in the header.
 
 import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Home, Hexagon, Users, Search, Bell } from "lucide-react-native";
+import { Home, Hexagon, Users, Compass, Bell } from "lucide-react-native";
 
 import { useUnreadCount } from "../../lib/UnreadCountContext.js";
 
-// Route name (file name under app/(tabs)) -> label + icon.
+// Route name (file name under app/(tabs)) -> label + icon. Routes without an
+// entry here (e.g. "search") stay mounted but are hidden from the bar.
 const META = {
   feed: { label: "Feed", Icon: Home },
   circles: { label: "Circles", Icon: Hexagon },
   groups: { label: "Groups", Icon: Users },
-  search: { label: "Search", Icon: Search },
+  discover: { label: "Discover", Icon: Compass },
   notifications: { label: "Notify", Icon: Bell },
 };
 
