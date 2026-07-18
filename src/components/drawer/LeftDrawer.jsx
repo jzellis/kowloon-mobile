@@ -481,8 +481,8 @@ export function LeftDrawer({ visible, onClose }) {
           <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
             <ServerInfoSection client={client} />
             <SearchBar onNavigate={navigate} />
-            <DiscoverSection client={client} onNavigate={navigate} />
             <PagesMenuSection client={client} onNavigate={navigate} />
+            <DiscoverSection client={client} onNavigate={navigate} />
           </ScrollView>
         </SafeAreaView>
 
