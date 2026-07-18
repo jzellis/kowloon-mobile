@@ -162,7 +162,9 @@ export function FeedViewSelector({ value, onChange, subject }) {
   // One search box filters BOTH circles and groups. Only worth showing once the
   // combined list is long enough to bother scanning.
   const q = search.trim().toLowerCase();
-  const showSearch = circles.length + groups.length > 5;
+  // Show the search box whenever there's anything to search (was >5, which hid
+  // it for anyone with a handful of circles/groups).
+  const showSearch = circles.length + groups.length > 0;
   const filteredCircles = q
     ? circles.filter((c) => c.name?.toLowerCase().includes(q))
     : circles;
