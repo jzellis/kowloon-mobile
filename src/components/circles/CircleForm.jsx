@@ -217,17 +217,21 @@ export function CircleForm({
                   key={opt.label}
                   onPress={() => setTo(opt.value)}
                   android_ripple={{ color: "rgba(0,0,0,0.06)" }}
-                  className="flex-1 px-2 py-2.5"
-                  // Inline background so deselecting actually repaints (a bare
-                  // className with no bg leaves the old blue stuck on Android).
-                  style={{ backgroundColor: selected ? "#5588B1" : "#F4F4F4" }}
+                  className="flex-1"
                 >
-                  <Text
-                    className="font-ui uppercase tracking-[0.12em] text-[11px] text-center"
-                    style={{ color: selected ? "#F4F5F7" : "rgba(26,26,32,0.7)" }}
+                  {/* Background on an inner View: a bg on the ripple-owning
+                      Pressable node doesn't repaint on selection change. */}
+                  <View
+                    className="px-2 py-2.5"
+                    style={{ backgroundColor: selected ? "#5588B1" : "#F4F4F4" }}
                   >
-                    {opt.label}
-                  </Text>
+                    <Text
+                      className="font-ui uppercase tracking-[0.12em] text-[11px] text-center"
+                      style={{ color: selected ? "#F4F5F7" : "rgba(26,26,32,0.7)" }}
+                    >
+                      {opt.label}
+                    </Text>
+                  </View>
                 </Pressable>
               );
             })}

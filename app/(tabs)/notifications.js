@@ -139,17 +139,20 @@ export default function Notifications() {
               <Pressable
                 onPress={() => setFilter(item.key)}
                 android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-                className="px-3 py-1.5"
-                // Inline bg so the deselected filter repaints (bare className
-                // leaves the old highlight stuck on Android).
-                style={{ backgroundColor: active ? "#5588B1" : "#F4F4F4" }}
               >
-                <Text
-                  className="font-ui uppercase tracking-[0.14em] text-[11px]"
-                  style={{ color: active ? "#F4F5F7" : "rgba(26,26,32,0.7)" }}
+                {/* Background on an inner View so the deselected filter
+                    repaints — a bg on the ripple-owning Pressable sticks. */}
+                <View
+                  className="px-3 py-1.5"
+                  style={{ backgroundColor: active ? "#5588B1" : "#F4F4F4" }}
                 >
-                  {item.label}
-                </Text>
+                  <Text
+                    className="font-ui uppercase tracking-[0.14em] text-[11px]"
+                    style={{ color: active ? "#F4F5F7" : "rgba(26,26,32,0.7)" }}
+                  >
+                    {item.label}
+                  </Text>
+                </View>
               </Pressable>
             );
           }}

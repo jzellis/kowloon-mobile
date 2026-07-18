@@ -105,22 +105,29 @@ export default function TypographySettings() {
                 <Pressable
                   key={font.key}
                   onPress={() => setTypography({ fontFamily: font.key })}
-                  className="mr-3 px-4 py-4 w-40"
-                  // Inline background so switching typeface repaints reliably.
-                  style={{
-                    backgroundColor: active ? "rgba(85,136,177,0.12)" : "#FFFFFF",
-                  }}
+                  className="mr-3 w-40"
                   android_ripple={{ color: "rgba(0,0,0,0.06)" }}
                 >
-                  <Text
-                    style={{ fontFamily: fontName(font.key, "regular") }}
-                    className="text-xl text-base-content"
+                  {/* Background on an inner View so it repaints when selection
+                      changes — a bg on the ripple-owning Pressable node sticks. */}
+                  <View
+                    className="px-4 py-4"
+                    style={{
+                      backgroundColor: active
+                        ? "rgba(85,136,177,0.12)"
+                        : "#FFFFFF",
+                    }}
                   >
-                    {font.label}
-                  </Text>
-                  <Text className="font-ui text-[10px] uppercase tracking-[0.16em] text-base-content/50 mt-2">
-                    {font.classification}
-                  </Text>
+                    <Text
+                      style={{ fontFamily: fontName(font.key, "regular") }}
+                      className="text-xl text-base-content"
+                    >
+                      {font.label}
+                    </Text>
+                    <Text className="font-ui text-[10px] uppercase tracking-[0.16em] text-base-content/50 mt-2">
+                      {font.classification}
+                    </Text>
+                  </View>
                 </Pressable>
               );
             })}
