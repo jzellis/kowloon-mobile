@@ -455,7 +455,6 @@ export function LeftDrawer({ visible, onClose }) {
       transparent
       animationType="fade"
       onRequestClose={onClose}
-      statusBarTranslucent
     >
       <View className="flex-1 flex-row">
         {/* Panel */}

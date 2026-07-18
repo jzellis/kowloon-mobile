@@ -78,6 +78,7 @@ export default function CircleDetail() {
 
   const ownerId = circle?.actorId || circle?.actor?.id;
   const isOwner = !!account?.id && ownerId === account.id;
+  const owner = circle?.actor || (ownerId ? { id: ownerId } : null);
   const members = Array.isArray(circle?.members)
     ? circle.members.map(memberView)
     : [];
@@ -303,6 +304,39 @@ export default function CircleDetail() {
                 ) : null}
               </View>
             </View>
+
+            {/* Owner */}
+            {owner ? (
+              <View className="px-5 pt-2 pb-4">
+                <Text className="font-ui uppercase tracking-[0.18em] text-[11px] text-base-content/50 mb-2">
+                  Owner
+                </Text>
+                <Pressable
+                  onPress={() =>
+                    owner.id &&
+                    router.push(`/user/${encodeURIComponent(owner.id)}`)
+                  }
+                  android_ripple={{ color: "rgba(0,0,0,0.05)" }}
+                  className="flex-row items-center"
+                >
+                  <Avatar actor={owner} size={40} baseUrl={account?.baseUrl} />
+                  <View className="flex-1 ml-3 min-w-0">
+                    <Text
+                      className="font-ui text-base text-base-content"
+                      numberOfLines={1}
+                    >
+                      {owner.name || owner.id}
+                    </Text>
+                    <Text
+                      className="font-ui text-xs text-base-content/55"
+                      numberOfLines={1}
+                    >
+                      {owner.id}
+                    </Text>
+                  </View>
+                </Pressable>
+              </View>
+            ) : null}
 
             {/* Quick-add bar — owner only */}
             {isOwner ? (

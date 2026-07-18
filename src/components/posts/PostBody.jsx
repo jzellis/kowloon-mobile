@@ -12,7 +12,9 @@
 // `fontSize`/`lineHeight` so the detail screen can apply the user's prefs.
 
 import { Linking, Pressable, Text, View } from "react-native";
+import { router } from "expo-router";
 
+import { kowloonPostIdFromUrl } from "../../lib/parseKowloonUrl.js";
 import { SmartImage as Image } from "../ui/SmartImage.jsx";
 import { AudioAttachment } from "./AudioAttachment.jsx";
 import { VideoAttachment } from "./VideoAttachment.jsx";
@@ -161,6 +163,12 @@ export function PostBody({ post, typography }) {
   async function openHref() {
     const href = post?.href;
     if (!href) return;
+    // A Link post that points at a Kowloon post opens in-app, not the browser.
+    const postId = kowloonPostIdFromUrl(href);
+    if (postId) {
+      router.push(`/post/${encodeURIComponent(postId)}`);
+      return;
+    }
     try {
       await Linking.openURL(href);
     } catch {

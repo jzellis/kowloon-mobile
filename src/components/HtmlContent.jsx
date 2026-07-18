@@ -9,10 +9,26 @@
 // typography fonts; the feed card uses the Inter defaults.
 
 import { useMemo } from "react";
-import { useWindowDimensions } from "react-native";
+import { Linking, useWindowDimensions } from "react-native";
+import { router } from "expo-router";
 import RenderHtml from "react-native-render-html";
 
 import { fontName } from "../lib/typography.js";
+import { kowloonPostIdFromUrl } from "../lib/parseKowloonUrl.js";
+
+// Links to Kowloon posts open in-app (the post detail); everything else goes to
+// the browser. Uses the imported router singleton so it works even from surfaces
+// outside the active screen's router context.
+function handleLinkPress(_event, href) {
+  const postId = kowloonPostIdFromUrl(href);
+  if (postId) {
+    router.push(`/post/${encodeURIComponent(postId)}`);
+    return;
+  }
+  if (href) Linking.openURL(href).catch(() => {});
+}
+
+const RENDERERS_PROPS = { a: { onPress: handleLinkPress } };
 
 const INK = "#1A1A20";
 const MUTED = "rgba(26,26,32,0.62)";
@@ -130,6 +146,7 @@ export function HtmlContent({
       tagsStyles={tagsStyles}
       systemFonts={systemFonts}
       defaultTextProps={{ selectable }}
+      renderersProps={RENDERERS_PROPS}
       enableExperimentalMarginCollapsing
     />
   );
