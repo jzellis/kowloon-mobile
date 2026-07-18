@@ -208,7 +208,10 @@ export default function Compose() {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ["images", "videos"],
         allowsMultipleSelection: true,
-        quality: 0.8,
+        // quality MUST be 1.0 (and allowsEditing false, the default) or Android
+        // re-encodes the pick to a single JPEG frame — flattening animated GIFs.
+        // The server resizes non-GIF images anyway, so full quality is fine here.
+        quality: 1,
       });
       if (result.canceled || !result.assets?.length) return;
       const next = result.assets.map((a) => {

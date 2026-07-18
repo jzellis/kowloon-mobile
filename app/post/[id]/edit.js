@@ -194,7 +194,9 @@ export default function EditPost() {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ["images", "videos"],
         allowsMultipleSelection: true,
-        quality: 0.8,
+        // quality 1.0 + allowsEditing false keeps animated GIFs animated on
+        // Android (otherwise the pick is flattened to a single JPEG frame).
+        quality: 1,
       });
       if (result.canceled || !result.assets?.length) return;
       const next = result.assets.map((a) => {
