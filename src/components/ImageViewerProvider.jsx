@@ -1,22 +1,32 @@
 // ImageViewerProvider — tap any post image to view it fullscreen.
 //
-// A tiny, dependency-free lightbox: openViewer(urls, startIndex) shows the
-// image(s) full-screen on black, swipe left/right between multiple, tap the
-// image or the X to close. (Pinch-to-zoom-into-detail can be layered on later
-// with gesture-handler if we want it.)
+// Pinch-to-zoom, pan, and double-tap-to-zoom via react-native-awesome-gallery
+// (rides the app's gesture-handler + reanimated). Swipe between multiple images;
+// swipe down to close. Long-press (or the top-right menu) opens an action sheet
+// to Save the image, Share it as a new Media post, or hand it to the OS share
+// sheet. Render items use expo-image so animated GIFs animate here too.
 
-import { createContext, useCallback, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useRef, useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   Dimensions,
-  FlatList,
   Modal,
   Pressable,
+  Text,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { X } from "lucide-react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import Gallery from "react-native-awesome-gallery";
+import { Image as ExpoImage } from "expo-image";
+import { router } from "expo-router";
+import { MoreVertical, X } from "lucide-react-native";
+import * as FileSystem from "expo-file-system/legacy";
+import * as MediaLibrary from "expo-media-library";
+import * as Sharing from "expo-sharing";
 
-import { SmartImage as Image } from "./ui/SmartImage.jsx";
+import { setPendingShare } from "../lib/pendingShare.js";
 
 const ImageViewerContext = createContext(null);
 
@@ -24,20 +34,115 @@ export function useImageViewer() {
   return useContext(ImageViewerContext);
 }
 
+function extFor(mime = "") {
+  const m = mime.toLowerCase();
+  if (m.includes("gif")) return "gif";
+  if (m.includes("png")) return "png";
+  if (m.includes("webp")) return "webp";
+  return "jpg";
+}
+
 export function ImageViewerProvider({ children }) {
   const [state, setState] = useState(null); // { images: [uri], index } | null
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  // Tracks the currently-visible image so Save/Share act on the right one.
+  const indexRef = useRef(0);
 
   const open = useCallback((images, index = 0) => {
     const list = (Array.isArray(images) ? images : [images]).filter(Boolean);
-    if (list.length) setState({ images: list, index: Math.max(0, index) });
+    if (list.length) {
+      indexRef.current = Math.max(0, index);
+      setState({ images: list, index: Math.max(0, index) });
+    }
   }, []);
 
-  const close = useCallback(() => setState(null), []);
+  const close = useCallback(() => {
+    setState(null);
+    setMenuOpen(false);
+  }, []);
+
+  const currentUrl = () => state?.images?.[indexRef.current] || null;
+
+  // Download the current image to the cache with a correct extension (from the
+  // response content-type), returning { uri, name, mime }.
+  async function downloadCurrent() {
+    const url = currentUrl();
+    if (!url) throw new Error("No image selected");
+    const stamp = Date.now();
+    const tmp = `${FileSystem.cacheDirectory}kowloon-${stamp}`;
+    const res = await FileSystem.downloadAsync(url, tmp);
+    const mime =
+      res.headers?.["content-type"] ||
+      res.headers?.["Content-Type"] ||
+      "image/jpeg";
+    const name = `kowloon-${stamp}.${extFor(mime)}`;
+    const finalUri = `${FileSystem.cacheDirectory}${name}`;
+    try {
+      await FileSystem.moveAsync({ from: res.uri, to: finalUri });
+      return { uri: finalUri, name, mime };
+    } catch {
+      return { uri: res.uri, name, mime };
+    }
+  }
+
+  async function handleSave() {
+    setMenuOpen(false);
+    setBusy(true);
+    try {
+      const perm = await MediaLibrary.requestPermissionsAsync();
+      if (!perm.granted) {
+        Alert.alert("Permission needed", "Allow photo access to save images.");
+        return;
+      }
+      const { uri } = await downloadCurrent();
+      await MediaLibrary.saveToLibraryAsync(uri);
+      Alert.alert("Saved", "Image saved to your photos.");
+    } catch (e) {
+      Alert.alert("Couldn't save", e?.message || "Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleShareAsPost() {
+    setMenuOpen(false);
+    setBusy(true);
+    try {
+      const { uri, name, mime } = await downloadCurrent();
+      setPendingShare({ kind: "files", files: [{ uri, name, mimeType: mime }] });
+      close();
+      router.push("/compose?fromShare=1");
+    } catch (e) {
+      Alert.alert("Couldn't share", e?.message || "Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleOsShare() {
+    setMenuOpen(false);
+    setBusy(true);
+    try {
+      if (!(await Sharing.isAvailableAsync())) {
+        Alert.alert("Unavailable", "Sharing isn't available on this device.");
+        return;
+      }
+      const { uri, mime } = await downloadCurrent();
+      await Sharing.shareAsync(uri, { mimeType: mime });
+    } catch (e) {
+      Alert.alert("Couldn't share", e?.message || "Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   const { width, height } = Dimensions.get("window");
 
   return (
     <ImageViewerContext.Provider value={{ open }}>
       {children}
+
       <Modal
         visible={!!state}
         transparent
@@ -45,45 +150,99 @@ export function ImageViewerProvider({ children }) {
         onRequestClose={close}
         statusBarTranslucent
       >
-        <View className="flex-1 bg-black">
-          <FlatList
-            data={state?.images || []}
-            keyExtractor={(u, i) => `${u}-${i}`}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            initialScrollIndex={state?.index || 0}
-            getItemLayout={(_, i) => ({
-              length: width,
-              offset: width * i,
-              index: i,
-            })}
-            renderItem={({ item }) => (
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <View className="flex-1 bg-black">
+            {state ? (
+              <Gallery
+                data={state.images}
+                initialIndex={state.index}
+                onIndexChange={(i) => {
+                  indexRef.current = i;
+                }}
+                onSwipeToClose={close}
+                onLongPress={() => setMenuOpen(true)}
+                renderItem={({ item, setImageDimensions }) => (
+                  <ExpoImage
+                    source={{ uri: item }}
+                    style={{ width, height }}
+                    contentFit="contain"
+                    onLoad={(e) => {
+                      const w = e?.source?.width;
+                      const h = e?.source?.height;
+                      if (w && h) setImageDimensions({ width: w, height: h });
+                    }}
+                  />
+                )}
+              />
+            ) : null}
+
+            {/* Top bar — close (left) + menu (right) */}
+            <SafeAreaView
+              edges={["top"]}
+              className="absolute top-0 left-0 right-0 flex-row items-center justify-between"
+              pointerEvents="box-none"
+            >
               <Pressable
                 onPress={close}
-                style={{ width, height }}
-                className="items-center justify-center"
+                hitSlop={12}
+                className="m-4 p-2 bg-white/10"
+                android_ripple={{ color: "rgba(255,255,255,0.2)", borderless: true }}
               >
-                <Image
-                  source={{ uri: item }}
-                  style={{ width, height }}
-                  resizeMode="contain"
-                />
+                <X size={26} color="#FFFFFF" strokeWidth={2} />
               </Pressable>
-            )}
-          />
-          <SafeAreaView edges={["top"]} className="absolute top-0 right-0">
-            <Pressable
-              onPress={close}
-              hitSlop={12}
-              className="m-4 p-2 bg-white/10"
-              android_ripple={{ color: "rgba(255,255,255,0.2)", borderless: true }}
-            >
-              <X size={26} color="#FFFFFF" strokeWidth={2} />
-            </Pressable>
-          </SafeAreaView>
-        </View>
+              <Pressable
+                onPress={() => setMenuOpen(true)}
+                hitSlop={12}
+                className="m-4 p-2 bg-white/10"
+                android_ripple={{ color: "rgba(255,255,255,0.2)", borderless: true }}
+                accessibilityLabel="Image options"
+              >
+                <MoreVertical size={24} color="#FFFFFF" strokeWidth={2} />
+              </Pressable>
+            </SafeAreaView>
+
+            {busy ? (
+              <View className="absolute inset-0 items-center justify-center bg-black/40">
+                <ActivityIndicator size="large" color="#FFFFFF" />
+              </View>
+            ) : null}
+          </View>
+        </GestureHandlerRootView>
+      </Modal>
+
+      {/* Action sheet — Save / Share as post / OS share */}
+      <Modal
+        visible={menuOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setMenuOpen(false)}
+        statusBarTranslucent
+      >
+        <Pressable
+          className="flex-1 bg-black/50 justify-end"
+          onPress={() => setMenuOpen(false)}
+        >
+          <Pressable onPress={() => {}}>
+            <SafeAreaView edges={["bottom"]} className="bg-base-100">
+              <MenuRow label="Save to Photos" onPress={handleSave} />
+              <MenuRow label="Share as Media Post" onPress={handleShareAsPost} />
+              <MenuRow label="Share to Other Apps" onPress={handleOsShare} />
+            </SafeAreaView>
+          </Pressable>
+        </Pressable>
       </Modal>
     </ImageViewerContext.Provider>
+  );
+}
+
+function MenuRow({ label, onPress }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      android_ripple={{ color: "rgba(0,0,0,0.06)" }}
+      className="px-6 py-4"
+    >
+      <Text className="font-ui text-base text-base-content">{label}</Text>
+    </Pressable>
   );
 }

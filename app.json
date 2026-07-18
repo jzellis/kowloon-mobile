@@ -75,7 +75,16 @@
           ]
         }
       ],
-      "expo-image"
+      "expo-image",
+      "expo-sharing",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow Kowloon to save images to your photos.",
+          "savePhotosPermission": "Allow Kowloon to save images to your photos.",
+          "isAccessMediaLocationEnabled": false
+        }
+      ]
     ],
     "extra": {
       "router": {},
