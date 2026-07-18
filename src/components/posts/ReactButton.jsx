@@ -58,14 +58,16 @@ export function ReactButton({ client, post, onReacted, size = "md" }) {
   const [emojis, setEmojis] = useState(cachedEmojis ?? DEFAULT_EMOJIS);
   const [pending, setPending] = useState(false);
   const [count, setCount] = useState(post?.reactCount ?? 0);
+  const [myReact, setMyReact] = useState(post?.myReact ?? null);
   const [error, setError] = useState(null);
   const closeTimer = useRef(null);
 
-  // Refresh local count when a different post is passed in (e.g. parent
-  // refetched after a reaction landed).
+  // Refresh local count + the viewer's own reaction when a different post is
+  // passed in (e.g. parent refetched after a reaction landed).
   useEffect(() => {
     setCount(post?.reactCount ?? 0);
-  }, [post?.id, post?.reactCount]);
+    setMyReact(post?.myReact ?? null);
+  }, [post?.id, post?.reactCount, post?.myReact]);
 
   useEffect(() => {
     if (!client || cachedEmojis) return;
@@ -80,31 +82,38 @@ export function ReactButton({ client, post, onReacted, size = "md" }) {
 
   useEffect(() => () => clearTimeout(closeTimer.current), []);
 
+  // One reaction per user. Tapping your current emoji removes it; tapping a
+  // different one replaces it (one tap); tapping any when you have none adds it.
   async function react(emoji, name) {
     if (!client || pending) return;
     setOpen(false);
     setSheetOpen(false);
     setPending(true);
     setError(null);
-    // Optimistic bump — server returns { status: 'already_reacted' } when the
-    // same user already reacted with the same emoji, in which case we revert.
-    let bumped = false;
-    setCount((c) => {
-      bumped = true;
-      return c + 1;
-    });
+
+    const clearing = emoji === myReact;
+    const prevReact = myReact;
+    const prevCount = count;
+
+    // Optimistic update.
+    if (clearing) {
+      setMyReact(null);
+      setCount((c) => Math.max(0, c - 1));
+    } else {
+      setMyReact(emoji);
+      if (!prevReact) setCount((c) => c + 1); // new reactor (replace keeps count)
+    }
+
     try {
       const res = await client.activities.react({
         postId: post.id,
-        emoji,
-        name: name || emoji,
+        emoji: clearing ? null : emoji,
+        name: clearing ? undefined : name || emoji,
       });
-      if (res?.result?.status === "already_reacted" && bumped) {
-        setCount((c) => Math.max(0, c - 1));
-      }
       onReacted?.(res);
     } catch (e) {
-      if (bumped) setCount((c) => Math.max(0, c - 1));
+      setMyReact(prevReact);
+      setCount(prevCount);
       setError(e?.message || "Reaction failed.");
     } finally {
       setPending(false);
@@ -128,9 +137,19 @@ export function ReactButton({ client, post, onReacted, size = "md" }) {
           android_ripple={{ color: "rgba(0,0,0,0.06)", borderless: true }}
           className="flex-row items-center"
         >
-          <Smile size={iconSize} color="rgba(26,26,32,0.55)" strokeWidth={1.75} />
+          {myReact ? (
+            <Text style={{ fontSize: iconSize - 2, lineHeight: iconSize + 2 }}>
+              {myReact}
+            </Text>
+          ) : (
+            <Smile size={iconSize} color="rgba(26,26,32,0.55)" strokeWidth={1.75} />
+          )}
           {count > 0 ? (
-            <Text className={`font-ui ${countSize} text-base-content/55 ml-1.5`}>
+            <Text
+              className={`font-ui ${countSize} ml-1.5 ${
+                myReact ? "text-primary" : "text-base-content/55"
+              }`}
+            >
               {count}
             </Text>
           ) : null}

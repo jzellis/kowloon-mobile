@@ -14,6 +14,7 @@ import { Button } from "../../../src/components/ui/Button.jsx";
 import { Eyebrow } from "../../../src/components/ui/Heading.jsx";
 import { PostActionBar } from "../../../src/components/posts/PostActionBar.jsx";
 import { PostBody } from "../../../src/components/posts/PostBody.jsx";
+import { ReactsBar } from "../../../src/components/posts/ReactsBar.jsx";
 import { Reply } from "../../../src/components/posts/Reply.jsx";
 import { ReplyComposer } from "../../../src/components/posts/ReplyComposer.jsx";
 import { useActiveClient } from "../../../src/lib/useActiveClient.js";
@@ -185,6 +186,9 @@ export default function PostDetail() {
             <View style={{ paddingHorizontal: resolved.paddingHorizontal }}>
               <PostBody post={post} typography={typography} />
             </View>
+
+            {/* Reactions summary (read-only) */}
+            <ReactsBar reactCounts={post.reactCounts} />
 
             {/* Action bar — reply / react / repost / share / bookmark / more */}
             <View className="px-5 pt-5">
