@@ -22,8 +22,7 @@ export function FeedHeader({
 }) {
   // Resolve the circle/group behind the current view once, here — both the
   // selector's label fallback and the contextual action read from it.
-  const { kind, subject, isOwner, isMember, membershipLoading } =
-    useFeedSubject(viewKey);
+  const { kind, subject, isOwner } = useFeedSubject(viewKey);
 
   return (
     <View className="flex-row items-center px-5 pt-2.5 pb-5">
@@ -36,13 +35,7 @@ export function FeedHeader({
           />
         </View>
         <View className="flex-shrink-0 ml-2">
-          <FeedViewAction
-            kind={kind}
-            subject={subject}
-            isOwner={isOwner}
-            isMember={isMember}
-            membershipLoading={membershipLoading}
-          />
+          <FeedViewAction kind={kind} subject={subject} isOwner={isOwner} />
         </View>
       </View>
       <TypeFilter activeTypes={activeTypes} onSetTypes={onSetTypes} />
