@@ -5,12 +5,12 @@
     "scheme": "kowloon",
     "version": "0.1.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/app-icon-1024.png",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/app-icon-1024.png",
       "resizeMode": "contain",
-      "backgroundColor": "#FAF4E8"
+      "backgroundColor": "#002FA7"
     },
     "ios": {
       "supportsTablet": true,
@@ -27,10 +27,8 @@
       "package": "org.kwln.kowloon",
       "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "backgroundColor": "#002FA7",
+        "foregroundImage": "./assets/app-icon-1024.png"
       },
       "permissions": [
         "android.permission.CAMERA",
