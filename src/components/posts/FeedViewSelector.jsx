@@ -21,6 +21,7 @@ import {
 } from "react-native";
 import { useSelector } from "react-redux";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Compass } from "lucide-react-native";
 
 import { useActiveClient } from "../../lib/useActiveClient.js";
@@ -46,6 +47,7 @@ export function FeedViewSelector({ value, onChange, subject }) {
   const account = useSelector(selectActiveAccount);
   const client = useActiveClient();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const triggerRef = useRef(null);
   const [open, setOpen] = useState(false);
   const [dropPos, setDropPos] = useState({ top: 0, left: 0 });
@@ -184,12 +186,19 @@ export function FeedViewSelector({ value, onChange, subject }) {
   const noMatches =
     q && filteredCircles.length === 0 && filteredGroups.length === 0;
 
-  // Cap each of the circles / groups scroll areas so a long list in one never
-  // buries the other — split the space left below the fixed rows between them.
+  // Height available to the dropdown: from its top down to just above the
+  // Android nav bar / bottom safe-area inset (window height includes that area,
+  // so without subtracting it the footer gets clipped by the nav buttons).
   const screenH = Dimensions.get("window").height;
+  const availableHeight = Math.max(
+    280,
+    screenH - dropPos.top - insets.bottom - 12
+  );
+  // Split the space left below the fixed rows between the two sections so a long
+  // list in one never buries the other. ~300 covers the fixed rows + footer.
   const sectionMax = Math.max(
-    140,
-    Math.floor((screenH - dropPos.top - 16 - 280) / 2)
+    120,
+    Math.floor((availableHeight - 300) / 2)
   );
 
   function goDiscover() {
@@ -231,6 +240,8 @@ export function FeedViewSelector({ value, onChange, subject }) {
               top: dropPos.top,
               left: dropPos.left,
               width: DROPDOWN_WIDTH,
+              // Never extend past the bottom nav bar (clips the Discover footer).
+              maxHeight: availableHeight,
               // Subtle border + light shadow so the dropdown reads as a floating
               // panel over content (the borderless white was blending in).
               elevation: 8,
