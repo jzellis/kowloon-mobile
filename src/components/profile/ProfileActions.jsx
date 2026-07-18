@@ -6,7 +6,7 @@
 // notified). Block/Mute post the matching outbox activities. Rendered only for
 // non-self profiles; the parent decides that.
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -14,8 +14,10 @@ import {
   Pressable,
   ScrollView,
   Text,
+  TextInput,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ban, BellOff, Check, MoreHorizontal, X } from "lucide-react-native";
 
 export function ProfileActions({ client, account, targetId, name }) {
@@ -27,6 +29,12 @@ export function ProfileActions({ client, account, targetId, name }) {
   const [pickerLoading, setPickerLoading] = useState(false);
   const [addingTo, setAddingTo] = useState(null);
   const [addedTo, setAddedTo] = useState(() => new Set());
+  const [circleQuery, setCircleQuery] = useState("");
+
+  const filteredCircles = useMemo(() => {
+    const q = circleQuery.trim().toLowerCase();
+    return q ? circles.filter((c) => c.name?.toLowerCase().includes(q)) : circles;
+  }, [circles, circleQuery]);
 
   const openPicker = useCallback(async () => {
     if (!client || !account?.id) return;
@@ -174,72 +182,90 @@ export function ProfileActions({ client, account, targetId, name }) {
         </Pressable>
       </Modal>
 
-      {/* Add-to-Circle picker. */}
+      {/* Add-to-Circle picker — full-screen modal (a slide-up sheet clipped its
+          last row under Android's nav bar) with a search box at the top. */}
       <Modal
         visible={showPicker}
-        transparent
         animationType="slide"
         onRequestClose={() => setShowPicker(false)}
       >
-        <Pressable className="flex-1 bg-black/50" onPress={() => setShowPicker(false)} />
-        <View className="bg-base-100 max-h-[60%]">
-          <View className="flex-row items-center justify-between px-5 pt-4 pb-3">
-            <Text className="font-ui text-lg text-base-content" numberOfLines={1}>
+        <SafeAreaView className="flex-1 bg-base-100" edges={["top", "bottom"]}>
+          <View className="flex-row items-center justify-between px-5 py-4">
+            <Text
+              className="font-ui text-lg text-base-content flex-1 mr-3"
+              numberOfLines={1}
+            >
               Add {displayName} to Circle
             </Text>
             <Pressable onPress={() => setShowPicker(false)} hitSlop={8}>
-              <X size={18} color="rgba(26,26,32,0.7)" strokeWidth={2} />
+              <X size={20} color="rgba(26,26,32,0.7)" strokeWidth={2} />
             </Pressable>
           </View>
 
-          <ScrollView>
-            {pickerLoading ? (
-              <View className="py-10 items-center">
-                <ActivityIndicator />
-              </View>
-            ) : circles.length === 0 ? (
-              <View className="px-6 py-10 items-center">
-                <Text className="font-ui text-base text-base-content/55 text-center">
-                  No circles yet. Create one first.
-                </Text>
-              </View>
-            ) : (
-              circles.map((circle) => {
-                const isAdded = addedTo.has(circle.id);
-                const isAdding = addingTo === circle.id;
-                return (
-                  <Pressable
-                    key={circle.id}
-                    onPress={() => !isAdded && addToCircle(circle.id)}
-                    android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-                    className="flex-row items-center justify-between px-5 py-4"
-                  >
-                    <View className="flex-1 min-w-0 mr-3">
-                      <Text
-                        className={`font-ui text-base leading-tight ${
-                          isAdded ? "text-base-content/50" : "text-base-content"
-                        }`}
-                        numberOfLines={1}
-                      >
-                        {circle.name}
-                      </Text>
-                      {typeof circle.memberCount === "number" ? (
-                        <Text className="font-ui text-[11px] uppercase tracking-[0.14em] text-base-content/40 mt-0.5">
-                          {circle.memberCount.toLocaleString()} members
+          <View className="px-5 pb-3">
+            <TextInput
+              value={circleQuery}
+              onChangeText={setCircleQuery}
+              placeholder="Search your circles..."
+              placeholderTextColor="rgba(26,26,32,0.35)"
+              autoCorrect={false}
+              autoCapitalize="none"
+              className="bg-base-200 px-3 py-2.5 font-ui text-base text-base-content"
+            />
+          </View>
+
+          {pickerLoading ? (
+            <View className="py-10 items-center">
+              <ActivityIndicator />
+            </View>
+          ) : (
+            <ScrollView keyboardShouldPersistTaps="handled" className="flex-1">
+              {filteredCircles.length === 0 ? (
+                <View className="px-6 py-10 items-center">
+                  <Text className="font-ui text-base text-base-content/55 text-center">
+                    {circles.length === 0
+                      ? "No circles yet. Create one first."
+                      : "No circles match."}
+                  </Text>
+                </View>
+              ) : (
+                filteredCircles.map((circle) => {
+                  const isAdded = addedTo.has(circle.id);
+                  const isAdding = addingTo === circle.id;
+                  return (
+                    <Pressable
+                      key={circle.id}
+                      onPress={() => !isAdded && addToCircle(circle.id)}
+                      android_ripple={{ color: "rgba(0,0,0,0.05)" }}
+                      className="flex-row items-center justify-between px-5 py-4"
+                    >
+                      <View className="flex-1 min-w-0 mr-3">
+                        <Text
+                          className={`font-ui text-base leading-tight ${
+                            isAdded ? "text-base-content/50" : "text-base-content"
+                          }`}
+                          numberOfLines={1}
+                        >
+                          {circle.name}
                         </Text>
+                        {typeof circle.memberCount === "number" ? (
+                          <Text className="font-ui text-[11px] uppercase tracking-[0.14em] text-base-content/40 mt-0.5">
+                            {circle.memberCount.toLocaleString()} members
+                          </Text>
+                        ) : null}
+                      </View>
+                      {isAdding ? (
+                        <ActivityIndicator size="small" />
+                      ) : isAdded ? (
+                        <Check size={16} color="rgba(26,26,32,0.5)" strokeWidth={2.5} />
                       ) : null}
-                    </View>
-                    {isAdding ? (
-                      <ActivityIndicator size="small" />
-                    ) : isAdded ? (
-                      <Check size={16} color="rgba(26,26,32,0.5)" strokeWidth={2.5} />
-                    ) : null}
-                  </Pressable>
-                );
-              })
-            )}
-          </ScrollView>
-        </View>
+                    </Pressable>
+                  );
+                })
+              )}
+            </ScrollView>
+          )}
+        </SafeAreaView>
       </Modal>
     </View>
   );
