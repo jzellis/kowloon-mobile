@@ -11,6 +11,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  Dimensions,
   Modal,
   Pressable,
   ScrollView,
@@ -30,7 +31,6 @@ import { HexAvatar } from "../ui/HexAvatar.jsx";
 import { resolveImageUrl } from "../../lib/resolveImageUrl.js";
 
 const DROPDOWN_WIDTH = 240;
-const MAX_LIST_HEIGHT = 320;
 
 export function FeedViewSelector({ value, onChange, subject }) {
   // `subject` (from useFeedSubject, via FeedHeader) is the resolved circle/group
@@ -184,6 +184,14 @@ export function FeedViewSelector({ value, onChange, subject }) {
   const noMatches =
     q && filteredCircles.length === 0 && filteredGroups.length === 0;
 
+  // Cap each of the circles / groups scroll areas so a long list in one never
+  // buries the other — split the space left below the fixed rows between them.
+  const screenH = Dimensions.get("window").height;
+  const sectionMax = Math.max(
+    140,
+    Math.floor((screenH - dropPos.top - 16 - 280) / 2)
+  );
+
   function goDiscover() {
     close();
     router.push("/discover");
@@ -249,44 +257,45 @@ export function FeedViewSelector({ value, onChange, subject }) {
               </View>
             ) : null}
 
-            <ScrollView
-              keyboardShouldPersistTaps="handled"
-              style={{ maxHeight: MAX_LIST_HEIGHT }}
-              bounces={false}
-            >
-              {serverViews.map((v) => (
-                <Row
-                  key={v.value}
-                  label={v.label}
-                  summary={v.summary}
-                  selected={!isSubjectView && !isMineView}
-                  onPress={() => select(v.value)}
-                  icon={
-                    <ServerFeedIcon iconUrl={serverIcon} variant="public" size={22} />
-                  }
-                />
-              ))}
-
-              {/* My Posts — the viewer's own posts, any audience. */}
+            {/* Community + My Posts stay fixed at the top */}
+            {serverViews.map((v) => (
               <Row
-                key="mine"
-                label="My Posts"
-                summary="Everything you've posted, to any audience."
-                selected={isMineView}
-                onPress={() => select("mine")}
+                key={v.value}
+                label={v.label}
+                summary={v.summary}
+                selected={!isSubjectView && !isMineView}
+                onPress={() => select(v.value)}
                 icon={
-                  <HexAvatar
-                    uri={resolveImageUrl(account?.profile?.icon, baseUrl)}
-                    size={22}
-                  />
+                  <ServerFeedIcon iconUrl={serverIcon} variant="public" size={22} />
                 }
               />
+            ))}
+            <Row
+              key="mine"
+              label="My Posts"
+              summary="Everything you've posted, to any audience."
+              selected={isMineView}
+              onPress={() => select("mine")}
+              icon={
+                <HexAvatar
+                  uri={resolveImageUrl(account?.profile?.icon, baseUrl)}
+                  size={22}
+                />
+              }
+            />
 
-              {filteredCircles.length > 0 ? (
-                <View className="  mt-1">
-                  <Text className="font-ui uppercase tracking-[0.18em] text-[10px] text-base-content/40 px-4 pt-3 pb-1">
-                    Your circles
-                  </Text>
+            {/* Your circles — own scroll area, capped so it never buries groups */}
+            {filteredCircles.length > 0 ? (
+              <View className="mt-1">
+                <Text className="font-ui uppercase tracking-[0.18em] text-[10px] text-base-content/40 px-4 pt-3 pb-1">
+                  Your circles
+                </Text>
+                <ScrollView
+                  keyboardShouldPersistTaps="handled"
+                  nestedScrollEnabled
+                  bounces={false}
+                  style={{ maxHeight: sectionMax }}
+                >
                   {filteredCircles.map((c) => (
                     <Row
                       key={c.id}
@@ -295,21 +304,26 @@ export function FeedViewSelector({ value, onChange, subject }) {
                       selected={value === c.id}
                       onPress={() => select(c.id)}
                       icon={
-                        <HexAvatar
-                          uri={resolveImageUrl(c.icon, baseUrl)}
-                          size={22}
-                        />
+                        <HexAvatar uri={resolveImageUrl(c.icon, baseUrl)} size={22} />
                       }
                     />
                   ))}
-                </View>
-              ) : null}
+                </ScrollView>
+              </View>
+            ) : null}
 
-              {filteredGroups.length > 0 ? (
-                <View className="  mt-1">
-                  <Text className="font-ui uppercase tracking-[0.18em] text-[10px] text-base-content/40 px-4 pt-3 pb-1">
-                    Your groups
-                  </Text>
+            {/* Your groups — its own scroll area, always visible below circles */}
+            {filteredGroups.length > 0 ? (
+              <View className="mt-1">
+                <Text className="font-ui uppercase tracking-[0.18em] text-[10px] text-base-content/40 px-4 pt-3 pb-1">
+                  Your groups
+                </Text>
+                <ScrollView
+                  keyboardShouldPersistTaps="handled"
+                  nestedScrollEnabled
+                  bounces={false}
+                  style={{ maxHeight: sectionMax }}
+                >
                   {filteredGroups.map((g) => (
                     <Row
                       key={g.id}
@@ -317,22 +331,19 @@ export function FeedViewSelector({ value, onChange, subject }) {
                       selected={value === g.id}
                       onPress={() => select(g.id)}
                       icon={
-                        <HexAvatar
-                          uri={resolveImageUrl(g.icon, baseUrl)}
-                          size={22}
-                        />
+                        <HexAvatar uri={resolveImageUrl(g.icon, baseUrl)} size={22} />
                       }
                     />
                   ))}
-                </View>
-              ) : null}
+                </ScrollView>
+              </View>
+            ) : null}
 
-              {noMatches ? (
-                <Text className="font-ui text-xs text-base-content/40 px-4 py-3">
-                  No circles or groups match.
-                </Text>
-              ) : null}
-            </ScrollView>
+            {noMatches ? (
+              <Text className="font-ui text-xs text-base-content/40 px-4 py-3">
+                No circles or groups match.
+              </Text>
+            ) : null}
 
             {/* Discover footer — pinned below the scroll, always reachable */}
             <Pressable
