@@ -119,6 +119,24 @@ export function useFeed({ viewKey = "public", activeTypes = [], accountId } = {}
           cursor.current = oldest || cursor.current;
           // No total available — assume more if we got a full-ish page.
           setHasMore(items.length >= 15);
+        } else if (viewKey === "mine") {
+          // My Posts — the viewer's own posts across every audience they
+          // authored (the server returns all of an author's own posts). Page-based.
+          const page =
+            mode === "more"
+              ? (typeof cursor.current === "number" ? cursor.current : 0) + 1
+              : 1;
+          res = await client.feeds.getUserPosts({
+            userId: accountId,
+            // getUserPosts takes a single type; pass it only when exactly one
+            // type is active, otherwise fetch all.
+            type: activeTypes?.length === 1 ? activeTypes[0] : undefined,
+            page,
+          });
+          items = res?.orderedItems || res?.items || [];
+          const totalPages = Number(res?.totalPages);
+          setHasMore(totalPages ? page < totalPages : items.length >= 20);
+          cursor.current = page;
         } else if (isGroup(viewKey)) {
           // Group feed — page-based. getGroupPosts takes a single `type`,
           // not an array, so when filtering pass the first active type only

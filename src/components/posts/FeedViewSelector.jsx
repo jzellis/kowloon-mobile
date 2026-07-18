@@ -42,6 +42,7 @@ export function FeedViewSelector({ value, onChange, subject }) {
   const isSubjectView =
     typeof value === "string" &&
     (value.startsWith("circle:") || value.startsWith("group:"));
+  const isMineView = value === "mine";
   const account = useSelector(selectActiveAccount);
   const client = useActiveClient();
   const router = useRouter();
@@ -106,6 +107,14 @@ export function FeedViewSelector({ value, onChange, subject }) {
   // Icon for the collapsed trigger: server overlay for Public/Server, the
   // circle's / group's hex avatar otherwise.
   function iconFor(value, size = 20) {
+    if (value === "mine") {
+      return (
+        <HexAvatar
+          uri={resolveImageUrl(account?.profile?.icon, baseUrl)}
+          size={size}
+        />
+      );
+    }
     const circle = circles.find((c) => c.id === value);
     if (circle) {
       return <HexAvatar uri={resolveImageUrl(circle.icon, baseUrl)} size={size} />;
@@ -125,6 +134,7 @@ export function FeedViewSelector({ value, onChange, subject }) {
   }
 
   const currentLabel =
+    (isMineView && "My Posts") ||
     circles.find((c) => c.id === value)?.name ||
     groups.find((g) => g.id === value)?.name ||
     subjectForValue?.name ||
@@ -242,13 +252,28 @@ export function FeedViewSelector({ value, onChange, subject }) {
                   key={v.value}
                   label={v.label}
                   summary={v.summary}
-                  selected={!isSubjectView}
+                  selected={!isSubjectView && !isMineView}
                   onPress={() => select(v.value)}
                   icon={
                     <ServerFeedIcon iconUrl={serverIcon} variant="public" size={22} />
                   }
                 />
               ))}
+
+              {/* My Posts — the viewer's own posts, any audience. */}
+              <Row
+                key="mine"
+                label="My Posts"
+                summary="Everything you've posted, to any audience."
+                selected={isMineView}
+                onPress={() => select("mine")}
+                icon={
+                  <HexAvatar
+                    uri={resolveImageUrl(account?.profile?.icon, baseUrl)}
+                    size={22}
+                  />
+                }
+              />
 
               {filteredCircles.length > 0 ? (
                 <View className="  mt-1">
