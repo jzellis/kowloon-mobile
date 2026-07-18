@@ -240,6 +240,37 @@ export default function CircleDetail() {
                 </Text>
               ) : null}
 
+              {/* Owner card — between the header and the action bar */}
+              {owner ? (
+                <Pressable
+                  onPress={() =>
+                    owner.id &&
+                    router.push(`/user/${encodeURIComponent(owner.id)}`)
+                  }
+                  android_ripple={{ color: "rgba(0,0,0,0.05)" }}
+                  className="flex-row items-center mt-5"
+                >
+                  <Avatar actor={owner} size={40} baseUrl={account?.baseUrl} />
+                  <View className="flex-1 ml-3 min-w-0">
+                    <Text className="font-ui uppercase tracking-[0.18em] text-[10px] text-base-content/45 mb-0.5">
+                      Owner
+                    </Text>
+                    <Text
+                      className="font-ui text-base text-base-content"
+                      numberOfLines={1}
+                    >
+                      {owner.name || owner.id}
+                    </Text>
+                    <Text
+                      className="font-ui text-xs text-base-content/55"
+                      numberOfLines={1}
+                    >
+                      {owner.id}
+                    </Text>
+                  </View>
+                </Pressable>
+              ) : null}
+
               {/* Actions */}
               <View
                 className="flex-row items-center mt-5 flex-wrap"
@@ -304,39 +335,6 @@ export default function CircleDetail() {
                 ) : null}
               </View>
             </View>
-
-            {/* Owner */}
-            {owner ? (
-              <View className="px-5 pt-2 pb-4">
-                <Text className="font-ui uppercase tracking-[0.18em] text-[11px] text-base-content/50 mb-2">
-                  Owner
-                </Text>
-                <Pressable
-                  onPress={() =>
-                    owner.id &&
-                    router.push(`/user/${encodeURIComponent(owner.id)}`)
-                  }
-                  android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-                  className="flex-row items-center"
-                >
-                  <Avatar actor={owner} size={40} baseUrl={account?.baseUrl} />
-                  <View className="flex-1 ml-3 min-w-0">
-                    <Text
-                      className="font-ui text-base text-base-content"
-                      numberOfLines={1}
-                    >
-                      {owner.name || owner.id}
-                    </Text>
-                    <Text
-                      className="font-ui text-xs text-base-content/55"
-                      numberOfLines={1}
-                    >
-                      {owner.id}
-                    </Text>
-                  </View>
-                </Pressable>
-              </View>
-            ) : null}
 
             {/* Quick-add bar — owner only */}
             {isOwner ? (
