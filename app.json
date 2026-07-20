@@ -51,6 +51,12 @@
       ],
       "expo-video",
       "expo-audio",
+      [
+        "expo-notifications",
+        {
+          "color": "#002FA7"
+        }
+      ],
       "@react-native-community/datetimepicker",
       [
         "expo-share-intent",

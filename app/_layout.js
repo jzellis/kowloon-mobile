@@ -22,6 +22,7 @@ import { hydrateAccounts } from "../src/state/accountsSlice.js";
 import { FONT_ASSETS } from "../src/lib/typography.js";
 import { TypographyProvider } from "../src/lib/TypographyContext.js";
 import { UnreadCountProvider } from "../src/lib/UnreadCountContext.js";
+import { PushProvider } from "../src/lib/PushProvider.jsx";
 import { ShareIntentRouter } from "../src/components/ShareIntentRouter.jsx";
 import { ImageViewerProvider } from "../src/components/ImageViewerProvider.jsx";
 
@@ -60,15 +61,17 @@ export default function RootLayout() {
             <TypographyProvider>
               <UnreadCountProvider>
                 <ImageViewerProvider>
-                  <StatusBar style="auto" />
-                  <HydrationBoot />
-                  <ShareIntentRouter />
-                  <Stack
-                    screenOptions={{
-                      headerShown: false,
-                      contentStyle: { backgroundColor: "#FFFFFF" },
-                    }}
-                  />
+                  <PushProvider>
+                    <StatusBar style="auto" />
+                    <HydrationBoot />
+                    <ShareIntentRouter />
+                    <Stack
+                      screenOptions={{
+                        headerShown: false,
+                        contentStyle: { backgroundColor: "#FFFFFF" },
+                      }}
+                    />
+                  </PushProvider>
                 </ImageViewerProvider>
               </UnreadCountProvider>
             </TypographyProvider>
