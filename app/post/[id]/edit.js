@@ -91,6 +91,10 @@ function FieldLabel({ children }) {
 function PostBodyEditor({ initialHtml, editorRef }) {
   const editor = useEditorBridge({
     avoidIosKeyboard: true,
+    // Grow the editor to fit its content so the outer ScrollView scrolls the
+    // whole page — this avoids the WebView vs ScrollView nested-scroll conflict
+    // (nestedScrollEnabled didn't take on the tested Android build).
+    dynamicHeight: true,
     initialContent: initialHtml || "",
     bridgeExtensions: [
       ...TenTapStartKit,
@@ -101,15 +105,13 @@ function PostBodyEditor({ initialHtml, editorRef }) {
     editorRef.current = editor;
   }, [editor, editorRef]);
   return (
-    <View style={{ height: 320 }} className="bg-white border border-base-300">
+    <View className="bg-white border border-base-300">
       <View style={{ height: TOOLBAR_HEIGHT }}>
         <Toolbar editor={editor} hidden={false} items={TOOLBAR_ITEMS} />
       </View>
-      <View className="flex-1">
-        {/* nestedScrollEnabled lets the editor's WebView scroll internally
-            instead of the parent ScrollView stealing the gesture (Android). */}
-        <RichText editor={editor} nestedScrollEnabled />
-      </View>
+      {/* scrollEnabled={false}: with dynamicHeight the editor sizes to its
+          content, so the page — not the WebView — does the scrolling. */}
+      <RichText editor={editor} scrollEnabled={false} style={{ minHeight: 220 }} />
     </View>
   );
 }
