@@ -27,6 +27,7 @@ import { Compass } from "lucide-react-native";
 import { useActiveClient } from "../../lib/useActiveClient.js";
 import { useJoinedGroups } from "../../lib/useJoinedGroups.js";
 import { selectActiveAccount } from "../../state/accountsSlice.js";
+import { orderUserCircles } from "../../lib/orderCircles.js";
 import { ServerFeedIcon } from "./ServerFeedIcon.jsx";
 import { HexAvatar } from "../ui/HexAvatar.jsx";
 import { resolveImageUrl } from "../../lib/resolveImageUrl.js";
@@ -78,9 +79,7 @@ export function FeedViewSelector({ value, onChange, subject }) {
       .then((res) => {
         const items = res?.orderedItems || res?.items || [];
         if (!cancelled) {
-          setCircles(
-            items.filter((c) => c?.id && c?.name && c?.type !== "System")
-          );
+          setCircles(orderUserCircles(items));
         }
       })
       .catch(() => {});
@@ -150,7 +149,7 @@ export function FeedViewSelector({ value, onChange, subject }) {
         .getUserCircles({ userId: account.id })
         .then((res) => {
           const items = res?.orderedItems || res?.items || [];
-          setCircles(items.filter((c) => c?.id && c?.name && c?.type !== "System"));
+          setCircles(orderUserCircles(items));
         })
         .catch(() => {});
     }

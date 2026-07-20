@@ -12,6 +12,7 @@ import { useSelector } from "react-redux";
 
 import { useActiveClient } from "../../lib/useActiveClient.js";
 import { selectActiveAccount } from "../../state/accountsSlice.js";
+import { orderUserCircles } from "../../lib/orderCircles.js";
 
 // `allowPrivate` opts in to a self-only ("Only Me") tier, addressed to the
 // user's own ID. Off by default — bookmarks enable it; the post composer does not.
@@ -57,9 +58,7 @@ export function AudienceSelector({ value, onChange, allowPrivate = false }) {
       .then((res) => {
         const items = res?.orderedItems || res?.items || [];
         if (!cancelled) {
-          setCircles(
-            items.filter((c) => c?.id && c?.name && c?.type !== "System")
-          );
+          setCircles(orderUserCircles(items));
         }
       })
       .catch(() => {});

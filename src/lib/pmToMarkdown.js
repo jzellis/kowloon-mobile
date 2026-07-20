@@ -6,15 +6,27 @@
 // exactly the nodes the Note/Article toolbar can produce.
 //
 // The server stores Markdown source and renders HTML itself, so this is the
-// last step before createPost(). Underline has no Markdown representation —
-// it degrades to plain text (same limitation the web composer has).
+// last step before createPost(). Underline has no Markdown syntax, so it's
+// emitted as inline <u> HTML (the server renders + allows it — issue #32).
 
-const ESCAPE_RE = /([\\`*_{}\[\]()#+\-.!>])/g;
+// Only escape the inline markers that would actually change parsing mid-text
+// (emphasis, code spans, links). Deliberately NOT escaping . ! ( ) { } + - # >
+// etc. — escaping those left visible backslashes throughout the stored source,
+// which showed up when editing a post (issue #34). Leading block markers are
+// handled per-paragraph in escapeLeadingMarker().
+const INLINE_ESCAPE_RE = /([\\`*_[\]])/g;
 
 function escapeText(text) {
-  // Escape Markdown-significant characters in literal text so user content
-  // like "a*b" or "1. not a list" survives the round-trip.
-  return String(text).replace(ESCAPE_RE, "\\$1");
+  return String(text).replace(INLINE_ESCAPE_RE, "\\$1");
+}
+
+// Escape a block marker only when it LEADS a paragraph line, so literal prose
+// like "- nope", "# nope", or "1. nope" round-trips without turning into a
+// list / heading — while ordinary mid-sentence punctuation stays clean.
+function escapeLeadingMarker(text) {
+  return text
+    .replace(/^(\s*)([#>+-])(\s)/, "$1\\$2$3")
+    .replace(/^(\s*)(\d+)([.)])(\s)/, "$1$2\\$3$4");
 }
 
 // Apply a text node's marks, innermost first. `code` wins outright — Markdown
@@ -35,7 +47,9 @@ function applyMarks(text, marks) {
   if (has("bold")) out = `**${out}**`;
   if (has("italic")) out = `*${out}*`;
   if (has("strike")) out = `~~${out}~~`;
-  // `underline` intentionally unhandled — Markdown has no underline.
+  // Markdown has no underline, so emit inline HTML. The server's markdown
+  // renderer passes it through and its sanitizer allows <u> (issue #32).
+  if (has("underline")) out = `<u>${out}</u>`;
   if (linkMark?.attrs?.href) out = `[${out}](${linkMark.attrs.href})`;
   return out;
 }
@@ -62,7 +76,7 @@ function indentLines(text, prefix) {
 function block(node, depth = 0) {
   switch (node.type) {
     case "paragraph":
-      return inline(node.content);
+      return escapeLeadingMarker(inline(node.content));
 
     case "heading": {
       const level = Math.min(Math.max(node.attrs?.level || 1, 1), 6);

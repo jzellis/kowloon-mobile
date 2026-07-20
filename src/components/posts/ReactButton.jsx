@@ -127,7 +127,13 @@ export function ReactButton({ client, post, onReacted, size = "md" }) {
     <View>
       <View className="relative">
         <Pressable
-          onPress={() => setOpen((o) => !o)}
+          onPress={() => {
+            // Already reacted → a plain tap removes it (one reaction per user).
+            // Long-press opens the picker to change it. With no reaction yet,
+            // tap opens the inline picker to add one.
+            if (myReact) react(myReact);
+            else setOpen((o) => !o);
+          }}
           onLongPress={() => {
             setOpen(false);
             setSheetOpen(true);

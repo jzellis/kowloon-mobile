@@ -53,6 +53,8 @@ function buildTagStyles(fonts, fontSize, lineHeight) {
     b: { fontFamily: fonts.bold },
     em: { fontFamily: fonts.italic },
     i: { fontFamily: fonts.italic },
+    u: { textDecorationLine: "underline" },
+    s: { textDecorationLine: "line-through" },
     a: { color: PRIMARY, textDecorationLine: "none" },
     h1: {
       fontFamily: fonts.bold,

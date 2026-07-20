@@ -129,6 +129,7 @@ export default function UserProfile() {
 
   const name = user?.profile?.name || user?.name || user?.username || userId;
   const description = user?.profile?.description;
+  const pronouns = user?.profile?.pronouns;
   const location = user?.profile?.location;
   const urls = user?.profile?.urls || [];
   const featuredImage = resolveImageUrl(
@@ -195,6 +196,14 @@ export default function UserProfile() {
               >
                 {userId}
               </Text>
+              {pronouns ? (
+                <Text
+                  className="font-ui text-xs text-base-content/45 mt-0.5"
+                  numberOfLines={1}
+                >
+                  {pronouns}
+                </Text>
+              ) : null}
               {location?.name ? (
                 <View className="flex-row items-center mt-2">
                   <MapPin
