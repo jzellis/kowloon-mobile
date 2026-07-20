@@ -23,6 +23,7 @@ import { Avatar } from "../../src/components/posts/Avatar.jsx";
 import { FeedHeader } from "../../src/components/posts/FeedHeader.jsx";
 import { UserMenu } from "../../src/components/UserMenu.jsx";
 import { LeftDrawer } from "../../src/components/drawer/LeftDrawer.jsx";
+import { ComposeFab } from "../../src/components/nav/ComposeFab.jsx";
 import { Globe, Search } from "lucide-react-native";
 import { useFeed } from "../../src/lib/useFeed.js";
 import { consumeFeedRefresh } from "../../src/lib/feedRefreshSignal.js";
@@ -377,19 +378,10 @@ export default function Feed() {
       />
 
 
-      {/* Compose — square editorial FAB. The Tabs navigator now lays the tab
-          bar out below the scene, so the FAB only needs to clear the scene's
-          own bottom edge (which already sits above the bar). */}
-      <Pressable
-        onPress={() => router.push("/compose")}
-        style={{ bottom: 24, right: 20 }}
-        className="absolute w-14 h-14 bg-primary   items-center justify-center"
-        android_ripple={{ color: "rgba(255,255,255,0.15)" }}
-      >
-        <Text className="text-primary-content text-3xl leading-none mt-[-2px]">
-          +
-        </Text>
-      </Pressable>
+      {/* Compose — speed-dial FAB: tap to pick a post type, double-tap for the
+          default. The Tabs navigator lays the tab bar below the scene, so it
+          only needs to clear the scene's own bottom edge. */}
+      <ComposeFab />
     </View>
   );
 }
