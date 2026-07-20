@@ -1,0 +1,68 @@
+// ReplyReactScope — collapsible "who can reply & react" control for the post
+// composer/editor. Both fields default to the post's own audience (the parent
+// resets them whenever the audience changes); options broader than the audience
+// are disabled inside each selector. Collapsed by default so the composer stays
+// clean for the many who never touch it.
+
+import { useState } from "react";
+import { Pressable, Text, View } from "react-native";
+import { ChevronDown, ChevronRight } from "lucide-react-native";
+
+import { AudienceSelector } from "./AudienceSelector.jsx";
+
+export function ReplyReactScope({
+  audience,
+  canReply,
+  canReact,
+  onChangeReply,
+  onChangeReact,
+}) {
+  const [open, setOpen] = useState(false);
+  const customized = canReply !== audience || canReact !== audience;
+
+  return (
+    <View>
+      <Pressable
+        onPress={() => setOpen((o) => !o)}
+        className="flex-row items-center px-3 py-2.5"
+        android_ripple={{ color: "rgba(0,0,0,0.06)" }}
+      >
+        {open ? (
+          <ChevronDown size={14} color="rgba(26,26,32,0.5)" strokeWidth={1.9} />
+        ) : (
+          <ChevronRight size={14} color="rgba(26,26,32,0.5)" strokeWidth={1.9} />
+        )}
+        <Text className="font-ui uppercase tracking-[0.12em] text-[11px] text-base-content/50 ml-1.5 mr-2">
+          Replies &amp; reacts
+        </Text>
+        <Text
+          className="font-ui uppercase tracking-[0.12em] text-[11px] text-base-content flex-1"
+          numberOfLines={1}
+        >
+          {customized ? "Customized" : "Same as audience"}
+        </Text>
+      </Pressable>
+
+      {open ? (
+        <View className="mt-1">
+          <AudienceSelector
+            value={canReply}
+            onChange={onChangeReply}
+            allowPrivate
+            constrainTo={audience}
+            label="Reply"
+            title="Who can reply"
+          />
+          <AudienceSelector
+            value={canReact}
+            onChange={onChangeReact}
+            allowPrivate
+            constrainTo={audience}
+            label="React"
+            title="Who can react"
+          />
+        </View>
+      ) : null}
+    </View>
+  );
+}

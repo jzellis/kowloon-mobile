@@ -33,6 +33,7 @@ import { AppHeader } from "../../../src/components/nav/AppHeader.jsx";
 import { Button } from "../../../src/components/ui/Button.jsx";
 import { DateTimeField } from "../../../src/components/posts/DateTimeField.jsx";
 import { AudienceSelector } from "../../../src/components/posts/AudienceSelector.jsx";
+import { ReplyReactScope } from "../../../src/components/posts/ReplyReactScope.jsx";
 import { useActiveClient } from "../../../src/lib/useActiveClient.js";
 import { useKeyboardInset } from "../../../src/lib/useKeyboardInset.js";
 import { uploadFile } from "../../../src/lib/uploadFile.js";
@@ -136,6 +137,8 @@ export default function EditPost() {
   const [endDate, setEndDate] = useState("");
   const [endTime, setEndTime] = useState("");
   const [audience, setAudience] = useState("@public");
+  const [canReply, setCanReply] = useState("@public");
+  const [canReact, setCanReact] = useState("@public");
 
   // Unified attachment model (Media). Existing items carry { existing:true,
   // fileId, url }; newly picked items carry { existing:false, uri }.
@@ -164,6 +167,9 @@ export default function EditPost() {
       // source) means the editor shows formatted text, not escaped markdown.
       setInitialBodyHtml(doc?.body || "");
       setAudience(doc?.to || "@public");
+      // Reply/react default to the post audience when they were left to inherit.
+      setCanReply(doc?.canReply || doc?.to || "@public");
+      setCanReact(doc?.canReact || doc?.to || "@public");
       if (doc?.event?.startDate || doc?.startTime) {
         const s = splitDateTime(doc.event?.startDate || doc.startTime);
         setStartDate(s.date);
@@ -314,7 +320,7 @@ export default function EditPost() {
     setSubmitting(true);
     setError(null);
     try {
-      const updates = { content: trimmedContent, to: audience };
+      const updates = { content: trimmedContent, to: audience, canReply, canReact };
       if (hasTitleField) updates.title = trimmedTitle || "";
       if (isEvent) {
         updates.startTime = joinDateTime(startDate, startTime);
@@ -572,7 +578,23 @@ export default function EditPost() {
 
             <View className="mb-5">
               <FieldLabel>Visible To</FieldLabel>
-              <AudienceSelector value={audience} onChange={setAudience} />
+              <AudienceSelector
+                value={audience}
+                onChange={(v) => {
+                  setAudience(v);
+                  setCanReply(v);
+                  setCanReact(v);
+                }}
+              />
+              <View className="mt-2">
+                <ReplyReactScope
+                  audience={audience}
+                  canReply={canReply}
+                  canReact={canReact}
+                  onChangeReply={setCanReply}
+                  onChangeReact={setCanReact}
+                />
+              </View>
             </View>
 
             {error ? (

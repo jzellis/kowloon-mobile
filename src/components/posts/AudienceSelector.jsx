@@ -16,13 +16,33 @@ import { orderUserCircles } from "../../lib/orderCircles.js";
 
 // `allowPrivate` opts in to a self-only ("Only Me") tier, addressed to the
 // user's own ID. Off by default — bookmarks enable it; the post composer does not.
-export function AudienceSelector({ value, onChange, allowPrivate = false }) {
+export function AudienceSelector({
+  value,
+  onChange,
+  allowPrivate = false,
+  constrainTo = null,
+  label = "To",
+  title = "Post audience",
+}) {
   const account = useSelector(selectActiveAccount);
   const client = useActiveClient();
   const [open, setOpen] = useState(false);
   const [circles, setCircles] = useState([]);
 
   const serverTo = account?.server ? `@${account.server}` : "@public";
+  const selfId = account?.id;
+
+  // When constrainTo is set (the reply/react selectors), disable any option
+  // broader than the post's own audience — you can't let people who can't see
+  // the post interact with it. "Only Me" (self) is always allowed.
+  function optionEnabled(optValue) {
+    if (!constrainTo) return true; // the post's own audience selector: no limit
+    if (optValue === selfId) return true; // Only Me is the narrowest, always ok
+    if (constrainTo === "@public") return true; // public post: anything goes
+    if (constrainTo === serverTo) return optValue !== "@public"; // community: no public
+    if (constrainTo === selfId) return optValue === selfId; // just-me post: only just-me
+    return optValue === constrainTo; // constrainTo is a specific circle
+  }
 
   const audienceOptions = useMemo(
     () => [
@@ -85,7 +105,7 @@ export function AudienceSelector({ value, onChange, allowPrivate = false }) {
         android_ripple={{ color: "rgba(0,0,0,0.06)" }}
       >
         <Text className="font-ui uppercase tracking-[0.12em] text-[11px] text-base-content/50 mr-2">
-          To
+          {label}
         </Text>
         <Text
           className="font-ui uppercase tracking-[0.12em] text-[11px] text-base-content flex-1"
@@ -112,7 +132,7 @@ export function AudienceSelector({ value, onChange, allowPrivate = false }) {
             <SafeAreaView edges={["bottom"]} className="bg-base-100">
               <View className=" ">
                 <Text className="font-ui uppercase tracking-[0.18em] text-[11px] text-base-content/50 px-5 pt-4 pb-2">
-                  Post audience
+                  {title}
                 </Text>
                 <ScrollView className="max-h-96">
                   {audienceOptions.map((opt) => (
@@ -121,6 +141,7 @@ export function AudienceSelector({ value, onChange, allowPrivate = false }) {
                       label={opt.label}
                       summary={opt.summary}
                       selected={value === opt.value}
+                      disabled={!optionEnabled(opt.value)}
                       onPress={() => select(opt.value)}
                     />
                   ))}
@@ -136,6 +157,7 @@ export function AudienceSelector({ value, onChange, allowPrivate = false }) {
                           label={c.name}
                           summary={c.summary}
                           selected={value === c.id}
+                          disabled={!optionEnabled(c.id)}
                           onPress={() => select(c.id)}
                         />
                       ))}
@@ -151,16 +173,19 @@ export function AudienceSelector({ value, onChange, allowPrivate = false }) {
   );
 }
 
-function Row({ label, summary, selected, onPress }) {
+function Row({ label, summary, selected, onPress, disabled = false }) {
   return (
     <Pressable
-      onPress={onPress}
-      android_ripple={{ color: "rgba(0,0,0,0.05)" }}
-      className={`px-5 py-3 ${selected ? "bg-secondary" : ""}`}
+      onPress={disabled ? undefined : onPress}
+      disabled={disabled}
+      android_ripple={disabled ? undefined : { color: "rgba(0,0,0,0.05)" }}
+      className={`px-5 py-3 ${selected && !disabled ? "bg-secondary" : ""} ${
+        disabled ? "opacity-35" : ""
+      }`}
     >
       <Text
         className={`font-ui uppercase tracking-[0.14em] text-xs ${
-          selected ? "text-secondary-content" : "text-base-content"
+          selected && !disabled ? "text-secondary-content" : "text-base-content"
         }`}
       >
         {label}
@@ -168,7 +193,7 @@ function Row({ label, summary, selected, onPress }) {
       {summary ? (
         <Text
           className={`font-ui text-xs mt-0.5 ${
-            selected ? "text-secondary-content/70" : "text-base-content/45"
+            selected && !disabled ? "text-secondary-content/70" : "text-base-content/45"
           }`}
         >
           {summary}

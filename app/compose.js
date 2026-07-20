@@ -43,6 +43,7 @@ import * as DocumentPicker from "expo-document-picker";
 import { PostTypeDropdown } from "../src/components/posts/PostTypeDropdown.jsx";
 import { PostTypeIcon } from "../src/components/posts/PostTypeIcon.jsx";
 import { AudienceSelector } from "../src/components/posts/AudienceSelector.jsx";
+import { ReplyReactScope } from "../src/components/posts/ReplyReactScope.jsx";
 import { LocationField } from "../src/components/posts/LocationField.jsx";
 import { DateTimeField } from "../src/components/posts/DateTimeField.jsx";
 import { useActiveClient } from "../src/lib/useActiveClient.js";
@@ -137,6 +138,9 @@ export default function Compose() {
   const [audience, setAudience] = useState(
     typeof params.to === "string" && params.to ? params.to : "@public"
   );
+  // Reply/react scope — both track the post audience until narrowed by hand.
+  const [canReply, setCanReply] = useState(audience);
+  const [canReact, setCanReact] = useState(audience);
   const [posting, setPosting] = useState(false);
   const [error, setError] = useState(null);
 
@@ -542,6 +546,8 @@ export default function Compose() {
             : undefined,
         content: markdown.trim() || undefined,
         to: audience,
+        canReply,
+        canReact,
         dedupeKey,
       });
       requestFeedRefresh();
@@ -823,10 +829,29 @@ export default function Compose() {
               <LocationField value={location} onChange={setLocation} />
             </View>
 
-            {/* Audience + Cancel/Post — below the editor body */}
+            {/* Reply/react scope — collapsible, above the audience row */}
+            <View className="px-4">
+              <ReplyReactScope
+                audience={audience}
+                canReply={canReply}
+                canReact={canReact}
+                onChangeReply={setCanReply}
+                onChangeReact={setCanReact}
+              />
+            </View>
+
+            {/* Audience + Cancel/Post — below the editor body. Changing the
+                audience resets the reply/react scope to match it. */}
             <View className="flex-row items-stretch px-4 py-3">
               <View className="flex-1 mr-2">
-                <AudienceSelector value={audience} onChange={setAudience} />
+                <AudienceSelector
+                  value={audience}
+                  onChange={(v) => {
+                    setAudience(v);
+                    setCanReply(v);
+                    setCanReact(v);
+                  }}
+                />
               </View>
               <Pressable
                 onPress={() => router.back()}
