@@ -19,6 +19,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 import { useRouter } from "expo-router";
 import { useSelector } from "react-redux";
 import {
@@ -480,22 +481,24 @@ export function LeftDrawer({ visible, onClose }) {
       onRequestClose={onClose}
     >
       <View className="flex-1 flex-row">
+        {/* Dark status-bar icons while the drawer is open (the white header
+            fills the status-bar area; the app's light-on-blue icons would
+            vanish on white). Reverts to the app default when the drawer closes. */}
+        <StatusBar style="dark" />
         {/* Panel */}
         <SafeAreaView
           edges={["left", "bottom"]}
           style={{ width: panelWidth }}
           className="bg-base-100  "
         >
-          {/* Header — Klein blue, matching the app top bar. paddingTop fills the
-              status-bar area so the drawer never sits under it (issue 33). */}
+          {/* Header — white, with the server icon + title (matching the app top
+              bar's size/formatting, in black). paddingTop fills the status-bar
+              area so the drawer never sits under it (issue 33). */}
           <View
-            className="bg-header px-5 pb-3 flex-row items-center"
+            className="bg-base-100 border-b border-base-200 px-5 pb-3 flex-row items-center"
             style={{ paddingTop: insets.top + 8 }}
           >
-            <View
-              className="w-6 h-6 items-center justify-center overflow-hidden mr-2.5"
-              style={{ backgroundColor: "rgba(255,255,255,0.16)" }}
-            >
+            <View className="w-6 h-6 items-center justify-center overflow-hidden mr-2.5 bg-base-200">
               {serverIcon ? (
                 <Image
                   source={{ uri: serverIcon }}
@@ -503,11 +506,11 @@ export function LeftDrawer({ visible, onClose }) {
                   resizeMode="cover"
                 />
               ) : (
-                <Globe size={15} color="#FFFFFF" strokeWidth={1.75} />
+                <Globe size={15} color="rgba(26,26,32,0.7)" strokeWidth={1.75} />
               )}
             </View>
             <Text
-              className="font-ui text-xl tracking-tight text-header-content flex-1"
+              className="font-ui text-xl tracking-tight text-base-content flex-1"
               numberOfLines={1}
             >
               {account?.serverName || account?.server || "Menu"}
@@ -515,9 +518,9 @@ export function LeftDrawer({ visible, onClose }) {
             <Pressable
               onPress={onClose}
               hitSlop={8}
-              android_ripple={{ color: "rgba(255,255,255,0.15)", borderless: true }}
+              android_ripple={{ color: "rgba(0,0,0,0.06)", borderless: true }}
             >
-              <X size={20} color="#FFFFFF" strokeWidth={1.75} />
+              <X size={20} color="rgba(26,26,32,0.7)" strokeWidth={1.75} />
             </Pressable>
           </View>
 
