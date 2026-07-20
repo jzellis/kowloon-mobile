@@ -40,6 +40,7 @@ import { selectActiveAccount } from "../../../src/state/accountsSlice.js";
 import { pmToMarkdown } from "../../../src/lib/pmToMarkdown.js";
 
 const TOOLBAR_HEIGHT = 44;
+const EDITOR_HEIGHT = 320;
 // The default editor toolbar minus the task-list (checkbox) button — matches
 // the composer's toolbar.
 const TOOLBAR_ITEMS = DEFAULT_TOOLBAR_ITEMS.filter(
@@ -91,10 +92,6 @@ function FieldLabel({ children }) {
 function PostBodyEditor({ initialHtml, editorRef }) {
   const editor = useEditorBridge({
     avoidIosKeyboard: true,
-    // Grow the editor to fit its content so the outer ScrollView scrolls the
-    // whole page — this avoids the WebView vs ScrollView nested-scroll conflict
-    // (nestedScrollEnabled didn't take on the tested Android build).
-    dynamicHeight: true,
     initialContent: initialHtml || "",
     bridgeExtensions: [
       ...TenTapStartKit,
@@ -104,14 +101,17 @@ function PostBodyEditor({ initialHtml, editorRef }) {
   useEffect(() => {
     editorRef.current = editor;
   }, [editor, editorRef]);
+  // Fixed height with the WebView's own internal scroll. This works because the
+  // editor is a sibling of the metadata ScrollView (not nested inside it), so
+  // nothing steals the scroll gesture.
   return (
-    <View className="bg-white border border-base-300">
+    <View style={{ height: EDITOR_HEIGHT }} className="bg-white border border-base-300">
       <View style={{ height: TOOLBAR_HEIGHT }}>
         <Toolbar editor={editor} hidden={false} items={TOOLBAR_ITEMS} />
       </View>
-      {/* scrollEnabled={false}: with dynamicHeight the editor sizes to its
-          content, so the page — not the WebView — does the scrolling. */}
-      <RichText editor={editor} scrollEnabled={false} style={{ minHeight: 220 }} />
+      <View className="flex-1">
+        <RichText editor={editor} />
+      </View>
     </View>
   );
 }
@@ -401,15 +401,12 @@ export default function EditPost() {
         </View>
       ) : post ? (
         <>
-          <ScrollView
-            keyboardShouldPersistTaps="handled"
-            contentContainerStyle={{
-              padding: 20,
-              paddingBottom: 20 + keyboardInset,
-            }}
-          >
+          {/* Title + editor sit ABOVE the scroll area so the editor's own
+              WebView handles scrolling (a parent ScrollView would steal the
+              pan gesture, which is why nesting it didn't scroll). */}
+          <View className="px-5 pt-4">
             {hasTitleField ? (
-              <View className="mb-5">
+              <View className="mb-4">
                 <FieldLabel>Title</FieldLabel>
                 <TextInput
                   value={title}
@@ -421,23 +418,29 @@ export default function EditPost() {
               </View>
             ) : null}
 
-            <View className="mb-5">
-              <FieldLabel>{type === "Note" ? "Body" : "Content"}</FieldLabel>
-              {/* Rich editor — same tentap editor as the composer. Mounts with
-                  the loaded body as initialContent. */}
-              {initialBodyHtml !== null ? (
-                <PostBodyEditor
-                  initialHtml={initialBodyHtml}
-                  editorRef={editorRef}
-                />
-              ) : (
-                <View
-                  style={{ height: 320 }}
-                  className="bg-base-200 border border-base-300"
-                />
-              )}
-            </View>
+            <FieldLabel>{type === "Note" ? "Body" : "Content"}</FieldLabel>
+            {/* Rich editor — same tentap editor as the composer. Mounts with the
+                loaded body as initialContent. */}
+            {initialBodyHtml !== null ? (
+              <PostBodyEditor initialHtml={initialBodyHtml} editorRef={editorRef} />
+            ) : (
+              <View
+                style={{ height: EDITOR_HEIGHT }}
+                className="bg-base-200 border border-base-300"
+              />
+            )}
+          </View>
 
+          {/* Metadata fields scroll independently below the editor. */}
+          <ScrollView
+            className="flex-1"
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={{
+              paddingHorizontal: 20,
+              paddingTop: 16,
+              paddingBottom: 20 + keyboardInset,
+            }}
+          >
             {isEvent ? (
               <>
                 <View className="mb-3">
