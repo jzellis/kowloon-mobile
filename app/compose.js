@@ -829,20 +829,9 @@ export default function Compose() {
               <LocationField value={location} onChange={setLocation} />
             </View>
 
-            {/* Reply/react scope — collapsible, above the audience row */}
-            <View className="px-4">
-              <ReplyReactScope
-                audience={audience}
-                canReply={canReply}
-                canReact={canReact}
-                onChangeReply={setCanReply}
-                onChangeReact={setCanReact}
-              />
-            </View>
-
             {/* Audience + Cancel/Post — below the editor body. Changing the
                 audience resets the reply/react scope to match it. */}
-            <View className="flex-row items-stretch px-4 py-3">
+            <View className="flex-row items-stretch px-4 pt-3">
               <View className="flex-1 mr-2">
                 <AudienceSelector
                   value={audience}
@@ -879,6 +868,17 @@ export default function Compose() {
                   </Text>
                 )}
               </Pressable>
+            </View>
+
+            {/* Advanced — reply/react scope, tucked under the To selector */}
+            <View className="px-4 pb-3">
+              <ReplyReactScope
+                audience={audience}
+                canReply={canReply}
+                canReact={canReact}
+                onChangeReply={setCanReply}
+                onChangeReact={setCanReact}
+              />
             </View>
           </>
         )}

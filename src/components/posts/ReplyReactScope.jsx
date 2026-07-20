@@ -32,15 +32,14 @@ export function ReplyReactScope({
         ) : (
           <ChevronRight size={14} color="rgba(26,26,32,0.5)" strokeWidth={1.9} />
         )}
-        <Text className="font-ui uppercase tracking-[0.12em] text-[11px] text-base-content/50 ml-1.5 mr-2">
-          Replies &amp; reacts
+        <Text className="font-ui uppercase tracking-[0.12em] text-[11px] text-base-content/50 ml-1.5">
+          Advanced
         </Text>
-        <Text
-          className="font-ui uppercase tracking-[0.12em] text-[11px] text-base-content flex-1"
-          numberOfLines={1}
-        >
-          {customized ? "Customized" : "Same as audience"}
-        </Text>
+        {customized ? (
+          <Text className="font-ui uppercase tracking-[0.12em] text-[10px] text-primary ml-2">
+            Customized
+          </Text>
+        ) : null}
       </Pressable>
 
       {open ? (
