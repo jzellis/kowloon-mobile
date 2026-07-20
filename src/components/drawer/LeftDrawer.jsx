@@ -18,11 +18,13 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { useSelector } from "react-redux";
 import {
   ChevronDown,
   ChevronRight,
+  Globe,
   MapPin,
   Search,
   Users,
@@ -31,6 +33,7 @@ import {
 
 import { useActiveClient } from "../../lib/useActiveClient.js";
 import { resolveImageUrl } from "../../lib/resolveImageUrl.js";
+import { selectActiveAccount } from "../../state/accountsSlice.js";
 
 const DRAWER_WIDTH_PCT = 0.85;
 
@@ -441,8 +444,28 @@ function DiscoverSection({ client, onNavigate }) {
 export function LeftDrawer({ visible, onClose }) {
   const router = useRouter();
   const client = useActiveClient();
+  const account = useSelector(selectActiveAccount);
+  const insets = useSafeAreaInsets();
   const screenWidth = Dimensions.get("window").width;
   const panelWidth = Math.round(screenWidth * DRAWER_WIDTH_PCT);
+  const [serverIcon, setServerIcon] = useState(null);
+
+  // Server icon for the header, matching the feed masthead.
+  useEffect(() => {
+    if (!client) return;
+    let cancelled = false;
+    client.feeds
+      .getServerInfo()
+      .then((info) => {
+        if (!cancelled && info?.icon) {
+          setServerIcon(resolveImageUrl(info.icon, client?.http?.baseUrl));
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [client]);
 
   function navigate(path) {
     onClose();
@@ -459,21 +482,42 @@ export function LeftDrawer({ visible, onClose }) {
       <View className="flex-1 flex-row">
         {/* Panel */}
         <SafeAreaView
-          edges={["top", "left", "bottom"]}
+          edges={["left", "bottom"]}
           style={{ width: panelWidth }}
           className="bg-base-100  "
         >
-          {/* Fixed header */}
-          <View className="flex-row items-center justify-between px-5 pt-2 pb-3  ">
-            <Text className="font-ui uppercase tracking-[0.18em] text-[11px] text-base-content/55">
-              Menu
+          {/* Header — Klein blue, matching the app top bar. paddingTop fills the
+              status-bar area so the drawer never sits under it (issue 33). */}
+          <View
+            className="bg-header px-5 pb-3 flex-row items-center"
+            style={{ paddingTop: insets.top + 8 }}
+          >
+            <View
+              className="w-6 h-6 items-center justify-center overflow-hidden mr-2.5"
+              style={{ backgroundColor: "rgba(255,255,255,0.16)" }}
+            >
+              {serverIcon ? (
+                <Image
+                  source={{ uri: serverIcon }}
+                  style={{ width: 24, height: 24 }}
+                  resizeMode="cover"
+                />
+              ) : (
+                <Globe size={15} color="#FFFFFF" strokeWidth={1.75} />
+              )}
+            </View>
+            <Text
+              className="font-ui text-xl tracking-tight text-header-content flex-1"
+              numberOfLines={1}
+            >
+              {account?.serverName || account?.server || "Menu"}
             </Text>
             <Pressable
               onPress={onClose}
               hitSlop={8}
-              android_ripple={{ color: "rgba(0,0,0,0.06)", borderless: true }}
+              android_ripple={{ color: "rgba(255,255,255,0.15)", borderless: true }}
             >
-              <X size={20} color="rgba(26,26,32,0.7)" strokeWidth={1.75} />
+              <X size={20} color="#FFFFFF" strokeWidth={1.75} />
             </Pressable>
           </View>
 
