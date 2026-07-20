@@ -79,7 +79,7 @@ export function FeedViewSelector({ value, onChange, subject }) {
       .then((res) => {
         const items = res?.orderedItems || res?.items || [];
         if (!cancelled) {
-          setCircles(orderUserCircles(items));
+          setCircles(orderUserCircles(items, account?.id));
         }
       })
       .catch(() => {});
@@ -149,7 +149,7 @@ export function FeedViewSelector({ value, onChange, subject }) {
         .getUserCircles({ userId: account.id })
         .then((res) => {
           const items = res?.orderedItems || res?.items || [];
-          setCircles(orderUserCircles(items));
+          setCircles(orderUserCircles(items, account?.id));
         })
         .catch(() => {});
     }

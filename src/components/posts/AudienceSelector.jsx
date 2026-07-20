@@ -58,7 +58,7 @@ export function AudienceSelector({ value, onChange, allowPrivate = false }) {
       .then((res) => {
         const items = res?.orderedItems || res?.items || [];
         if (!cancelled) {
-          setCircles(orderUserCircles(items));
+          setCircles(orderUserCircles(items, account?.id));
         }
       })
       .catch(() => {});
