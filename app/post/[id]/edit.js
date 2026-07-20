@@ -3,7 +3,7 @@
 // times, audience (all types), Media attachments (add/remove), and the featured
 // image (Article/Event). Post type and href are still fixed after posting.
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   ActivityIndicator,
@@ -19,6 +19,15 @@ import { useSelector } from "react-redux";
 import { X } from "lucide-react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
+import {
+  CoreBridge,
+  DEFAULT_TOOLBAR_ITEMS,
+  Images,
+  RichText,
+  TenTapStartKit,
+  Toolbar,
+  useEditorBridge,
+} from "@10play/tentap-editor";
 
 import { AppHeader } from "../../../src/components/nav/AppHeader.jsx";
 import { Button } from "../../../src/components/ui/Button.jsx";
@@ -28,6 +37,14 @@ import { useActiveClient } from "../../../src/lib/useActiveClient.js";
 import { useKeyboardInset } from "../../../src/lib/useKeyboardInset.js";
 import { uploadFile } from "../../../src/lib/uploadFile.js";
 import { selectActiveAccount } from "../../../src/state/accountsSlice.js";
+import { pmToMarkdown } from "../../../src/lib/pmToMarkdown.js";
+
+const TOOLBAR_HEIGHT = 44;
+// The default editor toolbar minus the task-list (checkbox) button — matches
+// the composer's toolbar.
+const TOOLBAR_ITEMS = DEFAULT_TOOLBAR_ITEMS.filter(
+  (item) => item.image?.() !== Images.checkList
+);
 
 const pad = (n) => String(n).padStart(2, "0");
 
@@ -66,6 +83,37 @@ function FieldLabel({ children }) {
   );
 }
 
+// The rich editor lives in its own component so it can be created WITH the post
+// body as initialContent. (Creating an empty editor and calling setContent once
+// it reports ready was unreliable — the content was dropped.) It mounts only
+// after the post loads, and hands its editor instance up via editorRef so the
+// parent can serialize on save.
+function PostBodyEditor({ initialHtml, editorRef }) {
+  const editor = useEditorBridge({
+    avoidIosKeyboard: true,
+    initialContent: initialHtml || "",
+    bridgeExtensions: [
+      ...TenTapStartKit,
+      CoreBridge.configureCSS(`.ProseMirror { padding: 10px 16px; }`),
+    ],
+  });
+  useEffect(() => {
+    editorRef.current = editor;
+  }, [editor, editorRef]);
+  return (
+    <View style={{ height: 320 }} className="bg-white border border-base-300">
+      <View style={{ height: TOOLBAR_HEIGHT }}>
+        <Toolbar editor={editor} hidden={false} items={TOOLBAR_ITEMS} />
+      </View>
+      <View className="flex-1">
+        {/* nestedScrollEnabled lets the editor's WebView scroll internally
+            instead of the parent ScrollView stealing the gesture (Android). */}
+        <RichText editor={editor} nestedScrollEnabled />
+      </View>
+    </View>
+  );
+}
+
 export default function EditPost() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
@@ -81,7 +129,6 @@ export default function EditPost() {
   const [error, setError] = useState(null);
 
   const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
   const [startDate, setStartDate] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -95,6 +142,12 @@ export default function EditPost() {
   // newly picked { existing:false, uri }, or null when there is none/removed.
   const [featuredImage, setFeaturedImage] = useState(null);
 
+  // Rich text editor — rendered by <PostBodyEditor> once the post loads, so it
+  // can be created with the body as initialContent. editorRef receives the
+  // editor instance so handleSubmit can serialize it on save.
+  const [initialBodyHtml, setInitialBodyHtml] = useState(null);
+  const editorRef = useRef(null);
+
   const load = useCallback(async () => {
     if (!client || !id) return;
     setLoading(true);
@@ -104,9 +157,10 @@ export default function EditPost() {
       const doc = res?.post || res?.object || res;
       setPost(doc);
       setTitle(doc?.title || doc?.name || "");
-      // Server stores the editable markdown source at source.content; body is
-      // the rendered HTML. We edit the source.
-      setContent(doc?.source?.content || "");
+      // Load the rendered HTML body into the rich editor; on save we serialize
+      // it back to Markdown source via pmToMarkdown. Using the body (not the raw
+      // source) means the editor shows formatted text, not escaped markdown.
+      setInitialBodyHtml(doc?.body || "");
       setAudience(doc?.to || "@public");
       if (doc?.event?.startDate || doc?.startTime) {
         const s = splitDateTime(doc.event?.startDate || doc.startTime);
@@ -246,7 +300,8 @@ export default function EditPost() {
 
   async function handleSubmit() {
     if (submitting) return;
-    const trimmedContent = content.trim();
+    const editorDoc = editorRef.current ? await editorRef.current.getJSON() : null;
+    const trimmedContent = (pmToMarkdown(editorDoc) || "").trim();
     const trimmedTitle = title.trim();
     // Only a Note truly requires body text; other types can be a title, an
     // attachment set, a featured image, or just an audience change.
@@ -366,15 +421,19 @@ export default function EditPost() {
 
             <View className="mb-5">
               <FieldLabel>{type === "Note" ? "Body" : "Content"}</FieldLabel>
-              <TextInput
-                value={content}
-                onChangeText={setContent}
-                multiline
-                placeholder="Write your post…"
-                placeholderTextColor="rgba(26,26,32,0.35)"
-                className="  bg-white px-3 py-2.5 font-ui text-base text-base-content"
-                style={{ minHeight: 200, textAlignVertical: "top" }}
-              />
+              {/* Rich editor — same tentap editor as the composer. Mounts with
+                  the loaded body as initialContent. */}
+              {initialBodyHtml !== null ? (
+                <PostBodyEditor
+                  initialHtml={initialBodyHtml}
+                  editorRef={editorRef}
+                />
+              ) : (
+                <View
+                  style={{ height: 320 }}
+                  className="bg-base-200 border border-base-300"
+                />
+              )}
             </View>
 
             {isEvent ? (
