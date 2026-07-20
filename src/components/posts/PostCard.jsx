@@ -33,17 +33,6 @@ function attachmentKind(att) {
   return "other";
 }
 
-function decodeEntities(s) {
-  if (!s) return "";
-  return String(s)
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, " ");
-}
-
 // Static class strings — NativeWind needs the full class name at build time,
 // so we can't interpolate `text-post-${type}`.
 const TYPE_META = {
@@ -184,13 +173,15 @@ export function PostCard({ post, onDeleted }) {
               </Text>
             ) : null}
             <LocationLine location={post?.location} />
-            {plainPreview ? (
-              <Text
-                className="text-base-content/80 mb-3"
-                style={{ fontFamily: resolved.regularFamily, fontSize: resolved.fontSize, lineHeight: resolved.lineHeight }}
-              >
-                {decodeEntities(plainPreview)}
-              </Text>
+            {previewHtml ? (
+              <View className="mb-3">
+                <HtmlContent
+                  html={previewHtml}
+                  fonts={contentFonts}
+                  fontSize={resolved.fontSize}
+                  lineHeight={resolved.lineHeight}
+                />
+              </View>
             ) : null}
             {Array.isArray(post.attachments) && post.attachments.length > 0 ? (
               <View>
@@ -281,13 +272,13 @@ export function PostCard({ post, onDeleted }) {
                 {linkHost}
               </Text>
             ) : null}
-            {plainPreview ? (
-              <Text
-                className="text-base-content/80"
-                style={{ fontFamily: resolved.regularFamily, fontSize: resolved.fontSize, lineHeight: resolved.lineHeight }}
-              >
-                {decodeEntities(plainPreview)}
-              </Text>
+            {previewHtml ? (
+              <HtmlContent
+                html={previewHtml}
+                fonts={contentFonts}
+                fontSize={resolved.fontSize}
+                lineHeight={resolved.lineHeight}
+              />
             ) : null}
           </>
         ) : (
