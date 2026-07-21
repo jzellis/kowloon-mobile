@@ -25,6 +25,7 @@
     },
     "android": {
       "package": "org.kwln.kowloon",
+      "googleServicesFile": "./google-services.json",
       "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
         "backgroundColor": "#002FA7",

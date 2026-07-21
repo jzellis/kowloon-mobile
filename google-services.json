@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "251378334951",
+    "project_id": "kowloon-613bd",
+    "storage_bucket": "kowloon-613bd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:251378334951:android:0704b55cd2c4fcf02cb642",
+        "android_client_info": {
+          "package_name": "org.kwln.kowloon"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDda4fP5Bg-q4FO4VR4OTywBX8ZsqJquVE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

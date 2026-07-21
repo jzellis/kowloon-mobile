@@ -4,27 +4,27 @@
 //      reusing notificationRoute() — the same logic the notifications screen uses.
 //   3. Registers the active account's push token with its server.
 //
-// Everything degrades gracefully in Expo Go / on simulators (getPushRegistration
-// returns null); the 60s foreground poll still delivers notifications there.
+// Expo Go (SDK 53+) removed remote push, and importing expo-notifications there
+// THROWS at module-eval time — which would take down the whole provider tree
+// (and with it the Redux Provider, blanking the app at the splash screen). So we
+// never statically import it: in Expo Go this is a pure no-op and the 60s
+// foreground poll still delivers notifications. In a real dev/prod build we
+// dynamically import expo-notifications (and push.js, which also imports it).
 
 import { useEffect } from "react";
-import * as Notifications from "expo-notifications";
 import { useSelector } from "react-redux";
 import { router } from "expo-router";
+import Constants from "expo-constants";
 
 import { selectActiveAccount } from "../state/accountsSlice.js";
 import { useActiveClient } from "./useActiveClient.js";
-import { getPushRegistration } from "./push.js";
 import { notificationRoute } from "./notifications.js";
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+// Expo Go reports executionEnvironment "storeClient"; dev/prod builds report
+// "standalone"/"bare". appOwnership is a legacy fallback ("expo" in Expo Go).
+const IS_EXPO_GO =
+  Constants.executionEnvironment === "storeClient" ||
+  Constants.appOwnership === "expo";
 
 function routeFromResponse(response) {
   const data = response?.notification?.request?.content?.data;
@@ -43,21 +43,40 @@ export function PushProvider({ children }) {
 
   // Tap routing: warm taps via the listener, cold-start taps via the last response.
   useEffect(() => {
-    const sub = Notifications.addNotificationResponseReceivedListener(routeFromResponse);
-    Notifications.getLastNotificationResponseAsync()
-      .then((resp) => {
-        if (resp) routeFromResponse(resp);
-      })
-      .catch(() => {});
-    return () => sub.remove();
+    if (IS_EXPO_GO) return;
+    let sub;
+    let cancelled = false;
+    (async () => {
+      const Notifications = await import("expo-notifications");
+      if (cancelled) return;
+      Notifications.setNotificationHandler({
+        handleNotification: async () => ({
+          shouldPlaySound: true,
+          shouldSetBadge: false,
+          shouldShowBanner: true,
+          shouldShowList: true,
+        }),
+      });
+      sub = Notifications.addNotificationResponseReceivedListener(routeFromResponse);
+      Notifications.getLastNotificationResponseAsync()
+        .then((resp) => {
+          if (resp) routeFromResponse(resp);
+        })
+        .catch(() => {});
+    })();
+    return () => {
+      cancelled = true;
+      sub?.remove();
+    };
   }, []);
 
   // Register the active account's device token with its server.
   useEffect(() => {
-    if (!account?.id || !client) return;
+    if (IS_EXPO_GO || !account?.id || !client) return;
     let cancelled = false;
     (async () => {
       try {
+        const { getPushRegistration } = await import("./push.js");
         const reg = await getPushRegistration();
         if (!reg || cancelled) return;
         await client.http.post("/push/register", reg);
