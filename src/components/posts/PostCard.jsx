@@ -14,6 +14,7 @@ import { VideoAttachment } from "./VideoAttachment.jsx";
 import { LocationLine } from "./LocationLine.jsx";
 import { PostActionBar } from "./PostActionBar.jsx";
 import { HtmlContent } from "../HtmlContent.jsx";
+import { useImageViewer } from "../ImageViewerProvider.jsx";
 import { useActiveClient } from "../../lib/useActiveClient.js";
 import { useTypography } from "../../lib/TypographyContext.js";
 import { kowloonPostIdFromUrl } from "../../lib/parseKowloonUrl.js";
@@ -52,6 +53,7 @@ function hostOf(url) {
 
 export function PostCard({ post, onDeleted }) {
   const router = useRouter();
+  const viewer = useImageViewer();
   const client = useActiveClient();
   const currentUser = client?.auth?.getUser?.() || null;
   const meta = TYPE_META[post?.type] || TYPE_META.Note;
@@ -193,14 +195,17 @@ export function PostCard({ post, onDeleted }) {
                     (a) => attachmentKind(a) === "image"
                   );
                   if (imgs.length === 0) return null;
+                  const urls = imgs.map((im) => im.url);
                   if (imgs.length === 1) {
                     return (
-                      <Image
-                        source={{ uri: imgs[0].url }}
-                        className="w-full mb-2 bg-base-200"
-                        style={{ aspectRatio: 4 / 5 }}
-                        resizeMode="cover"
-                      />
+                      <Pressable onPress={() => viewer?.open(urls, 0)}>
+                        <Image
+                          source={{ uri: imgs[0].url }}
+                          className="w-full mb-2 bg-base-200"
+                          style={{ aspectRatio: 4 / 5 }}
+                          resizeMode="cover"
+                        />
+                      </Pressable>
                     );
                   }
                   return (
@@ -209,8 +214,9 @@ export function PostCard({ post, onDeleted }) {
                         const lastOdd =
                           imgs.length % 2 === 1 && i === imgs.length - 1;
                         return (
-                          <View
+                          <Pressable
                             key={`${img.url}-${i}`}
+                            onPress={() => viewer?.open(urls, i)}
                             style={{ width: lastOdd ? "100%" : "49%" }}
                           >
                             <Image
@@ -218,7 +224,7 @@ export function PostCard({ post, onDeleted }) {
                               className="w-full h-40   bg-base-200"
                               resizeMode="cover"
                             />
-                          </View>
+                          </Pressable>
                         );
                       })}
                     </View>
@@ -233,18 +239,20 @@ export function PostCard({ post, onDeleted }) {
                     const kind = attachmentKind(att);
                     const key = `${att.url}-${i}`;
                     if (kind === "video") {
-                      return <VideoAttachment key={key} att={att} />;
+                      return <VideoAttachment key={key} att={att} tapToFullscreen />;
                     }
                     return <AudioAttachment key={key} att={att} />;
                   })}
               </View>
             ) : image ? (
-              <Image
-                source={{ uri: image }}
-                className="w-full mb-3 bg-base-200"
-                style={{ aspectRatio: 4 / 5 }}
-                resizeMode="cover"
-              />
+              <Pressable onPress={() => viewer?.open([image], 0)}>
+                <Image
+                  source={{ uri: image }}
+                  className="w-full mb-3 bg-base-200"
+                  style={{ aspectRatio: 4 / 5 }}
+                  resizeMode="cover"
+                />
+              </Pressable>
             ) : null}
           </>
         ) : post?.type === "Link" ? (
@@ -332,11 +340,13 @@ export function PostCard({ post, onDeleted }) {
             ) : null}
 
             {image ? (
-              <Image
-                source={{ uri: image }}
-                className="w-full h-48 mt-3   bg-base-200"
-                resizeMode="cover"
-              />
+              <Pressable onPress={() => viewer?.open([image], 0)}>
+                <Image
+                  source={{ uri: image }}
+                  className="w-full h-48 mt-3   bg-base-200"
+                  resizeMode="cover"
+                />
+              </Pressable>
             ) : null}
           </>
         )}
