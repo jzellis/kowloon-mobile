@@ -239,7 +239,7 @@ export function PostCard({ post, onDeleted }) {
                     const kind = attachmentKind(att);
                     const key = `${att.url}-${i}`;
                     if (kind === "video") {
-                      return <VideoAttachment key={key} att={att} tapToFullscreen />;
+                      return <VideoAttachment key={key} att={att} />;
                     }
                     return <AudioAttachment key={key} att={att} />;
                   })}
