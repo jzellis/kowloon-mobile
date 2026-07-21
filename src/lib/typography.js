@@ -91,7 +91,7 @@ export const FONT_ASSETS = {
 export const FONT_SIZES = { xs: 10, s: 14, m: 16, l: 18, xl: 21 };
 export const FONT_SIZE_ORDER = ["xs", "s", "m", "l", "xl"];
 
-export const LINE_SPACINGS = { compact: 1.5, normal: 1.75, relaxed: 2.0 };
+export const LINE_SPACINGS = { compact: 1.25, normal: 1.5, relaxed: 1.8 };
 export const LINE_SPACING_ORDER = ["compact", "normal", "relaxed"];
 
 // Horizontal padding (px) applied to reading surfaces. Larger = narrower text.

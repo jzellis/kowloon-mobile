@@ -197,7 +197,8 @@ export function PostCard({ post, onDeleted }) {
                     return (
                       <Image
                         source={{ uri: imgs[0].url }}
-                        className="w-full h-72 mb-2   bg-base-200"
+                        className="w-full mb-2 bg-base-200"
+                        style={{ aspectRatio: 4 / 5 }}
                         resizeMode="cover"
                       />
                     );
@@ -240,7 +241,8 @@ export function PostCard({ post, onDeleted }) {
             ) : image ? (
               <Image
                 source={{ uri: image }}
-                className="w-full h-72 mb-3   bg-base-200"
+                className="w-full mb-3 bg-base-200"
+                style={{ aspectRatio: 4 / 5 }}
                 resizeMode="cover"
               />
             ) : null}

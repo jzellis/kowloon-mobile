@@ -381,7 +381,10 @@ export default function Compose() {
                 .replace(/</g, "&lt;")
                 .replace(/>/g, "&gt;")
                 .replace(/\n+/g, "<br>");
-              editor.setContent(`<p>${escaped}</p>`);
+              // Drop the preview summary in as a blockquote (it's the source's
+              // text, not the user's own), with an empty paragraph after so the
+              // cursor lands below — same pattern as the repost quote above.
+              editor.setContent(`<blockquote><p>${escaped}</p></blockquote><p></p>`);
             }
           } catch {
             // editor not ready or unreachable — skip silently
