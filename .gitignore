@@ -42,3 +42,6 @@ yarn-error.*
 
 # design-sync (generated bundle uploaded to claude.ai/design)
 ds-bundle/
+
+# Firebase App Distribution service-account key (sensitive — never commit)
+firebase-service-account*.json

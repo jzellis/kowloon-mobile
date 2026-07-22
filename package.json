@@ -8,6 +8,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
+    "distribute:android": "node scripts/distribute-android.mjs",
     "postinstall": "patch-package",
     "eas-build-pre-install": "test -d ../client || git clone --depth 1 https://github.com/jzellis/kowloon-client.git ../client"
   },
