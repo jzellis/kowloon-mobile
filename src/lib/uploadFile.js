@@ -8,6 +8,8 @@
 //
 // Returns the server's upload response: { ok, file: { id, url, thumbnails, metadata } }.
 
+import { normalizeImageForUpload } from "./normalizeImage.js";
+
 export async function uploadFile(
   client,
   {
@@ -24,6 +26,12 @@ export async function uploadFile(
 ) {
   if (!client) throw new Error("uploadFile: no client");
   if (!uri) throw new Error("uploadFile: uri is required");
+
+  // Bake EXIF orientation upright (and cap size) for JPEG/HEIC before sending.
+  // No-op for GIFs/PNGs/video/audio. This is the fix for sideways uploads --
+  // the orientation tag is gone by the time the server sees the bytes, so it
+  // has to happen here, on the device, while the pixels can still be corrected.
+  ({ uri, name, mimeType } = await normalizeImageForUpload({ uri, name, mimeType }));
 
   const filename = name || `upload-${Date.now()}`;
   const contentType = mimeType || "application/octet-stream";
