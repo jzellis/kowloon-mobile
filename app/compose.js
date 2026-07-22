@@ -135,8 +135,13 @@ export default function Compose() {
   const sharedTextRef = useRef(shared?.kind === "text" ? shared.text || "" : "");
   const sharedTextInjectedRef = useRef(false);
   const [previewing, setPreviewing] = useState(false);
+  // When resharing a Community post, PostActionBar passes the original's audience
+  // as `constrain` so this Link post can't be widened past it (#47).
+  const constrainAudience =
+    typeof params.constrain === "string" && params.constrain ? params.constrain : null;
   const [audience, setAudience] = useState(
-    typeof params.to === "string" && params.to ? params.to : "@public"
+    constrainAudience ||
+      (typeof params.to === "string" && params.to ? params.to : "@public")
   );
   // Reply/react scope — both track the post audience until narrowed by hand.
   const [canReply, setCanReply] = useState(audience);
@@ -838,6 +843,7 @@ export default function Compose() {
               <View className="flex-1 mr-2">
                 <AudienceSelector
                   value={audience}
+                  constrainTo={constrainAudience}
                   onChange={(v) => {
                     setAudience(v);
                     setCanReply(v);

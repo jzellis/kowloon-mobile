@@ -62,7 +62,9 @@ export function CircleForm({
   const [description, setDescription] = useState(
     initialValues.description || initialValues.summary || ""
   );
-  const [to, setTo] = useState(initialValues.to ?? "@public");
+  // Circles are personal by default — "Only Me" (self-addressed to the owner),
+  // not public. A circle is a private contact list; public is an explicit opt-in. (#48)
+  const [to, setTo] = useState(initialValues.to ?? account?.id ?? "@public");
   const [iconAsset, setIconAsset] = useState(null); // newly picked { uri, name, mimeType }
   const [iconUrl, setIconUrl] = useState(initialValues.icon || null); // existing
   const [members, setMembers] = useState(

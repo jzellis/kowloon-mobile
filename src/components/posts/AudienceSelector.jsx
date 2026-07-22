@@ -38,8 +38,15 @@ export function AudienceSelector({
   function optionEnabled(optValue) {
     if (!constrainTo) return true; // the post's own audience selector: no limit
     if (optValue === selfId) return true; // Only Me is the narrowest, always ok
-    if (constrainTo === "@public") return true; // public post: anything goes
-    if (constrainTo === serverTo) return optValue !== "@public"; // community: no public
+    if (constrainTo === "@public" || constrainTo === "public") return true; // public: anything goes
+    // Server / community constraint — matches "@<domain>" (any domain, incl.
+    // federated), "@server", or "server". Everything but Public is allowed.
+    const isServerConstraint =
+      constrainTo === serverTo ||
+      constrainTo === "@server" ||
+      constrainTo === "server" ||
+      (/^@[a-z0-9.-]+$/i.test(constrainTo) && constrainTo !== "@public");
+    if (isServerConstraint) return optValue !== "@public";
     if (constrainTo === selfId) return optValue === selfId; // just-me post: only just-me
     return optValue === constrainTo; // constrainTo is a specific circle
   }

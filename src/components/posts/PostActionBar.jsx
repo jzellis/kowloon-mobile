@@ -58,6 +58,21 @@ function isPublicPost(post) {
   );
 }
 
+// Audience tier of a post, for gating reshares (#47):
+//   "public"     → @public: reshareable anywhere.
+//   "server"     → @<domain>: reshareable only to Community (no wider).
+//   "restricted" → a circle/group/self address: not reshareable at all.
+function postAudienceTier(post) {
+  if (isPublicPost(post)) return "public";
+  const to = String(post?.to || "").trim();
+  if (to.startsWith("circle:") || to.startsWith("group:")) return "restricted";
+  // @user@domain (two @s) = addressed to a specific user (self / private).
+  if (/^@[^@\s]+@[^@\s]+$/.test(to)) return "restricted";
+  // @domain (single @, not @public) = server / community.
+  if (/^@[a-z0-9.-]+$/i.test(to)) return "server";
+  return "restricted"; // unknown addressing → fail closed
+}
+
 // Lightweight HTML strip for the repost-quote prefill. textPreview is usually
 // already plain text, but the body/summary fallback might carry tags. Not a
 // sanitizer — purely for plain-text excerpt extraction.
@@ -151,6 +166,15 @@ export function PostActionBar({
   function handleRepost() {
     if (!currentUser) return;
     if (!shareUrl) return;
+    // A reshare can't leak a post to a wider audience than the original (#47).
+    const tier = postAudienceTier(post);
+    if (tier === "restricted") {
+      Alert.alert(
+        "Can't reshare",
+        "This post was shared with a specific circle (or privately), so it can't be reshared."
+      );
+      return;
+    }
     // Carry the original's identity into the new draft so the reshare uses
     // the same hero image and quotes the source — compose.js prefills these
     // from params (see Repost prefill block there).
@@ -165,6 +189,9 @@ export function PostActionBar({
         title,
         featuredImage,
         quote,
+        // Community posts may only be reshared to Community — cap the audience
+        // selector to the original's tier so it can't be widened to Public.
+        ...(tier === "server" ? { constrain: post?.to } : {}),
       },
     });
   }
