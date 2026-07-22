@@ -24,7 +24,7 @@ import { readFileSync, writeFileSync, mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-const GROUP = process.env.GROUP || "testers";
+const GROUP = process.env.GROUP || "fb-friend-testers";
 
 function capture(cmd) {
   // stdout piped (for JSON), stderr inherited (npx/eas warnings stay visible).
