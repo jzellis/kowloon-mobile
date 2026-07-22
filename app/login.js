@@ -88,7 +88,22 @@ export default function Login() {
     } catch (e) {
       forgetClient(parsed.id);
       await purgeAccountStorage(parsed.id).catch(() => {});
-      const msg = e?.response?.data?.error || e?.message || "Login failed.";
+      // Only call it a credentials problem on an actual 401. A server blip (5xx,
+      // e.g. mid-deploy) or a network failure must NOT read as "wrong password" —
+      // that sends people chasing a password that's actually fine.
+      const status = e?.statusCode;
+      let msg;
+      if (status === 401) {
+        msg = "That username or password is incorrect.";
+      } else if (status === 403) {
+        msg = e?.message || "This account can't sign in right now.";
+      } else if (e?.name === "NetworkError") {
+        msg = "Couldn't reach the server. Check your connection and try again.";
+      } else if (typeof status === "number" && status >= 500) {
+        msg = "The server had a problem (it may be briefly restarting). Try again in a moment.";
+      } else {
+        msg = e?.message || "Login failed. Please try again.";
+      }
       setError(String(msg));
     } finally {
       setSubmitting(false);
