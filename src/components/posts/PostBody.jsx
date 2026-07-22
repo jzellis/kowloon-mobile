@@ -22,16 +22,21 @@ import { LocationLine } from "./LocationLine.jsx";
 import { HtmlContent } from "../HtmlContent.jsx";
 import { useImageViewer } from "../ImageViewerProvider.jsx";
 
+// An attachment may arrive as a rich { url, mediaType, name } object (enriched
+// feeds) or as a bare URL string (feeds that don't enrich, or empty mediaType
+// for stored proxy URLs).
+const attUrl = (att) => (typeof att === "string" ? att : att?.url || att?.href || "");
+
 function attachmentKind(att) {
-  const mime = (att?.mediaType || "").toLowerCase();
-  const name = (att?.name || "").toLowerCase();
+  const mime = (att?.mediaType || att?.mimeType || att?.type || "").toLowerCase();
+  const src = (attUrl(att) || att?.name || "").toLowerCase();
   if (mime.startsWith("image/")) return "image";
-  if (mime.startsWith("audio/")) return "audio";
-  if (name.endsWith(".m4a") || name.endsWith(".aac") || name.endsWith(".mp3")) {
-    return "audio";
-  }
   if (mime.startsWith("video/")) return "video";
-  return "other";
+  if (mime.startsWith("audio/")) return "audio";
+  if (/\.(m4a|aac|mp3|wav|ogg|flac)(\?|$)/.test(src)) return "audio";
+  if (/\.(mp4|mov|webm|m4v)(\?|$)/.test(src)) return "video";
+  // Unknown/empty mediaType: assume image (Media posts are photo-first). #45.
+  return "image";
 }
 
 function hostOf(url) {
@@ -94,12 +99,12 @@ function formatEventRange(post) {
 function ImageGrid({ images }) {
   const viewer = useImageViewer();
   if (images.length === 0) return null;
-  const urls = images.map((im) => im.url);
+  const urls = images.map(attUrl);
   if (images.length === 1) {
     return (
       <Pressable onPress={() => viewer?.open(urls, 0)}>
         <Image
-          source={{ uri: images[0].url }}
+          source={{ uri: attUrl(images[0]) }}
           className="w-full h-80 mb-3 bg-base-200"
           resizeMode="cover"
         />
@@ -112,12 +117,12 @@ function ImageGrid({ images }) {
         const lastOdd = images.length % 2 === 1 && i === images.length - 1;
         return (
           <Pressable
-            key={`${img.url}-${i}`}
+            key={`${attUrl(img)}-${i}`}
             onPress={() => viewer?.open(urls, i)}
             style={{ width: lastOdd ? "100%" : "49%" }}
           >
             <Image
-              source={{ uri: img.url }}
+              source={{ uri: attUrl(img) }}
               className="w-full h-48 bg-base-200"
               resizeMode="cover"
             />

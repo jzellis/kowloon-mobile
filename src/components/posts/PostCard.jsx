@@ -22,16 +22,22 @@ import { timeAgo } from "../../lib/timeAgo.js";
 
 // Classify an attachment by mediaType, with a fallback for `.m4a` files
 // which Android sometimes labels `video/mp4` even though they're audio.
+// An attachment may arrive as a rich { url, mediaType, name } object (enriched
+// feeds) or as a bare URL string (feeds that don't enrich — groups, My Posts —
+// and enriched feeds hand back empty mediaType for stored proxy URLs).
+const attUrl = (att) => (typeof att === "string" ? att : att?.url || att?.href || "");
+
 function attachmentKind(att) {
-  const mime = (att?.mediaType || "").toLowerCase();
-  const name = (att?.name || "").toLowerCase();
+  const mime = (att?.mediaType || att?.mimeType || att?.type || "").toLowerCase();
+  const src = (attUrl(att) || att?.name || "").toLowerCase();
   if (mime.startsWith("image/")) return "image";
-  if (mime.startsWith("audio/")) return "audio";
-  if (name.endsWith(".m4a") || name.endsWith(".aac") || name.endsWith(".mp3")) {
-    return "audio";
-  }
   if (mime.startsWith("video/")) return "video";
-  return "other";
+  if (mime.startsWith("audio/")) return "audio";
+  if (/\.(m4a|aac|mp3|wav|ogg|flac)(\?|$)/.test(src)) return "audio";
+  if (/\.(mp4|mov|webm|m4v)(\?|$)/.test(src)) return "video";
+  // Unknown/empty mediaType: assume image. Media posts are photo-first, and
+  // defaulting to an audio player was the #45 bug (images shown as "...audio").
+  return "image";
 }
 
 // Static class strings — NativeWind needs the full class name at build time,
@@ -195,12 +201,12 @@ export function PostCard({ post, onDeleted }) {
                     (a) => attachmentKind(a) === "image"
                   );
                   if (imgs.length === 0) return null;
-                  const urls = imgs.map((im) => im.url);
+                  const urls = imgs.map(attUrl);
                   if (imgs.length === 1) {
                     return (
                       <Pressable onPress={() => viewer?.open(urls, 0)}>
                         <Image
-                          source={{ uri: imgs[0].url }}
+                          source={{ uri: attUrl(imgs[0]) }}
                           className="w-full mb-2 bg-base-200"
                           style={{ aspectRatio: 4 / 5 }}
                           resizeMode="cover"
@@ -215,12 +221,12 @@ export function PostCard({ post, onDeleted }) {
                           imgs.length % 2 === 1 && i === imgs.length - 1;
                         return (
                           <Pressable
-                            key={`${img.url}-${i}`}
+                            key={`${attUrl(img)}-${i}`}
                             onPress={() => viewer?.open(urls, i)}
                             style={{ width: lastOdd ? "100%" : "49%" }}
                           >
                             <Image
-                              source={{ uri: img.url }}
+                              source={{ uri: attUrl(img) }}
                               className="w-full h-40   bg-base-200"
                               resizeMode="cover"
                             />
