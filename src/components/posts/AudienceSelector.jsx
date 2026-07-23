@@ -13,6 +13,7 @@ import { useSelector } from "react-redux";
 import { useActiveClient } from "../../lib/useActiveClient.js";
 import { selectActiveAccount } from "../../state/accountsSlice.js";
 import { orderUserCircles } from "../../lib/orderCircles.js";
+import { useJoinedGroups } from "../../lib/useJoinedGroups.js";
 
 // `allowPrivate` opts in to a self-only ("Only Me") tier, addressed to the
 // user's own ID. Off by default — bookmarks enable it; the post composer does not.
@@ -28,6 +29,9 @@ export function AudienceSelector({
   const client = useActiveClient();
   const [open, setOpen] = useState(false);
   const [circles, setCircles] = useState([]);
+  // Groups the viewer belongs to are always addressable (below circles),
+  // mirroring the Feed selector (#67). Same source: the Groups system circle.
+  const { groups, refresh: refreshGroups } = useJoinedGroups();
 
   const serverTo = account?.server ? `@${account.server}` : "@public";
   const selfId = account?.id;
@@ -97,6 +101,7 @@ export function AudienceSelector({
   const currentLabel =
     audienceOptions.find((a) => a.value === value)?.label ||
     circles.find((c) => c.id === value)?.name ||
+    groups.find((g) => g.id === value)?.name ||
     "Public";
 
   function select(v) {
@@ -107,7 +112,10 @@ export function AudienceSelector({
   return (
     <>
       <Pressable
-        onPress={() => setOpen(true)}
+        onPress={() => {
+          refreshGroups?.(); // pick up newly-joined groups on open
+          setOpen(true);
+        }}
         className="flex-row items-center   px-3 py-2.5"
         android_ripple={{ color: "rgba(0,0,0,0.06)" }}
       >
@@ -166,6 +174,23 @@ export function AudienceSelector({
                           selected={value === c.id}
                           disabled={!optionEnabled(c.id)}
                           onPress={() => select(c.id)}
+                        />
+                      ))}
+                    </View>
+                  ) : null}
+
+                  {groups.length > 0 ? (
+                    <View className="  mt-1 pt-1">
+                      <Text className="font-ui uppercase tracking-[0.18em] text-[10px] text-base-content/40 px-5 py-2">
+                        Your groups
+                      </Text>
+                      {groups.map((g) => (
+                        <Row
+                          key={g.id}
+                          label={g.name}
+                          selected={value === g.id}
+                          disabled={!optionEnabled(g.id)}
+                          onPress={() => select(g.id)}
                         />
                       ))}
                     </View>
