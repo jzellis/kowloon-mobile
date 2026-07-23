@@ -48,7 +48,10 @@ export default function NewGroup() {
           uri: iconAsset.uri,
           name: iconAsset.name,
           mimeType: iconAsset.mimeType,
-          to,
+          // Group icon/banner are always @public — they show in Discover, search,
+          // and member lists. Inheriting the group's `to` made a server-only
+          // group's icon restricted, so it 401'd and never displayed (#69).
+          to: "@public",
           generateThumbnail: true,
         });
         iconUrl = up?.file?.url;
@@ -60,7 +63,7 @@ export default function NewGroup() {
           uri: bannerAsset.uri,
           name: bannerAsset.name,
           mimeType: bannerAsset.mimeType,
-          to,
+          to: "@public",
         });
         imageUrl = up?.file?.url;
       }

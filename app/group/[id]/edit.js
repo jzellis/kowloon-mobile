@@ -68,7 +68,8 @@ export default function EditGroup() {
           uri: iconAsset.uri,
           name: iconAsset.name,
           mimeType: iconAsset.mimeType,
-          to,
+          // Icon/banner are always public — see app/group/new.js (#69).
+          to: "@public",
           generateThumbnail: true,
         });
         finalIcon = up?.file?.url || finalIcon;
@@ -80,7 +81,7 @@ export default function EditGroup() {
           uri: bannerAsset.uri,
           name: bannerAsset.name,
           mimeType: bannerAsset.mimeType,
-          to,
+          to: "@public",
         });
         finalImage = up?.file?.url || finalImage;
       }
