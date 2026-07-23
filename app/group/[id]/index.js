@@ -10,6 +10,7 @@ import {
   Image,
   Pressable,
   ScrollView,
+  Share,
   Text,
   View,
 } from "react-native";
@@ -22,6 +23,7 @@ import {
   MapPin,
   Newspaper,
   Pencil,
+  Share2,
   Trash2,
 } from "lucide-react-native";
 
@@ -104,6 +106,41 @@ export default function GroupDetail() {
   const viewerIsLocal = isLocalToServer(account?.id, account?.server);
   const needsApproval = joinNeedsApproval(group?.rsvpPolicy, viewerIsLocal);
   const inviteOnly = group?.rsvpPolicy === "inviteOnly";
+
+  // Shareable group URL — prefer the group's canonical url, else build the web
+  // URL from the group id's home domain.
+  const groupIdStr = String(id);
+  const groupDomain = groupIdStr.split("@")[1] || account?.server;
+  const shareUrl =
+    group?.url ||
+    (groupDomain
+      ? `https://${groupDomain}/groups/${encodeURIComponent(groupIdStr)}`
+      : null);
+
+  // Share a group internally (as a Link post) or externally (OS share sheet) (#70).
+  function handleShareGroup() {
+    if (!shareUrl) return;
+    Alert.alert(group?.name || "Share group", "Share this group", [
+      {
+        text: "Post as a Link",
+        onPress: () =>
+          router.push({
+            pathname: "/compose",
+            params: { type: "Link", href: shareUrl, title: group?.name || "" },
+          }),
+      },
+      {
+        text: "Share via…",
+        onPress: () =>
+          Share.share({
+            url: shareUrl,
+            message: group?.name ? `${group.name}\n${shareUrl}` : shareUrl,
+            title: group?.name || "",
+          }).catch(() => {}),
+      },
+      { text: "Cancel", style: "cancel" },
+    ]);
+  }
 
   async function handleJoin() {
     if (busy) return;
@@ -248,6 +285,19 @@ export default function GroupDetail() {
                     View Feed
                   </Text>
                 </Pressable>
+
+                {shareUrl ? (
+                  <Pressable
+                    onPress={handleShareGroup}
+                    android_ripple={{ color: "rgba(0,0,0,0.06)" }}
+                    className="flex-row items-center   px-3 py-2"
+                  >
+                    <Share2 size={13} color="rgba(26,26,32,0.85)" strokeWidth={1.75} />
+                    <Text className="font-ui uppercase tracking-[0.14em] text-[11px] text-base-content ml-1.5">
+                      Share
+                    </Text>
+                  </Pressable>
+                ) : null}
 
                 {account?.id && !isOwner ? (
                   isMember ? (
