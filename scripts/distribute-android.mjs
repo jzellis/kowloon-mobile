@@ -31,6 +31,19 @@ function capture(cmd) {
   return execSync(cmd, { stdio: ["inherit", "pipe", "inherit"], encoding: "utf8" });
 }
 
+// Prefer an installed `eas` on PATH — `npx eas-cli@latest` re-downloads the whole
+// CLI every run and can silently hang on an install prompt (the piped stdout
+// hides it). Fall back to npx only where eas isn't installed (e.g. CI).
+function easBin() {
+  try {
+    execSync("eas --version", { stdio: "ignore" });
+    return "eas";
+  } catch {
+    return "npx --yes eas-cli@latest";
+  }
+}
+const EAS = easBin();
+
 // 1. Firebase Android app id — read from google-services.json so it never drifts.
 const gs = JSON.parse(readFileSync(new URL("../google-services.json", import.meta.url)));
 const appId = gs.client[0].client_info.mobilesdk_app_id;
@@ -38,7 +51,7 @@ const appId = gs.client[0].client_info.mobilesdk_app_id;
 // 2. Newest FINISHED Android build with an APK artifact.
 console.log("Looking up the latest finished Android build on EAS...");
 const raw = capture(
-  "npx eas-cli@latest build:list --platform android --limit 5 --non-interactive --json"
+  `${EAS} build:list --platform android --limit 5 --non-interactive --json`
 );
 const builds = JSON.parse(raw.slice(raw.indexOf("[")));
 const build = builds.find(
