@@ -103,7 +103,15 @@ export default function PostDetail() {
     try {
       const res = await client.feeds.getReplies({ postId: String(id) });
       const server = res?.orderedItems || res?.items || [];
-      const contentOf = (r) => String(r?.body || r?.source?.content || "").trim();
+      // Dedupe on the RAW source.content (identical on the optimistic copy and
+      // the server copy). The old code compared the server's rendered HTML body
+      // against the optimistic raw text, so they never matched and the reply
+      // showed twice until you left the screen (#66). Fall back to stripped body.
+      const contentOf = (r) => {
+        const raw = r?.source?.content;
+        if (typeof raw === "string" && raw.length) return raw.trim();
+        return String(r?.body || "").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+      };
       setReplies((prev) => {
         const seen = new Set(server.map((r) => `${r.actorId}|${contentOf(r)}`));
         const stillPending = prev.filter(
