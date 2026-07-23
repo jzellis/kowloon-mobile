@@ -62,7 +62,13 @@ function splitDateTime(iso) {
 
 function joinDateTime(date, time) {
   if (!date) return undefined;
-  return time ? `${date}T${time}` : date;
+  // Encode the device's LOCAL wall-clock as a full UTC ISO instant so event
+  // times don't shift by the viewer's offset on display (#63). Mirrors compose.js.
+  const [y, mo, d] = String(date).split("-").map(Number);
+  const [h, mi] = String(time || "00:00").split(":").map(Number);
+  if (!y || !mo || !d) return time ? `${date}T${time}` : date;
+  const dt = new Date(y, mo - 1, d, h || 0, mi || 0, 0, 0);
+  return isNaN(dt.getTime()) ? (time ? `${date}T${time}` : date) : dt.toISOString();
 }
 
 function kindFromMime(mime = "", name = "") {

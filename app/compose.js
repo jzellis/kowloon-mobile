@@ -77,7 +77,16 @@ function nextRoundHour() {
 }
 function joinDateTime(date, time) {
   if (!date) return undefined;
-  return time ? `${date}T${time}` : date;
+  // Build the instant from the device's LOCAL wall-clock, then serialize to a
+  // full UTC ISO. A bare "2026-07-23T00:00" has no zone, so the server read it
+  // as UTC and the display (local Intl) shifted it by the viewer's offset — a
+  // 00:00 event showed as 7pm the previous day in Panama (#63). Encoding the
+  // real instant round-trips back to the same displayed wall-clock.
+  const [y, mo, d] = String(date).split("-").map(Number);
+  const [h, mi] = String(time || "00:00").split(":").map(Number);
+  if (!y || !mo || !d) return time ? `${date}T${time}` : date;
+  const dt = new Date(y, mo - 1, d, h || 0, mi || 0, 0, 0);
+  return isNaN(dt.getTime()) ? (time ? `${date}T${time}` : date) : dt.toISOString();
 }
 function kindFromMime(m) {
   const s = (m || "").toLowerCase();
