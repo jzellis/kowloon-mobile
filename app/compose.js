@@ -95,6 +95,19 @@ function kindFromMime(m) {
   return "image";
 }
 
+// expo-image-picker throws "Attempting to launch an unregistered
+// ActivityResultLauncher" when Android recreated the app's Activity (config
+// change, GPS use, memory pressure, "Don't keep activities"). It's a framework
+// bug; the only recovery is a full app restart. Turn the raw Java stack into a
+// plain-language instruction (#72).
+function pickerErrorMessage(e, fallback) {
+  const m = String(e?.message || "");
+  if (/ActivityResultLauncher|unregistered/i.test(m)) {
+    return "Android reset the media picker. Fully close and reopen Kowloon, then try again.";
+  }
+  return e?.message || fallback;
+}
+
 export default function Compose() {
   const router = useRouter();
   const client = useActiveClient();
@@ -217,7 +230,7 @@ export default function Compose() {
         mimeType: asset.mimeType || "image/jpeg",
       });
     } catch (e) {
-      setError(e?.message || "Couldn't open the photo library.");
+      setError(pickerErrorMessage(e, "Couldn't open the photo library."));
     }
   }
 
@@ -247,7 +260,7 @@ export default function Compose() {
       });
       setAttachments((prev) => [...prev, ...next]);
     } catch (e) {
-      setError(e?.message || "Couldn't open the photo library.");
+      setError(pickerErrorMessage(e, "Couldn't open the photo library."));
     }
   }
 
@@ -267,7 +280,7 @@ export default function Compose() {
       }));
       setAttachments((prev) => [...prev, ...next]);
     } catch (e) {
-      setError(e?.message || "Couldn't open audio picker.");
+      setError(pickerErrorMessage(e, "Couldn't open audio picker."));
     }
   }
 
