@@ -2,9 +2,10 @@
 // card or post detail. Uses expo-audio's hook-based API (the modern
 // replacement for expo-av, which is no longer bundled in Expo Go).
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
+import { useFocusEffect } from "expo-router";
 
 function formatTime(seconds) {
   if (!seconds || !Number.isFinite(seconds)) return "";
@@ -31,6 +32,17 @@ export function AudioAttachment({ att }) {
       player.seekTo(0).catch(() => {});
     }
   }, [status?.didJustFinish, player]);
+
+  // Pause when the screen loses focus. Expo Router keeps screens mounted, so
+  // without this a clip started in the Feed keeps playing after you open a Post
+  // (and could play twice) (#60).
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        try { player.pause(); } catch {}
+      };
+    }, [player])
+  );
 
   function toggle() {
     setError(null);
