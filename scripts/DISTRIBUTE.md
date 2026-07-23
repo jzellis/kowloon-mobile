@@ -34,9 +34,28 @@ Options:
 - `NOTES="what to test" npm run distribute:android` — custom release notes
   (defaults to the build's git commit subject).
 
+## Automatic distribution (one command)
+
+`eas build --profile preview --platform android` now auto-distributes on success —
+no separate `distribute:android` step. The `eas-build-on-success` hook
+(`scripts/eas-distribute-onsuccess.mjs`) runs on EAS's builders after a successful
+Android/preview build and pushes the APK to Firebase. The manual
+`npm run distribute:android` still works as a fallback / for re-pushing an older build.
+
+**One-time setup — store the Firebase service account as an EAS secret:**
+1. Firebase console → Project settings → **Service accounts** → **Generate new
+   private key**. Give that service account the **Firebase App Distribution Admin**
+   role (Google Cloud console → IAM).
+2. Save the JSON, then:
+   ```bash
+   eas secret:create --scope project --name GOOGLE_SERVICE_ACCOUNT \
+     --type file --value ./firebase-service-account.json
+   ```
+   EAS mounts it on the builder and exposes the path as `$GOOGLE_SERVICE_ACCOUNT`.
+
+If the secret isn't set, the hook logs and **skips** (the build still succeeds) —
+so builds never fail over distribution, and you can fall back to the manual script.
+
 ## Notes
 
 - The Firebase app id is read from `google-services.json`, so it stays in sync.
-- To make distribution automatic on every build instead, an `eas-build-on-success`
-  hook can run the Firebase CLI on EAS's servers — needs the service-account key as
-  an EAS secret. The manual script above is simpler and more transparent for now.
