@@ -211,11 +211,13 @@ export function FeedViewSelector({ value, onChange, subject }) {
         ref={triggerRef}
         onPress={openDropdown}
         hitSlop={6}
-        className="flex-row items-center"
+        className="flex-row items-center shrink min-w-0"
       >
         <View className="mr-2.5">{iconFor(value, 26)}</View>
+        {/* shrink + numberOfLines so a long circle/group name truncates instead
+            of expanding the trigger and overlapping the type filters (#68). */}
         <Text
-          className="font-ui text-base font-bold tracking-tight text-base-content mr-1.5"
+          className="font-ui text-base font-bold tracking-tight text-base-content mr-1.5 shrink min-w-0"
           numberOfLines={1}
         >
           {currentLabel}
