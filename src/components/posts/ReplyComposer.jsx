@@ -60,7 +60,7 @@ export function ReplyComposer({
       });
       setText("");
       dedupeRef.current = null;
-      onSubmitted?.({ duplicated: !!res?.duplicated, result: res });
+      onSubmitted?.({ duplicated: !!res?.duplicated, result: res, content: text });
     } catch (e) {
       setError(e?.message || "Couldn't post reply.");
     } finally {

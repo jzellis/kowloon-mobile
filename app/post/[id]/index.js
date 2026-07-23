@@ -94,11 +94,23 @@ export default function PostDetail() {
   // Refresh just the replies list, WITHOUT toggling the top-level `loading`
   // state — a full load() collapses the screen to a spinner and resets scroll
   // to the top. Used after posting a reply so we can land on the new reply.
-  const reloadReplies = useCallback(async () => {
+  // Reconcile with the server WITHOUT dropping a just-posted reply that the read
+  // path hasn't caught up to yet — a full replace made new replies vanish until
+  // you left and re-entered (#66). Keep any still-pending optimistic replies the
+  // server list doesn't yet contain (matched by author + content).
+  const reconcileReplies = useCallback(async () => {
     if (!client || !id) return;
     try {
       const res = await client.feeds.getReplies({ postId: String(id) });
-      setReplies(res?.orderedItems || res?.items || []);
+      const server = res?.orderedItems || res?.items || [];
+      const contentOf = (r) => String(r?.body || r?.source?.content || "").trim();
+      setReplies((prev) => {
+        const seen = new Set(server.map((r) => `${r.actorId}|${contentOf(r)}`));
+        const stillPending = prev.filter(
+          (r) => r.__optimistic && !seen.has(`${r.actorId}|${contentOf(r)}`)
+        );
+        return [...server, ...stillPending];
+      });
     } catch {
       // keep the existing replies on a transient error
     }
@@ -245,16 +257,32 @@ export default function PostDetail() {
                 }
                 canReply={post.canReply}
                 autoFocus={shouldFocusReply && !loading && !!post}
-                onSubmitted={({ duplicated }) => {
+                onSubmitted={({ duplicated, content }) => {
                   if (duplicated) return;
-                  // Quietly refresh replies (no full-screen spinner), then
-                  // scroll to the new reply at the bottom of the thread.
-                  reloadReplies().then(() => {
-                    setTimeout(
-                      () => scrollRef.current?.scrollToEnd({ animated: true }),
-                      120
-                    );
-                  });
+                  // Show the reply instantly (optimistic), then reconcile with
+                  // the server a beat later — the read path lags the write, so a
+                  // plain refetch returned before the reply was queryable (#66).
+                  const optimistic = {
+                    id: `pending-${Date.now()}`,
+                    __optimistic: true,
+                    actorId: currentUser?.id,
+                    actor: {
+                      id: currentUser?.id,
+                      name: currentUser?.profile?.name,
+                      icon: currentUser?.profile?.icon,
+                    },
+                    source: { content },
+                    body: "",
+                    publishedAt: new Date().toISOString(),
+                  };
+                  setReplies((arr) => [...arr, optimistic]);
+                  setTimeout(
+                    () => scrollRef.current?.scrollToEnd({ animated: true }),
+                    120
+                  );
+                  // Reconcile a couple of times to absorb the read-lag window.
+                  setTimeout(() => reconcileReplies(), 800);
+                  setTimeout(() => reconcileReplies(), 2500);
                 }}
               />
             </View>
