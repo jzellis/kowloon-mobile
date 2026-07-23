@@ -175,6 +175,32 @@ export function PostMoreMenu({ post, client, currentUser, onDeleted }) {
     }
   }
 
+  // React Native can't select text across separate paragraphs, so "select the
+  // whole post" is impossible in the rendered body (#59). Offer a one-tap copy
+  // of the full text instead. Prefer the Markdown source; fall back to stripping
+  // the rendered HTML.
+  async function handleCopyText() {
+    close();
+    const raw = post?.source?.content || post?.textPreview || post?.body || "";
+    const text = String(raw)
+      .replace(/<br\s*\/?>/gi, "\n")
+      .replace(/<\/p>\s*<p[^>]*>/gi, "\n\n")
+      .replace(/<[^>]+>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .trim();
+    if (!text) return;
+    try {
+      await Clipboard.setStringAsync(text);
+    } catch {
+      // clipboard unavailable — ignore
+    }
+  }
+
   async function handleOpenBrowser() {
     close();
     if (!shareUrl) return;
@@ -218,6 +244,12 @@ export function PostMoreMenu({ post, client, currentUser, onDeleted }) {
         onPress: handleMute,
       });
     }
+  }
+
+  if (post?.source?.content || post?.body || post?.textPreview) {
+    const hasContent = items.some((i) => !i.sep);
+    if (hasContent) items.push({ key: "septext", sep: true });
+    items.push({ key: "copytext", Icon: Copy, label: "Copy Text", onPress: handleCopyText });
   }
 
   if (shareUrl) {
