@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Image, Text, View } from "react-native";
+import { Text, View } from "react-native";
+import { SmartImage } from "../ui/SmartImage.jsx";
 
 // Circular user avatar — person = circle is universal convention.
 // Falls back to a filled initial block when no icon is set or the image fails.
@@ -16,8 +17,12 @@ export function Avatar({ actor, size = 38, baseUrl }) {
   const radius = size / 2;
 
   if (icon && !failed) {
+    // Use expo-image (via SmartImage), not RN <Image>: the app's /files URLs
+    // carry an unencoded ":" and "@" in the path (file:<id>@<domain>), which RN's
+    // native Android loader rejects — so avatars fell back to initials on nearly
+    // every post while post images (already on expo-image) loaded fine (#61).
     return (
-      <Image
+      <SmartImage
         source={{ uri: icon }}
         onError={() => setFailed(true)}
         style={{ width: size, height: size, borderRadius: radius }}
