@@ -178,6 +178,11 @@ export default function Settings() {
             hint="Reading font, size, spacing, margins"
             onPress={() => router.push("/settings/typography")}
           />
+          <NavRow
+            label="Password"
+            hint="Change the password for this account"
+            onPress={() => router.push("/settings/password")}
+          />
         </View>
 
         {/* ── Appearance (app-level, per device) ── */}
