@@ -18,7 +18,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { X } from "lucide-react-native";
 
-import { AppHeader } from "../../src/components/nav/AppHeader.jsx";
+import { AppHeader, HeaderButton } from "../../src/components/nav/AppHeader.jsx";
 import { Avatar } from "../../src/components/posts/Avatar.jsx";
 import { useActiveClient } from "../../src/lib/useActiveClient.js";
 import { selectActiveAccount } from "../../src/state/accountsSlice.js";
@@ -164,7 +164,11 @@ export default function AdminUsers() {
 
   return (
     <SafeAreaView className="flex-1 bg-base-100" edges={["left", "right"]}>
-      <AppHeader back title="Users" />
+      <AppHeader
+        back
+        title="Users"
+        right={<HeaderButton label="New" onPress={() => router.push("/admin/user/new")} />}
+      />
 
       <View className="flex-row border-b border-base-200">
         {TABS.map((tb) => {
